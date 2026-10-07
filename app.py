@@ -4,7 +4,7 @@ import os
 # 1. 페이지 기본 설정
 st.set_page_config(page_title="협력사 글로벌 현황", page_icon="🌍", layout="wide")
 
-# 2. 프리미엄 C-Level CSS 주입
+# 2. 프리미엄 C-Level CSS 주입 (AI 관련 스타일 제거)
 st.markdown("""
     <style>
         /* 기본 여백 최소화 및 불필요한 요소 숨김 */
@@ -50,17 +50,6 @@ st.markdown("""
             margin-top: 30px; margin-bottom: 15px;
             padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;
         }
-
-        /* AI 전략 인사이트 박스 (프리미엄 느낌) */
-        .ai-insight-box {
-            background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            border-left: 4px solid #2563eb;
-            padding: 24px;
-            border-radius: 0 10px 10px 0;
-            margin-top: 10px;
-        }
-        .ai-insight-title { color: #1d4ed8; font-weight: 700; font-size: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;}
-        .ai-insight-text { color: #334155; font-size: 16px; line-height: 1.6; font-weight: 500; }
         
         /* 사이드바 스타일링 */
         [data-testid="stSidebar"] {
@@ -70,12 +59,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. 메인 화면 헤더
+# 3. 메인 화면 헤더 (요청하신 제목으로 고정)
 st.markdown("""
     <div class='dashboard-header'>
         <div>
-            <h1>Executive Dashboard</h1>
-            <p>글로벌 공급망 및 협력사 현황 분석 보고</p>
+            <h1>🌍 협력사별 글로벌 현황</h1>
+            <p>글로벌 공급망 및 파트너사 인프라 보고</p>
         </div>
         <div style="text-align: right;">
             <span style="background: #3b82f6; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;">Confidential</span>
@@ -83,7 +72,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# 4. 가상 데이터 설정
+# 4. 가상 데이터 설정 (AI 데이터 삭제)
 @st.cache_data
 def load_data():
     return [
@@ -95,8 +84,7 @@ def load_data():
                 {"name": "통신 컨트롤러", "emoji": "🔌", "img_path": "controller.png"},
                 {"name": "고성능 칩셋", "emoji": "💾", "img_path": "chip.png"}
             ],
-            "desc": "국내 천안 및 구미에서 핵심 R&D 및 초기 양산을 진행하며, 대량 생산은 베트남 하노이 공장에서 담당하고 있습니다. 북미 주요 고객사 대응을 위해 미국 산호세에 직영 영업소를 운영 중입니다.",
-            "ai": "베트남 하노이 지사를 적극 활용한 동남아 소싱 물량 확대를 권장합니다. 이를 통해 북미향 물류비 및 인건비 단가를 추가로 약 15% 절감할 수 있을 것으로 분석됩니다."
+            "desc": "국내 천안 및 구미에서 핵심 R&D 및 초기 양산을 진행하며, 대량 생산은 베트남 하노이 공장에서 담당하고 있습니다. 북미 주요 고객사 대응을 위해 미국 산호세에 직영 영업소를 운영 중입니다."
         },
         {
             "id": 2, "name": "B업체", "industry": "정밀 가공",
@@ -105,8 +93,7 @@ def load_data():
                 {"name": "정밀 모터", "emoji": "⚙️", "img_path": "motor.png"}, 
                 {"name": "로봇 암", "emoji": "🤖", "img_path": "robot.png"}
             ],
-            "desc": "부산 본사를 중심으로 창원과 중국 칭다오에서 주요 장비 부품을 가공하고 있습니다. 최근 북미 IRA 법안 대응 및 직납 체계 구축을 위해 미국 텍사스에 조립 법인을 신설하였습니다.",
-            "ai": "미국 텍사스 조립 공장 신설로 인해 북미향 설비 조달 시 고질적으로 발생하던 해상 물류 지연 리스크가 완전히 해소되었습니다. 해당 업체의 북미 발주 물량 확대를 검토 요망합니다."
+            "desc": "부산 본사를 중심으로 창원과 중국 칭다오에서 주요 장비 부품을 가공하고 있습니다. 최근 북미 IRA 법안 대응 및 직납 체계 구축을 위해 미국 텍사스에 조립 법인을 신설하였습니다."
         },
         {
             "id": 3, "name": "C업체", "industry": "원재료 (사출/화학)",
@@ -116,8 +103,7 @@ def load_data():
                 {"name": "특수 코팅액", "emoji": "💧", "img_path": "coating.png"},
                 {"name": "산업용 접착제", "emoji": "🍯", "img_path": "glue.png"}
             ],
-            "desc": "해외 지사는 없으나, 국내 핵심 화학 단지인 울산과 여수에 대규모 생산 플랜트를 운영하여 매우 안정적인 내수 공급망을 확보하고 있는 건실한 기업입니다.",
-            "ai": "국내 단일 공급망으로 품질 안정성과 재무 건전성이 매우 우수합니다. 단, 기초 원자재의 수입 의존도가 높으므로 거시경제(환율 변동)에 따른 납품 단가 모니터링 시스템 연동이 필요합니다."
+            "desc": "해외 지사는 없으나, 국내 핵심 화학 단지인 울산과 여수에 대규모 생산 플랜트를 운영하여 매우 안정적인 내수 공급망을 확보하고 있는 건실한 기업입니다."
         }
     ]
 
@@ -143,7 +129,7 @@ selected = next((s for s in filtered_data if s["name"] == selected_name), None)
 
 # 6. 우측 메인 상세 화면
 if selected:
-    # 6-1. 요약 메트릭 (임원진이 가장 먼저 보는 부분)
+    # 6-1. 요약 메트릭
     col1, col2, col3 = st.columns([1.5, 1, 1])
     with col1:
         st.markdown(f"<h2 style='margin:0; color:#0f172a; font-weight:800; font-size:32px;'>{selected['name']}</h2>", unsafe_allow_html=True)
@@ -201,21 +187,5 @@ if selected:
                 
                 st.markdown(f"<div style='font-size: 16px; font-weight: 600; color: #1e293b;'>{prod['name']}</div></div>", unsafe_allow_html=True)
 
-    # 6-5. AI 구매 전략 인사이트 (가장 강조되는 부분)
-    st.markdown("<div class='section-title'>✨ AI 전략 및 경영 제언</div>", unsafe_allow_html=True)
-    st.markdown(f"""
-        <div class="ai-insight-box">
-            <div class="ai-insight-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                </svg>
-                AI 분석 시스템 인사이트
-            </div>
-            <div class="ai-insight-text">{selected['ai']}</div>
-        </div>
-    """, unsafe_allow_html=True)
-    
     # 하단 여백
     st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
