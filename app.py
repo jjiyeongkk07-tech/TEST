@@ -5,7 +5,7 @@ import pydeck as pdk
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide")
 
-# 2. 고급 CSS 주입
+# 2. 고급 CSS 주입 (밸류체인 스타일 추가)
 css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
@@ -40,6 +40,24 @@ header { visibility: hidden; } footer { visibility: hidden; }
 .info-card-title { font-size: 14px; color: #64748b; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
 .info-card-value { font-size: 18px; color: #1e293b; font-weight: 700; line-height: 1.5; }
 
+/* 밸류체인 Flow 스타일 (새로 추가됨) */
+.vc-wrapper {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
+    padding: 30px 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    overflow-x: auto; margin-bottom: 10px;
+}
+.vc-step {
+    display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 150px;
+}
+.vc-stage {
+    font-size: 13px; font-weight: 800; color: #3b82f6; background: #eff6ff; 
+    padding: 6px 14px; border-radius: 20px; margin-bottom: 12px; letter-spacing: -0.5px;
+}
+.vc-location { font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+.vc-detail { font-size: 14px; font-weight: 500; color: #64748b; line-height: 1.4; word-break: keep-all; }
+.vc-arrow { font-size: 24px; color: #cbd5e1; font-weight: 900; padding: 0 10px; }
+
 /* 제품 카드 */
 .product-card { 
     background: linear-gradient(to bottom, #ffffff, #f8fafc); border: 1px solid #e2e8f0; 
@@ -69,21 +87,27 @@ header { visibility: hidden; } footer { visibility: hidden; }
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 헤더 (요청하신 최상단 제목 반영)
+# 3. 헤더
 st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터 (A~G 업체)
+# 4. 데이터 (밸류체인 데이터 추가)
 suppliers = [
     {
         "name": "A업체", "industry": "PCB 제조",
         "hq": "서울 서초구", "kr": "천안 공장, 구미 R&D센터", "gl": "베트남 하노이 공장, 미국 산호세 영업소",
         "desc": "국내 천안 및 구미에서 핵심 R&D 및 초기 양산을 진행하며, 대량 생산은 베트남 하노이 공장에서 담당하고 있습니다. 북미 주요 고객사 대응을 위해 미국 산호세에 직영 영업소를 운영 중입니다.",
+        "chain": [
+            {"stage": "원자재 소싱", "loc": "🇨🇳 중국 칭다오", "desc": "구리/수지 등 기초원료 조달"},
+            {"stage": "R&D / 초기양산", "loc": "🇰🇷 한국 천안·구미", "desc": "핵심 기술 설계 및 파일럿 양산"},
+            {"stage": "대량 양산 (조립)", "loc": "🇻🇳 베트남 하노이", "desc": "인건비 절감형 대규모 조립 라인"},
+            {"stage": "최종 납품", "loc": "🇺🇸 미국 산호세", "desc": "북미 주요 IT 고객사 직납"}
+        ],
         "products": [{"name": "서버용 PCB", "img": "🖲️"}, {"name": "통신 컨트롤러", "img": "🔌"}, {"name": "고성능 칩셋", "img": "💾"}],
         "locations": [
-            {"name": "본사 (서울)", "lat": 37.4836, "lon": 127.0326, "type": "hq", "color": [220, 38, 38, 220]}, # Red
-            {"name": "천안 공장", "lat": 36.8151, "lon": 127.1138, "type": "kr", "color": [37, 99, 235, 220]},   # Blue
+            {"name": "본사 (서울)", "lat": 37.4836, "lon": 127.0326, "type": "hq", "color": [220, 38, 38, 220]},
+            {"name": "천안 공장", "lat": 36.8151, "lon": 127.1138, "type": "kr", "color": [37, 99, 235, 220]},
             {"name": "구미 R&D", "lat": 36.1194, "lon": 128.3444, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "하노이 공장", "lat": 21.0285, "lon": 105.8542, "type": "gl", "color": [16, 185, 129, 220]}, # Green
+            {"name": "하노이 공장", "lat": 21.0285, "lon": 105.8542, "type": "gl", "color": [16, 185, 129, 220]},
             {"name": "산호세 영업소", "lat": 37.3382, "lon": -121.8863, "type": "gl", "color": [16, 185, 129, 220]}
         ]
     },
@@ -91,6 +115,12 @@ suppliers = [
         "name": "B업체", "industry": "정밀 가공",
         "hq": "부산 사하구", "kr": "창원 공장", "gl": "중국 칭다오 공장, 미국 텍사스 법인",
         "desc": "부산 본사를 중심으로 창원과 중국 칭다오에서 주요 장비 부품을 가공하고 있습니다. 최근 북미 IRA 법안 대응 및 직납 체계 구축을 위해 미국 텍사스에 조립 법인을 신설하였습니다.",
+        "chain": [
+            {"stage": "소재/기초가공", "loc": "🇰🇷 한국 부산·창원", "desc": "고정밀 기초 부품 가공"},
+            {"stage": "서브 부품가공", "loc": "🇨🇳 중국 칭다오", "desc": "범용 부품 위탁 생산"},
+            {"stage": "최종 조립", "loc": "🇺🇸 미국 텍사스", "desc": "IRA 대응 현지 조립 라인 가동"},
+            {"stage": "고객 납품", "loc": "🌎 북미 전역", "desc": "장비사 1차 벤더 납품"}
+        ],
         "products": [{"name": "정밀 모터", "img": "⚙️"}, {"name": "로봇 암", "img": "🤖"}],
         "locations": [
             {"name": "본사 (부산)", "lat": 35.1044, "lon": 128.9748, "type": "hq", "color": [220, 38, 38, 220]},
@@ -103,6 +133,12 @@ suppliers = [
         "name": "C업체", "industry": "화학/소재",
         "hq": "인천 남동구", "kr": "울산 공장, 여수 공장", "gl": "해당 없음",
         "desc": "해외 지사는 없으나, 국내 핵심 화학 단지인 울산과 여수에 대규모 생산 플랜트를 운영하여 매우 안정적인 내수 공급망을 확보하고 있는 건실한 기업입니다.",
+        "chain": [
+            {"stage": "원유/원료 수입", "loc": "🛢️ 중동 / 호주", "desc": "원유 및 기초 화합물 수입"},
+            {"stage": "정제 및 합성", "loc": "🇰🇷 한국 울산·여수", "desc": "대규모 석유화학 플랜트 가동"},
+            {"stage": "품질 검수", "loc": "🇰🇷 인천 본사", "desc": "최종 패키징 및 R&D 검수"},
+            {"stage": "내수 납품", "loc": "🚚 국내 전역", "desc": "국내 주요 대기업 납품"}
+        ],
         "products": [{"name": "합성수지", "img": "🧪"}, {"name": "특수 코팅액", "img": "💧"}, {"name": "산업용 접착제", "img": "🍯"}],
         "locations": [
             {"name": "본사 (인천)", "lat": 37.4473, "lon": 126.7315, "type": "hq", "color": [220, 38, 38, 220]},
@@ -114,6 +150,12 @@ suppliers = [
         "name": "D업체", "industry": "2차전지 소재",
         "hq": "경북 포항시", "kr": "포항 1, 2공장", "gl": "폴란드 브로츠와프 법인, 미국 미시간 법인",
         "desc": "글로벌 전기차 배터리 수요 증가에 대응하기 위해 포항에 대규모 양극재 라인을 증설하였으며, 유럽(폴란드)과 북미(미시간)에 핵심 생산 거점을 구축해 현지 조달 역량을 극대화했습니다.",
+        "chain": [
+            {"stage": "핵심 광물 소싱", "loc": "🇦🇺 남미 / 호주", "desc": "리튬, 니켈 원광석 직계약"},
+            {"stage": "전구체/양극재 생산", "loc": "🇰🇷 한국 포항", "desc": "글로벌 최대 규모 양극재 양산"},
+            {"stage": "현지 조달", "loc": "🇵🇱 폴란드 / 🇺🇸 미국", "desc": "유럽/북미 권역별 물류기지"},
+            {"stage": "고객사 직납", "loc": "🔋 글로벌 셀메이커", "desc": "완성차 및 배터리 3사 납품"}
+        ],
         "products": [{"name": "하이니켈 양극재", "img": "🔋"}, {"name": "실리콘 음극재", "img": "⚡"}, {"name": "전해액 첨가제", "img": "🧪"}],
         "locations": [
             {"name": "본사 및 공장 (포항)", "lat": 36.0190, "lon": 129.3435, "type": "hq", "color": [220, 38, 38, 220]},
@@ -125,6 +167,12 @@ suppliers = [
         "name": "E업체", "industry": "반도체 장비",
         "hq": "경기 화성시", "kr": "동탄 R&D센터, 평택 R&D센터", "gl": "대만 신주 연락사무소, 미국 실리콘밸리 지사",
         "desc": "국내 주요 반도체 제조사와의 끈끈한 협력을 바탕으로 화성과 평택에 차세대 장비 R&D 센터를 운영 중입니다. TSMC 및 인텔과의 기술 교류를 위해 대만과 미국 지사를 최근 오픈했습니다.",
+        "chain": [
+            {"stage": "부품 소싱/설계", "loc": "🇰🇷 화성 동탄", "desc": "코어 부품 설계 및 글로벌 소싱"},
+            {"stage": "장비 제조/셋업", "loc": "🇰🇷 평택 공장", "desc": "클린룸 내 장비 셋업 및 테스트"},
+            {"stage": "해외 CS 지원", "loc": "🇹🇼 대만 / 🇺🇸 미국", "desc": "고객사 인접 현지 기술 지원"},
+            {"stage": "고객 인도", "loc": "💻 글로벌 파운드리", "desc": "TSMC, Intel 등 메인 팹 반입"}
+        ],
         "products": [{"name": "CVD 증착장비", "img": "🏭"}, {"name": "웨이퍼 세정기", "img": "🧽"}],
         "locations": [
             {"name": "본사 (화성)", "lat": 37.1995, "lon": 126.8315, "type": "hq", "color": [220, 38, 38, 220]},
@@ -137,6 +185,12 @@ suppliers = [
         "name": "F업체", "industry": "디스플레이 부품",
         "hq": "경기 파주시", "kr": "파주 LCD/OLED 라인", "gl": "베트남 하이퐁 조립공장",
         "desc": "파주 본사에서 고부가가치 하이엔드 OLED 패널 부품을 생산하고, 노동 집약적인 후공정 및 모듈 조립은 베트남 하이퐁 공장으로 이관하여 원가 경쟁력을 크게 확보하고 있습니다.",
+        "chain": [
+            {"stage": "기초소재 수입", "loc": "🇯🇵 일본 / 🇹🇼 대만", "desc": "유리 기판 및 코팅 소재 수입"},
+            {"stage": "하이엔드 가공", "loc": "🇰🇷 한국 파주", "desc": "고도화된 OLED 패널 코어 가공"},
+            {"stage": "모듈 조립(후공정)", "loc": "🇻🇳 베트남 하이퐁", "desc": "원가 절감형 노동집약 후공정"},
+            {"stage": "최종 납품", "loc": "📱 스마트폰 제조사", "desc": "글로벌 모바일 제조 공장 납품"}
+        ],
         "products": [{"name": "초박형 글라스", "img": "📱"}, {"name": "터치 IC 센서", "img": "👆"}],
         "locations": [
             {"name": "본사 (파주)", "lat": 37.7600, "lon": 126.7800, "type": "hq", "color": [220, 38, 38, 220]},
@@ -147,6 +201,12 @@ suppliers = [
         "name": "G업체", "industry": "전장 부품",
         "hq": "경기 수원시", "kr": "화성 주행시험장", "gl": "멕시코 몬테레이 공장, 헝가리 부다페스트 공장",
         "desc": "수원 본사 및 화성 주행시험장에서 자율주행 모듈을 개발합니다. 북미 3대 완성차 업체 납품을 위해 멕시코에, 유럽 자동차 메이커 대응을 위해 헝가리에 각각 대형 공장을 가동하고 있습니다.",
+        "chain": [
+            {"stage": "알고리즘 R&D", "loc": "🇰🇷 한국 수원", "desc": "자율주행 코어 소프트웨어 개발"},
+            {"stage": "글로벌 소싱", "loc": "🌐 글로벌 전역", "desc": "렌즈, 칩셋 등 최적 단가 소싱"},
+            {"stage": "권역별 현지 조립", "loc": "🇲🇽 멕시코 / 🇭🇺 헝가리", "desc": "미주/유럽 타겟 현지 공장 가동"},
+            {"stage": "완성차 납품", "loc": "🚗 주요 자동차 메이커", "desc": "글로벌 Top 5 완성차 라인 납품"}
+        ],
         "products": [{"name": "자율주행 라이다", "img": "📡"}, {"name": "차량용 카메라", "img": "📷"}, {"name": "인포테인먼트", "img": "🖥️"}],
         "locations": [
             {"name": "본사 (수원)", "lat": 37.2636, "lon": 127.0286, "type": "hq", "color": [220, 38, 38, 220]},
@@ -157,7 +217,7 @@ suppliers = [
     }
 ]
 
-# 5. 사이드바 (업종 필터 및 검색)
+# 5. 사이드바 
 with st.sidebar:
     st.markdown("<h3 style='color:#0f172a; margin-bottom:20px; font-weight:900;'>🏢 파트너사 검색</h3>", unsafe_allow_html=True)
     
@@ -183,6 +243,7 @@ selected = next((s for s in filtered if s["name"] == selected_name), None)
 
 # 6. 메인 화면 출력
 if selected:
+    # --- 타이틀 및 개요 ---
     st.markdown(
         f"<div style='margin-bottom:20px;'><h2 style='margin:0; color:#0f172a; font-weight:900; font-size:40px;'>{selected['name']}</h2>"
         f"<p style='margin:8px 0 0 0; color:#475569; font-size:18px; font-weight:500;'>업종 : <span style='color:#3b82f6; font-weight:800;'>{selected['industry']}</span></p></div>",
@@ -192,7 +253,25 @@ if selected:
     st.markdown("<div class='section-title'>기업 개요</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
 
-    # --- 🗺️ 글로벌 거점 인프라 (지도 개선: 명확한 2D 마커 적용) ---
+    # --- 🔄 글로벌 밸류체인 Flow (새로 추가됨) ---
+    st.markdown("<div class='section-title'>글로벌 밸류체인 프로세스 (SCM Flow)</div>", unsafe_allow_html=True)
+    
+    chain_html = "<div class='vc-wrapper'>"
+    for i, step in enumerate(selected["chain"]):
+        chain_html += f"""
+        <div class='vc-step'>
+            <div class='vc-stage'>{step['stage']}</div>
+            <div class='vc-location'>{step['loc']}</div>
+            <div class='vc-detail'>{step['desc']}</div>
+        </div>
+        """
+        if i < len(selected["chain"]) - 1:
+            chain_html += "<div class='vc-arrow'>➔</div>"
+    chain_html += "</div>"
+    
+    st.markdown(chain_html, unsafe_allow_html=True)
+
+    # --- 🗺️ 글로벌 거점 인프라 ---
     st.markdown("<div class='section-title'>주요 거점 네트워크</div>", unsafe_allow_html=True)
     
     map_col, text_col = st.columns([1.5, 1])
@@ -200,34 +279,29 @@ if selected:
     with map_col:
         df_loc = pd.DataFrame(selected["locations"])
         
-        # 좌표 분포도에 따른 동적 줌 레벨 최적화
         lon_range = df_loc['lon'].max() - df_loc['lon'].min()
-        if lon_range > 150:    # 글로벌 (미국, 유럽 포함)
-            zoom_lvl = 1.0
-        elif lon_range > 50:   # 아시아 리전 (동남아 포함)
-            zoom_lvl = 2.5
-        else:                  # 국내 전용
-            zoom_lvl = 6.0
+        if lon_range > 150:    zoom_lvl = 1.0
+        elif lon_range > 50:   zoom_lvl = 2.5
+        else:                  zoom_lvl = 6.0
             
         view_state = pdk.ViewState(
             latitude=df_loc['lat'].mean(), 
             longitude=df_loc['lon'].mean(), 
             zoom=zoom_lvl, 
-            pitch=0  # 평면(2D) 뷰로 설정하여 위치 왜곡 방지 및 명확성 극대화
+            pitch=0
         )
         
-        # 3D 기둥(ColumnLayer)을 제거하고, 세련된 원형 점(ScatterplotLayer)으로 교체
         layer = pdk.Layer(
             "ScatterplotLayer",
             data=df_loc,
             get_position='[lon, lat]',
             get_fill_color='color',
-            get_line_color=[255, 255, 255], # 모든 마커에 흰색 테두리를 줘서 구분을 명확하게 함
+            get_line_color=[255, 255, 255], 
             stroked=True,
             line_width_min_pixels=2,
             radius_scale=1,
-            radius_min_pixels=8,  # 지도를 아무리 축소해도 최소 크기 유지 (잘 보임)
-            radius_max_pixels=20, # 지도를 아무리 확대해도 거대해지지 않음
+            radius_min_pixels=8,  
+            radius_max_pixels=20, 
             pickable=True,
         )
         
@@ -244,11 +318,10 @@ if selected:
         st.write("") 
         st.markdown(f"<div class='info-card' style='border-top-color:#2563eb;'><div class='info-card-title'>🇰🇷 Domestic (국내 공장/지사)</div><div class='info-card-value'>{selected['kr']}</div></div>", unsafe_allow_html=True)
         st.write("") 
-        
         gl_color = "#10b981" if selected['gl'] != "해당 없음" else "#94a3b8"
         st.markdown(f"<div class='info-card' style='border-top-color:{gl_color};'><div class='info-card-title'>🌐 Global (해외 법인/지사)</div><div class='info-card-value'>{selected['gl']}</div></div>", unsafe_allow_html=True)
 
-    # --- 📦 생산 품목 ---
+    # --- 📦 핵심 생산 품목 ---
     st.markdown("<div class='section-title'>핵심 생산 품목</div>", unsafe_allow_html=True)
     cols = st.columns(len(selected['products']))
     for idx, p in enumerate(selected['products']):
