@@ -2,7 +2,7 @@ import streamlit as st
 import os
 
 # 1. 페이지 기본 설정
-st.set_page_config(page_title="Executive Dashboard | 협력사 글로벌 현황", page_icon="🌍", layout="wide")
+st.set_page_config(page_title="협력사 글로벌 현황", page_icon="🌍", layout="wide")
 
 # 2. 프리미엄 C-Level CSS 주입
 st.markdown("""
