@@ -1,10 +1,32 @@
 import streamlit as st
 import os
 
-# 1. 페이지 기본 설정
+# 1. 페이지 기본 설정 (무조건 가장 먼저 와야 함)
 st.set_page_config(page_title="협력사별 글로벌 현황", page_icon="🌍", layout="wide")
 
-# 2. 가상 데이터 설정 (A, B, C 업체 / 품목 2~3개)
+# 2. 강제 CSS 주입 (상단 여백 제거 및 기본 헤더 숨김)
+st.markdown("""
+    <style>
+        /* Streamlit 기본 상단 여백을 1rem으로 대폭 축소 */
+        .block-container {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        /* 우측 상단 기본 메뉴(햄버거 버튼) 및 빈 헤더 숨김 */
+        header {
+            visibility: hidden;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# 3. 메인 화면 제목 (이제 화면 맨 위에 딱 붙어서 나옵니다)
+st.markdown("""
+    <div style='background-color: #0f172a; padding: 20px; border-radius: 10px; margin-bottom: 20px; margin-top: 0px;'>
+        <h1 style='color: white; text-align: center; margin: 0;'>🌍 협력사별 글로벌 현황</h1>
+    </div>
+""", unsafe_allow_html=True)
+
+# 4. 가상 데이터 설정
 @st.cache_data
 def load_data():
     return [
@@ -44,14 +66,7 @@ def load_data():
 
 suppliers = load_data()
 
-# 3. 메인 화면 제목
-st.markdown("""
-    <div style='background-color: #0f172a; padding: 20px; border-radius: 10px; margin-bottom: 30px;'>
-        <h1 style='color: white; text-align: center; margin: 0;'>🌍 협력사별 글로벌 현황</h1>
-    </div>
-""", unsafe_allow_html=True)
-
-# 4. 좌측 사이드바: 검색 및 리스트
+# 5. 좌측 사이드바: 검색 및 리스트
 st.sidebar.header("🔍 협력사 검색")
 search_term = st.sidebar.text_input("업체명 또는 업종 검색", "").strip()
 
@@ -61,23 +76,21 @@ for s in suppliers:
     if search_term.lower() in s["name"].lower() or search_term.lower() in s["industry"].lower():
         filtered_data.append(s)
 
-# 검색 결과가 없으면 전체 데이터를 다시 보여주어 화면이 텅 비는 것을 방지
+# 검색 결과 예외 처리
 if len(filtered_data) == 0:
     st.sidebar.error("검색 결과가 없습니다. 전체 목록을 표시합니다.")
     filtered_data = suppliers
 
-# 라디오 버튼으로 리스트 생성 (index=0을 주어 무조건 첫 번째 업체가 기본 선택되도록 강제)
 supplier_names = [s["name"] for s in filtered_data]
 selected_name = st.sidebar.radio("협력사 목록 (선택)", supplier_names, index=0)
 
-# 선택된 업체 데이터 추출
 selected = None
 for s in filtered_data:
     if s["name"] == selected_name:
         selected = s
         break
 
-# 5. 우측 메인 상세 화면 (selected 데이터가 있을 때만 렌더링)
+# 6. 우측 메인 상세 화면
 if selected:
     st.header(f"🏢 {selected['name']}")
     st.markdown(f"**업종:** `{selected['industry']}`")
@@ -93,15 +106,12 @@ if selected:
 
     st.write("---")
     
-    # 6. 대표 생산 품목 (에러 방지 렌더링)
     st.markdown("### 📦 대표 생산 품목")
-    
     num_products = len(selected['products'])
     prod_cols = st.columns(num_products)
     
     for idx, prod in enumerate(selected['products']):
         with prod_cols[idx]:
-            # 테두리 있는 컨테이너 생성
             with st.container(border=True):
                 # 로컬 이미지 파일이 있으면 띄우고, 없으면 이모지 출력
                 if os.path.exists(prod.get("img_path", "")):
@@ -113,10 +123,8 @@ if selected:
 
     st.write("---")
     
-    # 7. 상세 설명 및 AI 인사이트
     st.markdown("### 📝 기업 상세 설명")
     st.write(selected['desc'])
 
     st.markdown("### ✨ AI 구매 전략 인사이트")
     st.success(selected['ai'])
-
