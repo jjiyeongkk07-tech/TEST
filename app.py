@@ -119,5 +119,3 @@ else:
     st.markdown("---")
     st.markdown("### ✨ AI 구매 전략 인사이트")
     st.success(selected['ai'])
-
-    st.success(selected['ai'])
