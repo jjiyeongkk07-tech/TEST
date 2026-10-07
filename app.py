@@ -3,7 +3,7 @@ import pandas as pd
 import pydeck as pdk
 
 # 1. 페이지 설정
-st.set_page_config(page_title="협력사 글로벌 현황", page_icon="🌍", layout="wide")
+st.set_page_config(page_title="글로벌 SCM 및 파트너사 인프라 분석", page_icon="🌍", layout="wide")
 
 # 2. 고급 CSS 주입
 css = """
