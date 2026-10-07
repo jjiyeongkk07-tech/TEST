@@ -69,10 +69,10 @@ header { visibility: hidden; } footer { visibility: hidden; }
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 헤더 (문구 삭제 적용됨)
+# 3. 헤더
 st.markdown("<div class='dashboard-header'><h1>🌍 협력사별 글로벌 현황</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터 (A~G 업체로 확장)
+# 4. 데이터 
 suppliers = [
     {
         "name": "A업체", "industry": "PCB 제조",
@@ -123,7 +123,7 @@ suppliers = [
     },
     {
         "name": "E업체", "industry": "반도체 장비",
-        "hq": "경기 화성시", "kr": "동탄 R&D센터, 평택 R&D센터", "gl": "대만 신주 연락사무소, 미국 실리콘밸리 지사",
+        "hq": "경기 화성시", "kr": "동탄 R&D센터, 평택 R&D센터", "gl": "대만 신주 연락사무소, 미국 실리콘밸 지사",
         "desc": "국내 주요 반도체 제조사와의 끈끈한 협력을 바탕으로 화성과 평택에 차세대 장비 R&D 센터를 운영 중입니다. TSMC 및 인텔과의 기술 교류를 위해 대만과 미국 지사를 최근 오픈했습니다.",
         "products": [{"name": "CVD 증착장비", "img": "🏭"}, {"name": "웨이퍼 세정기", "img": "🧽"}],
         "locations": [
@@ -157,20 +157,14 @@ suppliers = [
     }
 ]
 
-# 5. 사이드바 (업종 필터 및 검색 기능 고도화)
+# 5. 사이드바 
 with st.sidebar:
     st.markdown("<h3 style='color:#0f172a; margin-bottom:20px; font-weight:900;'>🏢 파트너사 검색</h3>", unsafe_allow_html=True)
     
-    # 중복 없는 업종 리스트 추출
     industry_list = ["전체"] + sorted(list(set(s["industry"] for s in suppliers)))
-    
-    # 1. 업종 선택 필터
     selected_industry = st.selectbox("🏷️ 업종 필터", industry_list)
-    
-    # 2. 텍스트 검색 (업체명)
     search_term = st.text_input("🔍 업체명 검색", placeholder="예: A업체").strip()
 
-    # 다중 필터링 로직 적용
     filtered = suppliers
     if selected_industry != "전체":
         filtered = [s for s in filtered if s["industry"] == selected_industry]
@@ -180,17 +174,15 @@ with st.sidebar:
 
     if not filtered:
         st.warning("조건에 맞는 업체가 없습니다.")
-        filtered = suppliers # 결과가 없으면 전체 표시 방지하려면 이 줄을 삭제해도 됩니다.
+        filtered = suppliers
 
     st.markdown("<hr style='margin: 20px 0;'>", unsafe_allow_html=True)
     selected_name = st.radio("📊 상세 분석할 업체 선택", [s["name"] for s in filtered])
 
-# 선택된 업체 데이터 매칭
 selected = next((s for s in filtered if s["name"] == selected_name), None)
 
 # 6. 메인 화면 출력
 if selected:
-    # --- 타이틀 및 개요 ---
     st.markdown(
         f"<div style='margin-bottom:20px;'><h2 style='margin:0; color:#0f172a; font-weight:900; font-size:40px;'>{selected['name']}</h2>"
         f"<p style='margin:8px 0 0 0; color:#475569; font-size:18px; font-weight:500;'>업종 : <span style='color:#3b82f6; font-weight:800;'>{selected['industry']}</span></p></div>",
@@ -207,10 +199,8 @@ if selected:
 
     with map_col:
         df_loc = pd.DataFrame(selected["locations"])
-        
-        # 해외 지사가 있는지 판단하여 지도의 줌 레벨을 자동 조정
         has_global = any(loc["type"] == "gl" for loc in selected["locations"])
-        dynamic_zoom = 1.2 if has_global else 6.0
+        dynamic_zoom = 1.0 if has_global else 5.5
         
         view_state = pdk.ViewState(
             latitude=df_loc['lat'].mean(), 
@@ -223,9 +213,9 @@ if selected:
             "ColumnLayer",
             data=df_loc,
             get_position='[lon, lat]',
-            get_elevation=150000 if has_global else 50000, # 글로벌은 기둥을 더 높게 설정
-            elevation_scale=5,
-            radius=60000 if has_global else 20000,
+            get_elevation=350000 if has_global else 80000,   # 높이 대폭 상향
+            elevation_scale=1,
+            radius=150000 if has_global else 25000,          # 두께 대폭 상향
             get_fill_color='color',
             pickable=True,
             auto_highlight=True,
@@ -233,7 +223,7 @@ if selected:
         
         with st.container(border=True):
             st.pydeck_chart(pdk.Deck(
-                map_style="mapbox://styles/mapbox/light-v9", 
+                map_style="light",  # API Key가 필요없는 무료 Carto 지도로 변경 완료!
                 initial_view_state=view_state,
                 layers=[layer],
                 tooltip={"text": "{name}"} 
