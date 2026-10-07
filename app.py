@@ -1,18 +1,10 @@
 import streamlit as st
 import os
-import base64
 
 # 1. 페이지 기본 설정
 st.set_page_config(page_title="협력사별 글로벌 현황", page_icon="🌍", layout="wide")
 
-# (선택) 로컬 이미지가 있을 때 불러오는 함수
-def load_image_base64(image_path):
-    if os.path.exists(image_path):
-        with open(image_path, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode()
-    return None
-
-# 2. 가상 데이터 설정 (품목 2~3개씩 배치)
+# 2. 가상 데이터 설정 (A, B, C 업체 / 품목 2~3개)
 @st.cache_data
 def load_data():
     return [
@@ -52,10 +44,10 @@ def load_data():
 
 suppliers = load_data()
 
-# 3. 메인 화면 제목 (훨씬 눈에 띄게 강조)
+# 3. 메인 화면 제목 (색상 박스로 눈에 띄게 강조)
 st.markdown("""
-    <div style="background-color:#0f172a; padding:20px; border-radius:10px; margin-bottom:25px;">
-        <h1 style="color:white; margin:0; text-align:center;">🌍 협력사별 글로벌 현황</h1>
+    <div style='background-color: #0f172a; padding: 20px; border-radius: 10px; margin-bottom: 30px;'>
+        <h1 style='color: white; text-align: center; margin: 0;'>🌍 협력사별 글로벌 현황</h1>
     </div>
 """, unsafe_allow_html=True)
 
@@ -69,8 +61,5 @@ if not filtered_data:
     st.sidebar.warning("검색 결과가 없습니다.")
 else:
     supplier_names = [s["name"] for s in filtered_data]
-    selected_name = st.sidebar.radio("협력사 목록 (선택)", supplier_names)
-    selected = next(s for s in filtered_data if s["name"] == selected_name)
-
-    # 5. 우측 메인
+    selected_name = st.sidebar
 
