@@ -40,7 +40,7 @@ header { visibility: hidden; } footer { visibility: hidden; }
 .info-card-title { font-size: 14px; color: #64748b; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
 .info-card-value { font-size: 18px; color: #1e293b; font-weight: 700; line-height: 1.5; }
 
-/* 밸류체인 Flow 스타일 (새로 추가됨) */
+/* 밸류체인 Flow 스타일 */
 .vc-wrapper {
     display: flex; align-items: center; justify-content: space-between;
     background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
@@ -90,7 +90,7 @@ st.markdown(css, unsafe_allow_html=True)
 # 3. 헤더
 st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터 (밸류체인 데이터 추가)
+# 4. 데이터
 suppliers = [
     {
         "name": "A업체", "industry": "PCB 제조",
@@ -165,7 +165,7 @@ suppliers = [
     },
     {
         "name": "E업체", "industry": "반도체 장비",
-        "hq": "경기 화성시", "kr": "동탄 R&D센터, 평택 R&D센터", "gl": "대만 신주 연락사무소, 미국 실리콘밸리 지사",
+        "hq": "경기 화성시", "kr": "동탄 R&D센터, 평택 공장", "gl": "대만 신주 연락사무소, 미국 실리콘밸리 지사",
         "desc": "국내 주요 반도체 제조사와의 끈끈한 협력을 바탕으로 화성과 평택에 차세대 장비 R&D 센터를 운영 중입니다. TSMC 및 인텔과의 기술 교류를 위해 대만과 미국 지사를 최근 오픈했습니다.",
         "chain": [
             {"stage": "부품 소싱/설계", "loc": "🇰🇷 화성 동탄", "desc": "코어 부품 설계 및 글로벌 소싱"},
@@ -217,29 +217,57 @@ suppliers = [
     }
 ]
 
-# 5. 사이드바 
+# 5. 사이드바 (필터 고도화)
 with st.sidebar:
-    st.markdown("<h3 style='color:#0f172a; margin-bottom:20px; font-weight:900;'>🏢 파트너사 검색</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#0f172a; margin-bottom:20px; font-weight:900;'>🏢 파트너사 상세 검색</h3>", unsafe_allow_html=True)
     
+    # 5-1. 업종 필터
     industry_list = ["전체"] + sorted(list(set(s["industry"] for s in suppliers)))
     selected_industry = st.selectbox("🏷️ 업종 필터", industry_list)
-    search_term = st.text_input("🔍 업체명 검색", placeholder="예: A업체").strip()
-
+    
+    # 업종 필터 1차 적용
     filtered = suppliers
     if selected_industry != "전체":
         filtered = [s for s in filtered if s["industry"] == selected_industry]
     
+    # 5-2. 세부 품목 필터 (선택된 업종 내 품목만 추출하여 연동)
+    product_set = set()
+    for s in filtered:
+        for p in s["products"]:
+            product_set.add(p["name"])
+    
+    product_list = ["전체"] + sorted(list(product_set))
+    selected_product = st.selectbox("📦 세부 품목 필터", product_list)
+    
+    # 세부 품목 필터 2차 적용
+    if selected_product != "전체":
+        filtered = [s for s in filtered if any(p["name"] == selected_product for p in s["products"])]
+        
+    # 5-3. 지역(국내/해외) 필터
+    region_list = ["전체", "국내 전용", "글로벌 (해외 거점 보유)"]
+    selected_region = st.selectbox("🌍 지역 필터", region_list)
+    
+    # 지역 필터 3차 적용
+    if selected_region == "국내 전용":
+        filtered = [s for s in filtered if s["gl"] == "해당 없음"]
+    elif selected_region == "글로벌 (해외 거점 보유)":
+        filtered = [s for s in filtered if s["gl"] != "해당 없음"]
+
+    # 5-4. 업체명 검색어
+    search_term = st.text_input("🔍 업체명 검색", placeholder="예: A업체").strip()
+    
+    # 검색어 4차 적용
     if search_term:
         filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
 
+    # 결과 처리
     if not filtered:
         st.warning("조건에 맞는 업체가 없습니다.")
-        filtered = suppliers
-
-    st.markdown("<hr style='margin: 20px 0;'>", unsafe_allow_html=True)
-    selected_name = st.radio("📊 상세 분석할 업체 선택", [s["name"] for s in filtered])
-
-selected = next((s for s in filtered if s["name"] == selected_name), None)
+        selected = None
+    else:
+        st.markdown("<hr style='margin: 20px 0;'>", unsafe_allow_html=True)
+        selected_name = st.radio("📊 상세 분석할 업체 선택", [s["name"] for s in filtered])
+        selected = next((s for s in filtered if s["name"] == selected_name), None)
 
 # 6. 메인 화면 출력
 if selected:
@@ -253,7 +281,7 @@ if selected:
     st.markdown("<div class='section-title'>기업 개요</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
 
-    # --- 🔄 글로벌 밸류체인 Flow (새로 추가됨) ---
+    # --- 🔄 글로벌 밸류체인 Flow ---
     st.markdown("<div class='section-title'>글로벌 밸류체인 프로세스 (SCM Flow)</div>", unsafe_allow_html=True)
     
     chain_html = "<div class='vc-wrapper'>"
