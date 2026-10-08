@@ -1,3 +1,10 @@
+요청하신 이미지를 확인해 보니, 헤더(업종)를 제외하고 **총 25개의 업종 데이터**가 나열되어 있습니다. 
+
+해당 25종의 리스트를 추출하여 `selectbox`의 드롭다운 옵션으로 고정 적용했습니다. 또한, 필터 테스트 시 데이터가 정상적으로 연동되도록 **기존 A~G 업체의 샘플 데이터 업종도 추출된 리스트의 업종명으로 알맞게 변경(매핑)**해 두었습니다.
+
+아래 전체 코드를 복사해서 반영해 주세요.
+
+```python
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
@@ -5,7 +12,7 @@ import pydeck as pdk
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide")
 
-# 2. 고급 CSS 주입 (밸류체인 스타일 추가)
+# 2. 고급 CSS 주입
 css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
@@ -90,10 +97,10 @@ st.markdown(css, unsafe_allow_html=True)
 # 3. 헤더
 st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터
+# 4. 데이터 (요청하신 업종 리스트에 맞춰 기존 샘플들의 industry 값 수정)
 suppliers = [
     {
-        "name": "A업체", "industry": "PCB 제조",
+        "name": "A업체", "industry": "PCB", 
         "hq": "서울 서초구", "kr": "천안 공장, 구미 R&D센터", "gl": "베트남 하노이 공장, 미국 산호세 영업소",
         "desc": "국내 천안 및 구미에서 핵심 R&D 및 초기 양산을 진행하며, 대량 생산은 베트남 하노이 공장에서 담당하고 있습니다. 북미 주요 고객사 대응을 위해 미국 산호세에 직영 영업소를 운영 중입니다.",
         "chain": [
@@ -112,7 +119,7 @@ suppliers = [
         ]
     },
     {
-        "name": "B업체", "industry": "정밀 가공",
+        "name": "B업체", "industry": "가공(일반)",
         "hq": "부산 사하구", "kr": "창원 공장", "gl": "중국 칭다오 공장, 미국 텍사스 법인",
         "desc": "부산 본사를 중심으로 창원과 중국 칭다오에서 주요 장비 부품을 가공하고 있습니다. 최근 북미 IRA 법안 대응 및 직납 체계 구축을 위해 미국 텍사스에 조립 법인을 신설하였습니다.",
         "chain": [
@@ -130,7 +137,7 @@ suppliers = [
         ]
     },
     {
-        "name": "C업체", "industry": "화학/소재",
+        "name": "C업체", "industry": "에폭시",
         "hq": "인천 남동구", "kr": "울산 공장, 여수 공장", "gl": "해당 없음",
         "desc": "해외 지사는 없으나, 국내 핵심 화학 단지인 울산과 여수에 대규모 생산 플랜트를 운영하여 매우 안정적인 내수 공급망을 확보하고 있는 건실한 기업입니다.",
         "chain": [
@@ -147,7 +154,7 @@ suppliers = [
         ]
     },
     {
-        "name": "D업체", "industry": "2차전지 소재",
+        "name": "D업체", "industry": "원재료(철판)",
         "hq": "경북 포항시", "kr": "포항 1, 2공장", "gl": "폴란드 브로츠와프 법인, 미국 미시간 법인",
         "desc": "글로벌 전기차 배터리 수요 증가에 대응하기 위해 포항에 대규모 양극재 라인을 증설하였으며, 유럽(폴란드)과 북미(미시간)에 핵심 생산 거점을 구축해 현지 조달 역량을 극대화했습니다.",
         "chain": [
@@ -164,7 +171,7 @@ suppliers = [
         ]
     },
     {
-        "name": "E업체", "industry": "반도체 장비",
+        "name": "E업체", "industry": "임가공(조립)",
         "hq": "경기 화성시", "kr": "동탄 R&D센터, 평택 공장", "gl": "대만 신주 연락사무소, 미국 실리콘밸리 지사",
         "desc": "국내 주요 반도체 제조사와의 끈끈한 협력을 바탕으로 화성과 평택에 차세대 장비 R&D 센터를 운영 중입니다. TSMC 및 인텔과의 기술 교류를 위해 대만과 미국 지사를 최근 오픈했습니다.",
         "chain": [
@@ -182,7 +189,7 @@ suppliers = [
         ]
     },
     {
-        "name": "F업체", "industry": "디스플레이 부품",
+        "name": "F업체", "industry": "사출",
         "hq": "경기 파주시", "kr": "파주 LCD/OLED 라인", "gl": "베트남 하이퐁 조립공장",
         "desc": "파주 본사에서 고부가가치 하이엔드 OLED 패널 부품을 생산하고, 노동 집약적인 후공정 및 모듈 조립은 베트남 하이퐁 공장으로 이관하여 원가 경쟁력을 크게 확보하고 있습니다.",
         "chain": [
@@ -198,7 +205,7 @@ suppliers = [
         ]
     },
     {
-        "name": "G업체", "industry": "전장 부품",
+        "name": "G업체", "industry": "PRESS(CASE)",
         "hq": "경기 수원시", "kr": "화성 주행시험장", "gl": "멕시코 몬테레이 공장, 헝가리 부다페스트 공장",
         "desc": "수원 본사 및 화성 주행시험장에서 자율주행 모듈을 개발합니다. 북미 3대 완성차 업체 납품을 위해 멕시코에, 유럽 자동차 메이커 대응을 위해 헝가리에 각각 대형 공장을 가동하고 있습니다.",
         "chain": [
@@ -221,8 +228,16 @@ suppliers = [
 with st.sidebar:
     st.markdown("<h3 style='color:#0f172a; margin-bottom:20px; font-weight:900;'>🏢 파트너사 상세 검색</h3>", unsafe_allow_html=True)
     
-    # 5-1. 업종 필터
-    industry_list = ["전체"] + sorted(list(set(s["industry"] for s in suppliers)))
+    # 5-1. 업종 필터 (이미지에서 추출한 25종 고정)
+    all_industries = [
+        "PCB", "PRESS(CASE)", "PRESS(CORE)", "PRESS(TERMINAL)", "RUBBER",
+        "가공(COMM;Y)", "가공(DIECASTING)", "가공(MAGNET WIRE)", "가공(SHAFT)", "가공(일반)",
+        "단조", "라벨", "베어링", "사출", "소결(BRUSH)", "소결(GEAR)", "소결(MAGNET)", 
+        "에폭시", "원재료(SHAFT)", "원재료(사출)", "원재료(철판)", "원재료(황동)", 
+        "일반구매", "임가공(조립)", "포장재"
+    ]
+    
+    industry_list = ["전체"] + all_industries
     selected_industry = st.selectbox("🏷️ 업종 필터", industry_list)
     
     # 업종 필터 1차 적용
@@ -359,3 +374,4 @@ if selected:
         )
 
     st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
+```
