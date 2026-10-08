@@ -2,95 +2,120 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 
+# ==========================================
 # 1. 페이지 설정
-st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide")
+# ==========================================
+st.set_page_config(page_title="글로벌 SCM 분석 대시보드", page_icon="🏢", layout="wide")
 
-# 2. 고급 CSS 주입
+# ==========================================
+# 2. 고급 CSS 주입 (Corporate & Clean Style)
+# ==========================================
 css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
-html, body, [class*='css'] { font-family: 'Noto Sans KR', sans-serif !important; }
+/* 폰트: Pretendard 적용 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+html, body, [class*='css'], [class*='st-'] { 
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif !important; 
+}
 
-/* 배경 및 기본 레이아웃 */
-.stApp { background-color: #f1f5f9; }
-.block-container { padding-top: 1rem; padding-bottom: 2rem; max-width: 1400px; }
-header { visibility: hidden; } footer { visibility: hidden; }
+/* 기본 배경 및 레이아웃 */
+.stApp { background-color: #F8FAFC; }
+.block-container { padding-top: 2rem; padding-bottom: 3rem; max-width: 1440px; }
+header, footer { visibility: hidden; }
 
-/* 메인 타이틀 배너 */
-.dashboard-header { 
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
-    padding: 30px 40px; border-radius: 16px; margin-bottom: 30px; 
-    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); color: white;
-    position: relative; overflow: hidden;
+/* 메인 타이틀 바 */
+.main-header {
+    background: #0F172A;
+    padding: 24px 32px;
+    border-radius: 8px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
-.dashboard-header::after {
-    content: ''; position: absolute; top: -50%; right: -10%;
-    width: 300px; height: 300px; background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
-    border-radius: 50%;
+.main-header h1 { 
+    margin: 0; color: #FFFFFF; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
 }
-.dashboard-header h1 { margin: 0; font-size: 32px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; position: relative; z-index: 1;}
+.main-header .badge {
+    background: #3B82F6; color: white; padding: 6px 12px; border-radius: 4px; font-size: 14px; font-weight: 600;
+}
 
-/* 정보 카드 */
-.info-card { 
-    background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; 
-    padding: 24px; height: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-top: 4px solid #3b82f6;
+/* 기업 개요 헤더 영역 */
+.company-header {
+    display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px;
 }
-.info-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-.info-card-title { font-size: 14px; color: #64748b; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-.info-card-value { font-size: 18px; color: #1e293b; font-weight: 700; line-height: 1.5; }
+.company-name {
+    font-size: 36px; font-weight: 800; color: #111827; margin: 0; letter-spacing: -1px;
+}
+.company-industry {
+    background-color: #EFF6FF; color: #1D4ED8; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 15px; border: 1px solid #BFDBFE;
+}
 
-/* 밸류체인 Flow 스타일 */
-.vc-wrapper {
-    display: flex; align-items: center; justify-content: space-between;
-    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
-    padding: 30px 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-    overflow-x: auto; margin-bottom: 10px;
+/* 기업 설명 박스 */
+.desc-box {
+    background-color: #FFFFFF; border-left: 4px solid #3B82F6; border-radius: 0 8px 8px 0; 
+    padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 16px; 
+    color: #4B5563; line-height: 1.6; font-weight: 500; margin-bottom: 32px;
 }
-.vc-step {
-    display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 150px;
-}
-.vc-stage {
-    font-size: 13px; font-weight: 800; color: #3b82f6; background: #eff6ff; 
-    padding: 6px 14px; border-radius: 20px; margin-bottom: 12px; letter-spacing: -0.5px;
-}
-.vc-location { font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
-.vc-detail { font-size: 14px; font-weight: 500; color: #64748b; line-height: 1.4; word-break: keep-all; }
-.vc-arrow { font-size: 24px; color: #cbd5e1; font-weight: 900; padding: 0 10px; }
-
-/* 제품 카드 */
-.product-card { 
-    background: linear-gradient(to bottom, #ffffff, #f8fafc); border: 1px solid #e2e8f0; 
-    border-radius: 16px; padding: 30px 20px; text-align: center; height: 100%; 
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.3s;
-}
-.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #cbd5e1; }
-.product-emoji { font-size: 64px; line-height: 1; margin-bottom: 15px; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.1)); }
-.product-title { font-size: 18px; font-weight: 800; color: #0f172a; }
 
 /* 섹션 타이틀 */
 .section-title { 
-    font-size: 20px; font-weight: 900; color: #0f172a; margin-top: 45px; margin-bottom: 20px; 
-    display: flex; align-items: center; gap: 10px;
+    font-size: 20px; font-weight: 700; color: #111827; margin: 40px 0 20px 0; 
+    padding-bottom: 10px; border-bottom: 2px solid #E2E8F0;
 }
-.section-title::before { content: ''; display: block; width: 6px; height: 24px; background-color: #3b82f6; border-radius: 3px; }
 
-/* 기업 개요 박스 */
-.desc-box {
-    background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 25px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 17px; color: #334155; line-height: 1.8; font-weight: 500;
+/* SCM Flow 스테퍼 (Stepper) */
+.stepper-container {
+    background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 40px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px;
+}
+.stepper {
+    display: flex; justify-content: space-between; position: relative; max-width: 1000px; margin: 0 auto;
+}
+.stepper::before {
+    content: ''; position: absolute; top: 24px; left: 10%; right: 10%; height: 2px; background: #CBD5E1; z-index: 1;
+}
+.step {
+    position: relative; z-index: 2; text-align: center; flex: 1; padding: 0 10px;
+}
+.step-icon {
+    width: 48px; height: 48px; border-radius: 50%; background: #3B82F6; color: white;
+    display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;
+    margin: 0 auto 16px auto; border: 4px solid #FFFFFF; box-shadow: 0 0 0 1px #E2E8F0;
+}
+.step-stage { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+.step-loc { font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 8px; }
+.step-desc { font-size: 12px; color: #475569; line-height: 1.4; word-break: keep-all; }
+
+/* 데이터 카드 (인프라 현황) */
+.data-card { 
+    background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; 
+    padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+}
+.data-card-header { 
+    display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; 
+}
+.data-card-value { font-size: 16px; color: #0F172A; font-weight: 600; line-height: 1.5; }
+
+/* 제품 태그 */
+.product-tag-container { display: flex; flex-wrap: wrap; gap: 12px; }
+.product-tag {
+    background: #F8FAFC; border: 1px solid #CBD5E1; padding: 12px 20px; border-radius: 8px;
+    display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: #334155;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 
 /* 사이드바 스타일링 */
-[data-testid='stSidebar'] { background-color: #ffffff; border-right: 1px solid #e2e8f0; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
+[data-testid='stSidebar'] { background-color: #FFFFFF; border-right: 1px solid #E2E8F0; }
+.stSelectbox label, .stTextInput label, .stRadio label { font-weight: 600 !important; color: #334155 !important; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 헤더
-st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
-
-# 4. 데이터
+# ==========================================
+# 3. 데이터 소스 (기존 데이터 유지)
+# ==========================================
 suppliers = [
     {
         "name": "A업체", "industry": "PCB", 
@@ -98,17 +123,17 @@ suppliers = [
         "desc": "국내 천안 및 구미에서 핵심 R&D 및 초기 양산을 진행하며, 대량 생산은 베트남 하노이 공장에서 담당하고 있습니다. 북미 주요 고객사 대응을 위해 미국 산호세에 직영 영업소를 운영 중입니다.",
         "chain": [
             {"stage": "원자재 소싱", "loc": "🇨🇳 중국 칭다오", "desc": "구리/수지 등 기초원료 조달"},
-            {"stage": "R&D / 초기양산", "loc": "🇰🇷 한국 천안·구미", "desc": "핵심 기술 설계 및 파일럿 양산"},
-            {"stage": "대량 양산 (조립)", "loc": "🇻🇳 베트남 하노이", "desc": "인건비 절감형 대규모 조립 라인"},
+            {"stage": "R&D/초기양산", "loc": "🇰🇷 한국 천안·구미", "desc": "핵심 기술 설계 및 파일럿 양산"},
+            {"stage": "대량 양산(조립)", "loc": "🇻🇳 베트남 하노이", "desc": "인건비 절감형 대규모 조립 라인"},
             {"stage": "최종 납품", "loc": "🇺🇸 미국 산호세", "desc": "북미 주요 IT 고객사 직납"}
         ],
         "products": [{"name": "PCB", "img": "🖲️"}, {"name": "원재료", "img": "🪨"}],
         "locations": [
-            {"name": "본사 (서울)", "lat": 37.4836, "lon": 127.0326, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "천안 공장", "lat": 36.8151, "lon": 127.1138, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "구미 R&D", "lat": 36.1194, "lon": 128.3444, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "하노이 공장", "lat": 21.0285, "lon": 105.8542, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "산호세 영업소", "lat": 37.3382, "lon": -121.8863, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (서울)", "lat": 37.4836, "lon": 127.0326, "type": "hq", "color": [15, 23, 42, 200]}, # Slate
+            {"name": "천안 공장", "lat": 36.8151, "lon": 127.1138, "type": "kr", "color": [37, 99, 235, 200]}, # Blue
+            {"name": "구미 R&D", "lat": 36.1194, "lon": 128.3444, "type": "kr", "color": [37, 99, 235, 200]},
+            {"name": "하노이 공장", "lat": 21.0285, "lon": 105.8542, "type": "gl", "color": [16, 185, 129, 200]}, # Green
+            {"name": "산호세 영업소", "lat": 37.3382, "lon": -121.8863, "type": "gl", "color": [16, 185, 129, 200]}
         ]
     },
     {
@@ -123,10 +148,10 @@ suppliers = [
         ],
         "products": [{"name": "SHAFT", "img": "⚙️"}, {"name": "Bearing", "img": "🔄"}, {"name": "GEAR", "img": "🛞"}],
         "locations": [
-            {"name": "본사 (부산)", "lat": 35.1044, "lon": 128.9748, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "창원 공장", "lat": 35.2279, "lon": 128.6811, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "칭다오 공장", "lat": 36.0671, "lon": 120.3826, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "텍사스 법인", "lat": 31.9685, "lon": -99.9018, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (부산)", "lat": 35.1044, "lon": 128.9748, "type": "hq", "color": [15, 23, 42, 200]},
+            {"name": "창원 공장", "lat": 35.2279, "lon": 128.6811, "type": "kr", "color": [37, 99, 235, 200]},
+            {"name": "칭다오 공장", "lat": 36.0671, "lon": 120.3826, "type": "gl", "color": [16, 185, 129, 200]},
+            {"name": "텍사스 법인", "lat": 31.9685, "lon": -99.9018, "type": "gl", "color": [16, 185, 129, 200]}
         ]
     },
     {
@@ -141,9 +166,9 @@ suppliers = [
         ],
         "products": [{"name": "RUBBER", "img": "🧤"}],
         "locations": [
-            {"name": "본사 (인천)", "lat": 37.4473, "lon": 126.7315, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "울산 공장", "lat": 35.5383, "lon": 129.3113, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "여수 공장", "lat": 34.7603, "lon": 127.6622, "type": "kr", "color": [37, 99, 235, 220]}
+            {"name": "본사 (인천)", "lat": 37.4473, "lon": 126.7315, "type": "hq", "color": [15, 23, 42, 200]},
+            {"name": "울산 공장", "lat": 35.5383, "lon": 129.3113, "type": "kr", "color": [37, 99, 235, 200]},
+            {"name": "여수 공장", "lat": 34.7603, "lon": 127.6622, "type": "kr", "color": [37, 99, 235, 200]}
         ]
     },
     {
@@ -158,9 +183,9 @@ suppliers = [
         ],
         "products": [{"name": "원재료", "img": "🪨"}],
         "locations": [
-            {"name": "본사 및 공장 (포항)", "lat": 36.0190, "lon": 129.3435, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "폴란드 법인", "lat": 51.1079, "lon": 17.0385, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "미국 미시간 법인", "lat": 43.3266, "lon": -84.5361, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 및 공장 (포항)", "lat": 36.0190, "lon": 129.3435, "type": "hq", "color": [15, 23, 42, 200]},
+            {"name": "폴란드 법인", "lat": 51.1079, "lon": 17.0385, "type": "gl", "color": [16, 185, 129, 200]},
+            {"name": "미국 미시간 법인", "lat": 43.3266, "lon": -84.5361, "type": "gl", "color": [16, 185, 129, 200]}
         ]
     },
     {
@@ -175,10 +200,10 @@ suppliers = [
         ],
         "products": [{"name": "TERMINAL", "img": "🔌"}, {"name": "MAGNET WIRE", "img": "🧵"}],
         "locations": [
-            {"name": "본사 (화성)", "lat": 37.1995, "lon": 126.8315, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "평택 R&D", "lat": 36.9921, "lon": 127.1129, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "대만 신주 사무소", "lat": 24.8138, "lon": 120.9675, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "실리콘밸리 지사", "lat": 37.3875, "lon": -122.0575, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (화성)", "lat": 37.1995, "lon": 126.8315, "type": "hq", "color": [15, 23, 42, 200]},
+            {"name": "평택 R&D", "lat": 36.9921, "lon": 127.1129, "type": "kr", "color": [37, 99, 235, 200]},
+            {"name": "대만 신주 사무소", "lat": 24.8138, "lon": 120.9675, "type": "gl", "color": [16, 185, 129, 200]},
+            {"name": "실리콘밸리 지사", "lat": 37.3875, "lon": -122.0575, "type": "gl", "color": [16, 185, 129, 200]}
         ]
     },
     {
@@ -193,8 +218,8 @@ suppliers = [
         ],
         "products": [{"name": "MAGNET", "img": "🧲"}, {"name": "CORE", "img": "🔩"}],
         "locations": [
-            {"name": "본사 (파주)", "lat": 37.7600, "lon": 126.7800, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "하이퐁 공장", "lat": 20.8449, "lon": 106.6881, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (파주)", "lat": 37.7600, "lon": 126.7800, "type": "hq", "color": [15, 23, 42, 200]},
+            {"name": "하이퐁 공장", "lat": 20.8449, "lon": 106.6881, "type": "gl", "color": [16, 185, 129, 200]}
         ]
     },
     {
@@ -209,17 +234,29 @@ suppliers = [
         ],
         "products": [{"name": "CASE", "img": "📦"}, {"name": "BRUSH", "img": "🖌️"}],
         "locations": [
-            {"name": "본사 (수원)", "lat": 37.2636, "lon": 127.0286, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "화성 시험장", "lat": 37.2100, "lon": 126.8100, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "멕시코 몬테레이", "lat": 25.6866, "lon": -100.3161, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "헝가리 부다페스트", "lat": 47.4979, "lon": 19.0402, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (수원)", "lat": 37.2636, "lon": 127.0286, "type": "hq", "color": [15, 23, 42, 200]},
+            {"name": "화성 시험장", "lat": 37.2100, "lon": 126.8100, "type": "kr", "color": [37, 99, 235, 200]},
+            {"name": "멕시코 몬테레이", "lat": 25.6866, "lon": -100.3161, "type": "gl", "color": [16, 185, 129, 200]},
+            {"name": "헝가리 부다페스트", "lat": 47.4979, "lon": 19.0402, "type": "gl", "color": [16, 185, 129, 200]}
         ]
     }
 ]
 
-# 5. 사이드바 (필터 고도화)
+# ==========================================
+# 4. 헤더 렌더링
+# ==========================================
+st.markdown("""
+<div class='main-header'>
+    <h1>Global SCM Intelligence</h1>
+    <span class='badge'>Supply Chain Analytics</span>
+</div>
+""", unsafe_allow_html=True)
+
+# ==========================================
+# 5. 사이드바 (필터)
+# ==========================================
 with st.sidebar:
-    st.markdown("<h3 style='color:#0f172a; margin-bottom:20px; font-weight:900;'>🏢 파트너사 상세 검색</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#0F172A; font-weight:700; margin-bottom: 20px;'>🔍 검색 및 필터</h3>", unsafe_allow_html=True)
     
     # 5-1. 업종 필터 
     all_industries = [
@@ -230,104 +267,84 @@ with st.sidebar:
         "일반구매", "임가공(조립)", "포장재"
     ]
     
-    industry_list = ["전체"] + all_industries
-    selected_industry = st.selectbox("🏷️ 업종 필터", industry_list)
+    selected_industry = st.selectbox("업종 선택", ["전체"] + all_industries)
     
-    # 업종 필터 1차 적용
+    # 5-2. 지역 필터
+    selected_region = st.selectbox("주요 권역", ["전체", "국내", "중국", "인도", "유럽", "베트남", "미국"])
+    
+    st.divider()
+
+    # 5-3. 검색어 입력
+    search_term = st.text_input("기업명 직접 검색", placeholder="예: A업체").strip()
+
+    # 필터 적용 로직
     filtered = suppliers
     if selected_industry != "전체":
         filtered = [s for s in filtered if s["industry"] == selected_industry]
-    
-    # 5-2. 세부 품목 필터 (선택된 업종 내 품목만 추출하여 연동)
-    product_set = set()
-    for s in filtered:
-        for p in s["products"]:
-            product_set.add(p["name"])
-    
-    product_list = ["전체"] + sorted(list(product_set))
-    selected_product = st.selectbox("📦 세부 품목 필터", product_list)
-    
-    # 세부 품목 필터 2차 적용
-    if selected_product != "전체":
-        filtered = [s for s in filtered if any(p["name"] == selected_product for p in s["products"])]
         
-    # 5-3. 지역(국내/해외) 고정 필터 적용
-    region_list = ["전체", "국내", "중국", "인도", "유럽", "베트남"]
-    selected_region = st.selectbox("🌍 지역 필터", region_list)
-    
-    # 지역 필터 3차 적용
     if selected_region == "국내":
         filtered = [s for s in filtered if s["gl"] == "해당 없음"]
     elif selected_region == "유럽":
-        # 샘플 데이터의 폴란드, 헝가리가 유럽으로 정상 조회되도록 예외 처리
         filtered = [s for s in filtered if any(x in s["gl"] for x in ["유럽", "폴란드", "헝가리"])]
     elif selected_region != "전체":
         filtered = [s for s in filtered if selected_region in s["gl"]]
 
-    # 5-4. 업체명 검색어
-    search_term = st.text_input("🔍 업체명 검색", placeholder="예: A업체").strip()
-    
-    # 검색어 4차 적용
     if search_term:
         filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
 
-    # 결과 처리
+    st.divider()
+
+    # 결과 리스트 라디오 버튼
     if not filtered:
-        st.warning("조건에 맞는 업체가 없습니다.")
+        st.warning("조건에 맞는 파트너사가 없습니다.")
         selected = None
     else:
-        st.markdown("<hr style='margin: 20px 0;'>", unsafe_allow_html=True)
-        selected_name = st.radio("📊 상세 분석할 업체 선택", [s["name"] for s in filtered])
+        st.markdown("<p style='font-size:14px; font-weight:600; color:#64748b; margin-bottom:10px;'>📋 검색 결과 ({}건)</p>".format(len(filtered)), unsafe_allow_html=True)
+        selected_name = st.radio("상세 분석할 기업을 선택하세요", [s["name"] for s in filtered], label_visibility="collapsed")
         selected = next((s for s in filtered if s["name"] == selected_name), None)
 
-# 6. 메인 화면 출력
+# ==========================================
+# 6. 메인 콘텐츠 영역
+# ==========================================
 if selected:
-    # --- 타이틀 및 개요 ---
-    st.markdown(
-        f"<div style='margin-bottom:20px;'><h2 style='margin:0; color:#0f172a; font-weight:900; font-size:40px;'>{selected['name']}</h2>"
-        f"<p style='margin:8px 0 0 0; color:#475569; font-size:18px; font-weight:500;'>업종 : <span style='color:#3b82f6; font-weight:800;'>{selected['industry']}</span></p></div>",
-        unsafe_allow_html=True
-    )
+    # --- [섹션 1] 기업 개요 ---
+    st.markdown(f"""
+        <div class='company-header'>
+            <h2 class='company-name'>{selected['name']}</h2>
+            <span class='company-industry'>{selected['industry']}</span>
+        </div>
+        <div class='desc-box'>{selected['desc']}</div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("<div class='section-title'>기업 개요</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
-
-    # --- 🔄 글로벌 밸류체인 Flow ---
-    st.markdown("<div class='section-title'>글로벌 밸류체인 프로세스 (SCM Flow)</div>", unsafe_allow_html=True)
+    # --- [섹션 2] 글로벌 밸류체인 Flow ---
+    st.markdown("<div class='section-title'>Value Chain Process</div>", unsafe_allow_html=True)
     
-    chain_html = "<div class='vc-wrapper'>"
+    chain_html = "<div class='stepper-container'><div class='stepper'>"
     for i, step in enumerate(selected["chain"]):
         chain_html += f"""
-        <div class='vc-step'>
-            <div class='vc-stage'>{step['stage']}</div>
-            <div class='vc-location'>{step['loc']}</div>
-            <div class='vc-detail'>{step['desc']}</div>
+        <div class='step'>
+            <div class='step-icon'>{i+1}</div>
+            <div class='step-stage'>{step['stage']}</div>
+            <div class='step-loc'>{step['loc']}</div>
+            <div class='step-desc'>{step['desc']}</div>
         </div>
         """
-        if i < len(selected["chain"]) - 1:
-            chain_html += "<div class='vc-arrow'>➔</div>"
-    chain_html += "</div>"
-    
+    chain_html += "</div></div>"
     st.markdown(chain_html, unsafe_allow_html=True)
 
-    # --- 🗺️ 글로벌 거점 인프라 ---
-    st.markdown("<div class='section-title'>주요 거점 네트워크</div>", unsafe_allow_html=True)
+    # --- [섹션 3] 인프라 및 생산품목 (2단 레이아웃) ---
+    st.markdown("<div class='section-title'>Global Infrastructure & Assets</div>", unsafe_allow_html=True)
     
-    map_col, text_col = st.columns([1.5, 1])
+    col1, col2 = st.columns([1.6, 1])
 
-    with map_col:
+    # 왼쪽: 지도 데이터
+    with col1:
         df_loc = pd.DataFrame(selected["locations"])
-        
         lon_range = df_loc['lon'].max() - df_loc['lon'].min()
-        if lon_range > 150:    zoom_lvl = 1.0
-        elif lon_range > 50:   zoom_lvl = 2.5
-        else:                  zoom_lvl = 6.0
+        zoom_lvl = 1.0 if lon_range > 150 else (2.5 if lon_range > 50 else 6.0)
             
         view_state = pdk.ViewState(
-            latitude=df_loc['lat'].mean(), 
-            longitude=df_loc['lon'].mean(), 
-            zoom=zoom_lvl, 
-            pitch=0
+            latitude=df_loc['lat'].mean(), longitude=df_loc['lon'].mean(), zoom=zoom_lvl, pitch=0
         )
         
         layer = pdk.Layer(
@@ -345,28 +362,42 @@ if selected:
         )
         
         with st.container(border=True):
+            # 지도 스타일을 'road'로 변경하여 비즈니스용에 적합한 깔끔한 UI 제공
             st.pydeck_chart(pdk.Deck(
-                map_style="light",
+                map_style="road",
                 initial_view_state=view_state,
                 layers=[layer],
                 tooltip={"text": "{name}"} 
             ))
 
-    with text_col:
-        st.markdown(f"<div class='info-card' style='border-top-color:#dc2626;'><div class='info-card-title'>🏢 Headquarter (본사)</div><div class='info-card-value'>{selected['hq']}</div></div>", unsafe_allow_html=True)
-        st.write("") 
-        st.markdown(f"<div class='info-card' style='border-top-color:#2563eb;'><div class='info-card-title'>🇰🇷 Domestic (국내 공장/지사)</div><div class='info-card-value'>{selected['kr']}</div></div>", unsafe_allow_html=True)
-        st.write("") 
-        gl_color = "#10b981" if selected['gl'] != "해당 없음" else "#94a3b8"
-        st.markdown(f"<div class='info-card' style='border-top-color:{gl_color};'><div class='info-card-title'>🌐 Global (해외 법인/지사)</div><div class='info-card-value'>{selected['gl']}</div></div>", unsafe_allow_html=True)
+    # 오른쪽: 거점 텍스트 데이터 & 핵심 품목
+    with col2:
+        # 거점 인프라 현황
+        st.markdown(f"""
+            <div class='data-card' style='border-left: 4px solid #0F172A;'>
+                <div class='data-card-header'>🏢 Headquarter (본사)</div>
+                <div class='data-card-value'>{selected['hq']}</div>
+            </div>
+            <div class='data-card' style='border-left: 4px solid #3B82F6;'>
+                <div class='data-card-header'>🇰🇷 Domestic (국내 인프라)</div>
+                <div class='data-card-value'>{selected['kr']}</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        gl_border = "#10B981" if selected['gl'] != "해당 없음" else "#CBD5E1"
+        st.markdown(f"""
+            <div class='data-card' style='border-left: 4px solid {gl_border}; margin-bottom:32px;'>
+                <div class='data-card-header'>🌐 Global (해외 거점)</div>
+                <div class='data-card-value'>{selected['gl']}</div>
+            </div>
+        """, unsafe_allow_html=True)
 
-    # --- 📦 핵심 생산 품목 ---
-    st.markdown("<div class='section-title'>핵심 생산 품목</div>", unsafe_allow_html=True)
-    cols = st.columns(len(selected['products']))
-    for idx, p in enumerate(selected['products']):
-        cols[idx].markdown(
-            f"<div class='product-card'><div class='product-emoji'>{p['img']}</div><div class='product-title'>{p['name']}</div></div>",
-            unsafe_allow_html=True
-        )
+        # 핵심 생산 품목 태그형 UI
+        st.markdown("<p style='font-size:16px; font-weight:700; color:#111827; margin-bottom:12px;'>핵심 생산 품목</p>", unsafe_allow_html=True)
+        products_html = "<div class='product-tag-container'>"
+        for p in selected['products']:
+            products_html += f"<div class='product-tag'><span>{p['img']}</span> {p['name']}</div>"
+        products_html += "</div>"
+        st.markdown(products_html, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
