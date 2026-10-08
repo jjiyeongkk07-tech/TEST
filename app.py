@@ -1,8 +1,11 @@
-에러 화면을 확인해 보니, 파이썬 파일(`app.py`) 최상단에 제가 작성했던 **일반 설명 텍스트("요청하신 이미지를 확인해 보니...")까지 함께 복사되어 발생한 문법 오류(SyntaxError)**입니다. 파이썬이 코드가 아닌 일반 텍스트를 읽으려고 해서 생긴 문제입니다.
-
-기존 `app.py` 파일의 내용을 **모두 지우신 후**, 아래 회색 박스 우측 상단의 **[복사하기]** 또는 **[Copy]** 버튼을 눌러 **파이썬 코드만** 정확하게 붙여넣기 해보세요!
-
 ```python
+# 🚨 에러 원인: 안내해 드린 "한글 설명 멘트"까지 파이썬 파일(app.py)에 
+# 통째로 복사해서 붙여넣으셨기 때문에 발생한 문법 에러(SyntaxError)입니다 😭
+# 
+# ✅ 해결 방법: 기존 app.py 파일의 내용을 '전부 지우고' 
+# 아래의 코드(import ~ 부터 끝까지)만 정확하게 복사해서 붙여넣어 주세요!
+# (현재 읽고 계신 이 안내문은 파이썬 주석(#) 기호를 붙여두었으므로 같이 복사하셔도 에러가 나지 않습니다.)
+
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
@@ -95,7 +98,7 @@ st.markdown(css, unsafe_allow_html=True)
 # 3. 헤더
 st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터 (요청하신 업종 리스트에 맞춰 기존 샘플들의 industry 값 수정)
+# 4. 데이터
 suppliers = [
     {
         "name": "A업체", "industry": "PCB", 
@@ -142,7 +145,7 @@ suppliers = [
             {"stage": "원유/원료 수입", "loc": "🛢️ 중동 / 호주", "desc": "원유 및 기초 화합물 수입"},
             {"stage": "정제 및 합성", "loc": "🇰🇷 한국 울산·여수", "desc": "대규모 석유화학 플랜트 가동"},
             {"stage": "품질 검수", "loc": "🇰🇷 인천 본사", "desc": "최종 패키징 및 R&D 검수"},
-            {"stage": "내수 납품", "loc": "🚚 국내 전역", "desc": "국내 주요 대기업 납품"}
+            {"stage": "내 소 납품", "loc": "🚚 국내 전역", "desc": "국내 주요 대기업 납품"}
         ],
         "products": [{"name": "합성수지", "img": "🧪"}, {"name": "특수 코팅액", "img": "💧"}, {"name": "산업용 접착제", "img": "🍯"}],
         "locations": [
