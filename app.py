@@ -41,7 +41,7 @@ header { visibility: hidden; } footer { visibility: hidden; }
     transition: all 0.3s ease; 
 }
 .info-card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-color: #bba14f; }
-.info-card-title { font-size: 13px; color: var(--faded-text-color); font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.info-card-title { font-size: 14px; color: var(--faded-text-color); font-weight: 700; margin-bottom: 12px; letter-spacing: 1px; }
 .info-card-value { font-size: 19px; color: var(--text-color); font-weight: 800; line-height: 1.5; letter-spacing: -0.5px; }
 
 /* 제품 및 인증서 카드 */
@@ -78,7 +78,7 @@ st.markdown(css, unsafe_allow_html=True)
 # 3. 헤더
 st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터 (SCM Flow 제거, 인증/ESG 경영 데이터 추가)
+# 4. 데이터 
 base_certs = [
     {"name": "IATF 16949", "img": "📜"},
     {"name": "SQ 인증", "img": "🎖️"},
@@ -230,9 +230,9 @@ with st.sidebar:
         selected_name = st.radio("📊 상세 분석할 업체 선택", [s["name"] for s in filtered])
         selected = next((s for s in filtered if s["name"] == selected_name), None)
 
-# 6. 메인 화면 출력
+# 6. 메인 화면 출력 (순서 재배치)
 if selected:
-    # --- 타이틀 및 개요 ---
+    # [순서 1] 타이틀 및 기업 개요
     st.markdown(
         f"<div style='margin-bottom:25px; display:flex; align-items:baseline; gap: 15px;'>"
         f"<h2 style='margin:0; color:var(--text-color); font-weight:900; font-size:42px; letter-spacing: -1px;'>{selected['name']}</h2>"
@@ -243,12 +243,31 @@ if selected:
     st.markdown("<div class='section-title'>기업 개요</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
 
-    # --- 🗺️ 글로벌 거점 인프라 ---
+    # [순서 2] 품질 인증 및 ESG 경영
+    st.markdown("<div class='section-title'>품질 인증 및 ESG 경영</div>", unsafe_allow_html=True)
+    cols_cert = st.columns(len(selected['certs']))
+    for idx, c in enumerate(selected['certs']):
+        cols_cert[idx].markdown(
+            f"<div class='product-card'><div class='product-emoji'>{c['img']}</div><div class='product-title'>{c['name']}</div></div>",
+            unsafe_allow_html=True
+        )
+
+    # [순서 3] 핵심 생산 품목
+    st.markdown("<div class='section-title'>핵심 생산 품목</div>", unsafe_allow_html=True)
+    cols_prod = st.columns(len(selected['products']))
+    for idx, p in enumerate(selected['products']):
+        cols_prod[idx].markdown(
+            f"<div class='product-card'><div class='product-emoji'>{p['img']}</div><div class='product-title'>{p['name']}</div></div>",
+            unsafe_allow_html=True
+        )
+
+    # [순서 4] 주요 거점 네트워크 (지도)
     st.markdown("<div class='section-title'>주요 거점 네트워크</div>", unsafe_allow_html=True)
     
+    # 강조할 지역 옵션명 변경
     highlight_opt = st.radio(
         "📍 지도에서 강조할 지역을 선택하세요:", 
-        ["전체 보기", "🏢 본사 (HQ)", "🇰🇷 국내 거점", "🌐 해외 거점"], 
+        ["전체 보기", "🏢 국내(본사)", "🇰🇷 국내(지사)", "🌐 해외"], 
         horizontal=True
     )
     
@@ -260,19 +279,19 @@ if selected:
         def get_color(row):
             base_colors = {'hq': [31, 41, 55, 220], 'kr': [107, 114, 128, 220], 'gl': [187, 161, 79, 220]}
             hi_colors = {'hq': [220, 38, 38, 255], 'kr': [37, 99, 235, 255], 'gl': [16, 185, 129, 255]}
-            dim_color = [156, 163, 175, 100] # 다크/라이트 모드 범용 중간 회색
+            dim_color = [156, 163, 175, 100]
             
             if highlight_opt == "전체 보기": return base_colors[row['type']]
-            elif highlight_opt == "🏢 본사 (HQ)" and row['type'] == 'hq': return hi_colors['hq']
-            elif highlight_opt == "🇰🇷 국내 거점" and row['type'] == 'kr': return hi_colors['kr']
-            elif highlight_opt == "🌐 해외 거점" and row['type'] == 'gl': return hi_colors['gl']
+            elif highlight_opt == "🏢 국내(본사)" and row['type'] == 'hq': return hi_colors['hq']
+            elif highlight_opt == "🇰🇷 국내(지사)" and row['type'] == 'kr': return hi_colors['kr']
+            elif highlight_opt == "🌐 해외" and row['type'] == 'gl': return hi_colors['gl']
             else: return dim_color
 
         def get_radius(row):
             if highlight_opt == "전체 보기": return 120000
-            if highlight_opt == "🏢 본사 (HQ)" and row['type'] == 'hq': return 350000
-            if highlight_opt == "🇰🇷 국내 거점" and row['type'] == 'kr': return 350000
-            if highlight_opt == "🌐 해외 거점" and row['type'] == 'gl': return 350000
+            if highlight_opt == "🏢 국내(본사)" and row['type'] == 'hq': return 350000
+            if highlight_opt == "🇰🇷 국내(지사)" and row['type'] == 'kr': return 350000
+            if highlight_opt == "🌐 해외" and row['type'] == 'gl': return 350000
             return 40000 
 
         df_loc['color'] = df_loc.apply(get_color, axis=1)
@@ -283,7 +302,7 @@ if selected:
             lon_range = df_loc['lon'].max() - df_loc['lon'].min()
             zoom_lvl = 1.0 if lon_range > 150 else (2.5 if lon_range > 50 else 5.5)
         else:
-            target_type = 'hq' if "본사" in highlight_opt else ('kr' if "국내" in highlight_opt else 'gl')
+            target_type = 'hq' if "본사" in highlight_opt else ('kr' if "지사" in highlight_opt else 'gl')
             target_df = df_loc[df_loc['type'] == target_type]
             
             if not target_df.empty:
@@ -321,7 +340,7 @@ if selected:
         
         with st.container(border=True):
             st.pydeck_chart(pdk.Deck(
-                # map_style을 생략하면 Streamlit 테마 설정(다크/라이트)에 지도가 자동으로 맞춰집니다.
+                map_style="light", # 지도가 검게 나오는 현상 방지 (밝은 테마 고정)
                 initial_view_state=view_state,
                 layers=[layer],
                 tooltip={"text": "{name}"} 
@@ -329,35 +348,17 @@ if selected:
 
     with text_col:
         hq_border = "#dc2626" if "본사" in highlight_opt else "var(--faded-text-color)"
-        kr_border = "#2563eb" if "국내" in highlight_opt else "var(--faded-text-color)"
+        kr_border = "#2563eb" if "지사" in highlight_opt else "var(--faded-text-color)"
         gl_border = "#10b981" if "해외" in highlight_opt else ("#bba14f" if selected['gl'] != "해당 없음" else "var(--faded-text-color)")
         
-        hq_opacity = "1" if highlight_opt in ["전체 보기", "🏢 본사 (HQ)"] else "0.4"
-        kr_opacity = "1" if highlight_opt in ["전체 보기", "🇰🇷 국내 거점"] else "0.4"
-        gl_opacity = "1" if highlight_opt in ["전체 보기", "🌐 해외 거점"] else "0.4"
+        hq_opacity = "1" if highlight_opt in ["전체 보기", "🏢 국내(본사)"] else "0.4"
+        kr_opacity = "1" if highlight_opt in ["전체 보기", "🇰🇷 국내(지사)"] else "0.4"
+        gl_opacity = "1" if highlight_opt in ["전체 보기", "🌐 해외"] else "0.4"
 
-        st.markdown(f"<div class='info-card' style='border-left: 6px solid {hq_border}; opacity: {hq_opacity};'><div class='info-card-title'>🏢 Headquarter (본사)</div><div class='info-card-value'>{selected['hq']}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='info-card' style='border-left: 6px solid {hq_border}; opacity: {hq_opacity};'><div class='info-card-title'>🏢 국내(본사)</div><div class='info-card-value'>{selected['hq']}</div></div>", unsafe_allow_html=True)
         st.write("") 
-        st.markdown(f"<div class='info-card' style='border-left: 6px solid {kr_border}; opacity: {kr_opacity};'><div class='info-card-title'>🇰🇷 Domestic (국내 거점)</div><div class='info-card-value'>{selected['kr']}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='info-card' style='border-left: 6px solid {kr_border}; opacity: {kr_opacity};'><div class='info-card-title'>🇰🇷 국내(지사)</div><div class='info-card-value'>{selected['kr']}</div></div>", unsafe_allow_html=True)
         st.write("") 
-        st.markdown(f"<div class='info-card' style='border-left: 6px solid {gl_border}; opacity: {gl_opacity};'><div class='info-card-title'>🌐 Global (해외 거점)</div><div class='info-card-value'>{selected['gl']}</div></div>", unsafe_allow_html=True)
-
-    # --- 📦 핵심 생산 품목 ---
-    st.markdown("<div class='section-title'>핵심 생산 품목</div>", unsafe_allow_html=True)
-    cols_prod = st.columns(len(selected['products']))
-    for idx, p in enumerate(selected['products']):
-        cols_prod[idx].markdown(
-            f"<div class='product-card'><div class='product-emoji'>{p['img']}</div><div class='product-title'>{p['name']}</div></div>",
-            unsafe_allow_html=True
-        )
-
-    # --- 🎖️ 품질 인증 및 ESG 경영 ---
-    st.markdown("<div class='section-title'>품질 인증 및 ESG 경영</div>", unsafe_allow_html=True)
-    cols_cert = st.columns(len(selected['certs']))
-    for idx, c in enumerate(selected['certs']):
-        cols_cert[idx].markdown(
-            f"<div class='product-card'><div class='product-emoji'>{c['img']}</div><div class='product-title'>{c['name']}</div></div>",
-            unsafe_allow_html=True
-        )
+        st.markdown(f"<div class='info-card' style='border-left: 6px solid {gl_border}; opacity: {gl_opacity};'><div class='info-card-title'>🌐 해외</div><div class='info-card-value'>{selected['gl']}</div></div>", unsafe_allow_html=True)
 
     st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
