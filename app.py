@@ -88,10 +88,10 @@ base_certs = [
 
 suppliers = [
     {
-        "name": "A업체", "industry": "PCB", 
+        "name": "한성전장부산공장", "industry": "PCB", 
         "hq": "서울 서초구", "kr": "천안 공장, 구미 R&D센터", "gl": "베트남 하노이 공장, 미국 산호세 영업소",
         "desc": "국내 천안 및 구미에서 핵심 R&D 및 초기 양산을 진행하며, 대량 생산은 베트남 하노이 공장에서 담당하고 있습니다. 북미 주요 고객사 대응을 위해 미국 산호세에 직영 영업소를 운영 중입니다.",
-        "products": [{"name": "PCB", "img": "🖲️"}, {"name": "원재료", "img": "🪨"}],
+        "products": [{"name": "PCB", "img": "🖲️"}, {"name": "임가공(조립)", "img": "⚙️"}],
         "certs": base_certs,
         "locations": [
             {"name": "본사 (서울)", "lat": 37.4836, "lon": 127.0326, "type": "hq"},
@@ -102,10 +102,10 @@ suppliers = [
         ]
     },
     {
-        "name": "B업체", "industry": "가공(일반)",
+        "name": "효성정밀", "industry": "가공(일반)",
         "hq": "부산 사하구", "kr": "창원 공장", "gl": "중국 칭다오 공장, 미국 텍사스 법인",
         "desc": "부산 본사를 중심으로 창원과 중국 칭다오에서 주요 장비 부품을 가공하고 있습니다. 최근 북미 IRA 법안 대응 및 직납 체계 구축을 위해 미국 텍사스에 조립 법인을 신설하였습니다.",
-        "products": [{"name": "SHAFT", "img": "⚙️"}, {"name": "Bearing", "img": "🔄"}, {"name": "GEAR", "img": "🛞"}],
+        "products": [{"name": "WHEEL", "img": "🛞"}, {"name": "FLANGE", "img": "💿"}, {"name": "FLANGE COVER", "img": "🛡️"}],
         "certs": base_certs,
         "locations": [
             {"name": "본사 (부산)", "lat": 35.1044, "lon": 128.9748, "type": "hq"},
@@ -115,10 +115,10 @@ suppliers = [
         ]
     },
     {
-        "name": "C업체", "industry": "에폭시",
+        "name": "(주)성우", "industry": "에폭시",
         "hq": "인천 남동구", "kr": "울산 공장, 여수 공장", "gl": "해당 없음",
         "desc": "해외 지사는 없으나, 국내 핵심 화학 단지인 울산과 여수에 대규모 생산 플랜트를 운영하여 매우 안정적인 내수 공급망을 확보하고 있는 건실한 기업입니다.",
-        "products": [{"name": "RUBBER", "img": "🧤"}],
+        "products": [{"name": "ROTORCASE", "img": "🛢️"}, {"name": "CASE ASM", "img": "📦"}],
         "certs": base_certs,
         "locations": [
             {"name": "본사 (인천)", "lat": 37.4473, "lon": 126.7315, "type": "hq"},
@@ -127,10 +127,10 @@ suppliers = [
         ]
     },
     {
-        "name": "D업체", "industry": "원재료(철판)",
+        "name": "ZEB", "industry": "원재료(철판)",
         "hq": "경북 포항시", "kr": "포항 1, 2공장", "gl": "폴란드 브로츠와프 법인, 미국 미시간 법인",
         "desc": "글로벌 전기차 배터리 수요 증가에 대응하기 위해 포항에 대규모 양극재 라인을 증설하였으며, 유럽(폴란드)과 북미(미시간)에 핵심 생산 거점을 구축해 현지 조달 역량을 극대화했습니다.",
-        "products": [{"name": "원재료", "img": "🪨"}],
+        "products": [{"name": "CORE", "img": "🔩"}, {"name": "ROTORCASE", "img": "🛢️"}],
         "certs": base_certs,
         "locations": [
             {"name": "본사 및 공장 (포항)", "lat": 36.0190, "lon": 129.3435, "type": "hq"},
@@ -217,7 +217,8 @@ with st.sidebar:
     elif selected_region != "전체":
         filtered = [s for s in filtered if selected_region in s["gl"]]
 
-    search_term = st.text_input("🔍 업체명 검색", placeholder="예: A업체").strip()
+    # 예시명 변경
+    search_term = st.text_input("🔍 업체명 검색", placeholder="예: 한성전장부산공장").strip()
     
     if search_term:
         filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
@@ -230,7 +231,7 @@ with st.sidebar:
         selected_name = st.radio("📊 상세 분석할 업체 선택", [s["name"] for s in filtered])
         selected = next((s for s in filtered if s["name"] == selected_name), None)
 
-# 6. 메인 화면 출력 (순서 재배치)
+# 6. 메인 화면 출력
 if selected:
     # [순서 1] 타이틀 및 기업 개요
     st.markdown(
@@ -264,7 +265,6 @@ if selected:
     # [순서 4] 주요 거점 네트워크 (지도)
     st.markdown("<div class='section-title'>주요 거점 네트워크</div>", unsafe_allow_html=True)
     
-    # 강조할 지역 옵션명 변경
     highlight_opt = st.radio(
         "📍 지도에서 강조할 지역을 선택하세요:", 
         ["전체 보기", "🏢 국내(본사)", "🇰🇷 국내(지사)", "🌐 해외"], 
@@ -340,7 +340,7 @@ if selected:
         
         with st.container(border=True):
             st.pydeck_chart(pdk.Deck(
-                map_style="light", # 지도가 검게 나오는 현상 방지 (밝은 테마 고정)
+                map_style="light", 
                 initial_view_state=view_state,
                 layers=[layer],
                 tooltip={"text": "{name}"} 
