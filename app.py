@@ -1,4 +1,3 @@
-# === 여기서부터 복사하세요 ===
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
@@ -91,7 +90,7 @@ st.markdown(css, unsafe_allow_html=True)
 # 3. 헤더
 st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터 
+# 4. 데이터
 suppliers = [
     {
         "name": "A업체", "industry": "PCB", 
@@ -252,23 +251,17 @@ with st.sidebar:
     if selected_product != "전체":
         filtered = [s for s in filtered if any(p["name"] == selected_product for p in s["products"])]
         
-    # 5-3. 지역(국내/해외) 필터 (해외 국가명 동적 추출)
-    country_set = set()
-    for s in filtered:
-        if s["gl"] != "해당 없음":
-            # "베트남 하노이 공장, 미국 산호세 영업소" -> ['베트남', '미국']
-            for loc in s["gl"].split(","):
-                country = loc.strip().split(" ")[0]
-                country_set.add(country)
-                
-    region_list = ["전체", "국내 전용"] + sorted(list(country_set))
+    # 5-3. 지역(국내/해외) 고정 필터 적용
+    region_list = ["전체", "국내", "중국", "인도", "유럽", "베트남"]
     selected_region = st.selectbox("🌍 지역 필터", region_list)
     
     # 지역 필터 3차 적용
-    if selected_region == "국내 전용":
+    if selected_region == "국내":
         filtered = [s for s in filtered if s["gl"] == "해당 없음"]
+    elif selected_region == "유럽":
+        # 샘플 데이터의 폴란드, 헝가리가 유럽으로 정상 조회되도록 예외 처리
+        filtered = [s for s in filtered if any(x in s["gl"] for x in ["유럽", "폴란드", "헝가리"])]
     elif selected_region != "전체":
-        # 선택한 국가명이 gl 텍스트에 포함되어 있는지 확인
         filtered = [s for s in filtered if selected_region in s["gl"]]
 
     # 5-4. 업체명 검색어
