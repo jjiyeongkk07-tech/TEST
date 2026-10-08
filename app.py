@@ -5,92 +5,94 @@ import pydeck as pdk
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide")
 
-# 2. 고급 CSS 주입
+# 2. 프리미엄 & 묵직한 CSS 주입 (Executive / Consulting Style)
 css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
-html, body, [class*='css'] { font-family: 'Noto Sans KR', sans-serif !important; }
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 
-/* 배경 및 기본 레이아웃 */
-.stApp { background-color: #f1f5f9; }
-.block-container { padding-top: 1rem; padding-bottom: 2rem; max-width: 1400px; }
+/* 배경 및 기본 레이아웃 - 차분한 그레이 톤 */
+.stApp { background-color: #f3f4f6; }
+.block-container { padding-top: 2rem; padding-bottom: 3rem; max-width: 1400px; }
 header { visibility: hidden; } footer { visibility: hidden; }
 
-/* 메인 타이틀 배너 */
+/* 메인 타이틀 배너 - 무겁고 단단한 블랙/네이비 톤 + 골드 포인트 */
 .dashboard-header { 
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
-    padding: 30px 40px; border-radius: 16px; margin-bottom: 30px; 
-    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); color: white;
-    position: relative; overflow: hidden;
+    background: #111827; 
+    padding: 35px 40px; 
+    border-radius: 4px; /* 각진 테두리 */
+    margin-bottom: 40px; 
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); 
+    border-bottom: 4px solid #bba14f; /* 골드 하단 선 */
+    position: relative; 
 }
-.dashboard-header::after {
-    content: ''; position: absolute; top: -50%; right: -10%;
-    width: 300px; height: 300px; background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
-    border-radius: 50%;
+.dashboard-header h1 { 
+    margin: 0; font-size: 32px; font-weight: 800; color: #ffffff; 
+    letter-spacing: -1px; text-transform: uppercase;
 }
-.dashboard-header h1 { margin: 0; font-size: 32px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px; position: relative; z-index: 1;}
 
-/* 정보 카드 */
+/* 정보 카드 - 깔끔한 직선형 패키징 */
 .info-card { 
-    background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; 
-    padding: 24px; height: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-top: 4px solid #3b82f6;
+    background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 4px; 
+    padding: 30px 25px; height: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+    transition: all 0.2s ease;
 }
-.info-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-.info-card-title { font-size: 14px; color: #64748b; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-.info-card-value { font-size: 18px; color: #1e293b; font-weight: 700; line-height: 1.5; }
+.info-card:hover { box-shadow: 0 15px 20px -5px rgba(0,0,0,0.1); border-color: #d1d5db; }
+.info-card-title { font-size: 13px; color: #6b7280; font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.info-card-value { font-size: 19px; color: #111827; font-weight: 800; line-height: 1.5; letter-spacing: -0.5px; }
 
-/* 밸류체인 Flow 스타일 */
+/* 밸류체인 Flow 스타일 - 프로페셔널한 스텝 바 */
 .vc-wrapper {
     display: flex; align-items: center; justify-content: space-between;
-    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
-    padding: 30px 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    background: #ffffff; border: 1px solid #e5e7eb; border-radius: 4px;
+    padding: 35px 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
     overflow-x: auto; margin-bottom: 10px;
 }
 .vc-step {
     display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; min-width: 150px;
 }
 .vc-stage {
-    font-size: 13px; font-weight: 800; color: #3b82f6; background: #eff6ff; 
-    padding: 6px 14px; border-radius: 20px; margin-bottom: 12px; letter-spacing: -0.5px;
+    font-size: 12px; font-weight: 800; color: #bba14f; background: #111827; 
+    padding: 6px 16px; border-radius: 2px; margin-bottom: 15px; letter-spacing: 1px;
 }
-.vc-location { font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
-.vc-detail { font-size: 14px; font-weight: 500; color: #64748b; line-height: 1.4; word-break: keep-all; }
-.vc-arrow { font-size: 24px; color: #cbd5e1; font-weight: 900; padding: 0 10px; }
+.vc-location { font-size: 18px; font-weight: 800; color: #111827; margin-bottom: 8px; }
+.vc-detail { font-size: 14px; font-weight: 500; color: #4b5563; line-height: 1.5; word-break: keep-all; }
+.vc-arrow { font-size: 20px; color: #9ca3af; font-weight: 300; padding: 0 15px; }
 
-/* 제품 카드 */
+/* 제품 카드 - 여백을 살린 갤러리 톤 */
 .product-card { 
-    background: linear-gradient(to bottom, #ffffff, #f8fafc); border: 1px solid #e2e8f0; 
-    border-radius: 16px; padding: 30px 20px; text-align: center; height: 100%; 
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.3s;
+    background: #ffffff; border: 1px solid #e5e7eb; 
+    border-radius: 4px; padding: 40px 20px; text-align: center; height: 100%; 
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); transition: all 0.2s;
 }
-.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #cbd5e1; }
-.product-emoji { font-size: 64px; line-height: 1; margin-bottom: 15px; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.1)); }
-.product-title { font-size: 18px; font-weight: 800; color: #0f172a; }
+.product-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #bba14f; }
+.product-emoji { font-size: 56px; line-height: 1; margin-bottom: 20px; filter: grayscale(20%) drop-shadow(0px 5px 5px rgba(0,0,0,0.1)); }
+.product-title { font-size: 17px; font-weight: 800; color: #111827; letter-spacing: -0.5px; }
 
-/* 섹션 타이틀 */
+/* 섹션 타이틀 - 언더라인 포인트로 묵직하게 */
 .section-title { 
-    font-size: 20px; font-weight: 900; color: #0f172a; margin-top: 45px; margin-bottom: 20px; 
-    display: flex; align-items: center; gap: 10px;
+    font-size: 22px; font-weight: 900; color: #111827; margin-top: 50px; margin-bottom: 25px; 
+    display: inline-block; padding-bottom: 8px; border-bottom: 3px solid #111827;
+    letter-spacing: -0.5px;
 }
-.section-title::before { content: ''; display: block; width: 6px; height: 24px; background-color: #3b82f6; border-radius: 3px; }
 
-/* 기업 개요 박스 */
+/* 기업 개요 박스 - 짙은 바(Bar) 포인트 */
 .desc-box {
-    background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 25px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 17px; color: #334155; line-height: 1.8; font-weight: 500;
+    background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 4px; padding: 30px;
+    border-left: 5px solid #111827;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02); font-size: 17px; color: #374151; line-height: 1.8; font-weight: 500;
 }
 
 /* 사이드바 스타일링 */
-[data-testid='stSidebar'] { background-color: #ffffff; border-right: 1px solid #e2e8f0; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
+[data-testid='stSidebar'] { background-color: #ffffff; border-right: 1px solid #e5e7eb; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
 
 # 3. 헤더
-st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
+st.markdown("<div class='dashboard-header'><h1>GLOBAL SCM & INFRASTRUCTURE</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터
+# 4. 데이터 (색상만 테마에 맞게 톤다운: 본사=블랙, 국내=그레이, 해외=골드)
 suppliers = [
     {
         "name": "A업체", "industry": "PCB", 
@@ -104,11 +106,11 @@ suppliers = [
         ],
         "products": [{"name": "PCB", "img": "🖲️"}, {"name": "원재료", "img": "🪨"}],
         "locations": [
-            {"name": "본사 (서울)", "lat": 37.4836, "lon": 127.0326, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "천안 공장", "lat": 36.8151, "lon": 127.1138, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "구미 R&D", "lat": 36.1194, "lon": 128.3444, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "하노이 공장", "lat": 21.0285, "lon": 105.8542, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "산호세 영업소", "lat": 37.3382, "lon": -121.8863, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (서울)", "lat": 37.4836, "lon": 127.0326, "type": "hq", "color": [17, 24, 39, 220]},
+            {"name": "천안 공장", "lat": 36.8151, "lon": 127.1138, "type": "kr", "color": [107, 114, 128, 220]},
+            {"name": "구미 R&D", "lat": 36.1194, "lon": 128.3444, "type": "kr", "color": [107, 114, 128, 220]},
+            {"name": "하노이 공장", "lat": 21.0285, "lon": 105.8542, "type": "gl", "color": [187, 161, 79, 220]},
+            {"name": "산호세 영업소", "lat": 37.3382, "lon": -121.8863, "type": "gl", "color": [187, 161, 79, 220]}
         ]
     },
     {
@@ -123,10 +125,10 @@ suppliers = [
         ],
         "products": [{"name": "SHAFT", "img": "⚙️"}, {"name": "Bearing", "img": "🔄"}, {"name": "GEAR", "img": "🛞"}],
         "locations": [
-            {"name": "본사 (부산)", "lat": 35.1044, "lon": 128.9748, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "창원 공장", "lat": 35.2279, "lon": 128.6811, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "칭다오 공장", "lat": 36.0671, "lon": 120.3826, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "텍사스 법인", "lat": 31.9685, "lon": -99.9018, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (부산)", "lat": 35.1044, "lon": 128.9748, "type": "hq", "color": [17, 24, 39, 220]},
+            {"name": "창원 공장", "lat": 35.2279, "lon": 128.6811, "type": "kr", "color": [107, 114, 128, 220]},
+            {"name": "칭다오 공장", "lat": 36.0671, "lon": 120.3826, "type": "gl", "color": [187, 161, 79, 220]},
+            {"name": "텍사스 법인", "lat": 31.9685, "lon": -99.9018, "type": "gl", "color": [187, 161, 79, 220]}
         ]
     },
     {
@@ -141,9 +143,9 @@ suppliers = [
         ],
         "products": [{"name": "RUBBER", "img": "🧤"}],
         "locations": [
-            {"name": "본사 (인천)", "lat": 37.4473, "lon": 126.7315, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "울산 공장", "lat": 35.5383, "lon": 129.3113, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "여수 공장", "lat": 34.7603, "lon": 127.6622, "type": "kr", "color": [37, 99, 235, 220]}
+            {"name": "본사 (인천)", "lat": 37.4473, "lon": 126.7315, "type": "hq", "color": [17, 24, 39, 220]},
+            {"name": "울산 공장", "lat": 35.5383, "lon": 129.3113, "type": "kr", "color": [107, 114, 128, 220]},
+            {"name": "여수 공장", "lat": 34.7603, "lon": 127.6622, "type": "kr", "color": [107, 114, 128, 220]}
         ]
     },
     {
@@ -158,9 +160,9 @@ suppliers = [
         ],
         "products": [{"name": "원재료", "img": "🪨"}],
         "locations": [
-            {"name": "본사 및 공장 (포항)", "lat": 36.0190, "lon": 129.3435, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "폴란드 법인", "lat": 51.1079, "lon": 17.0385, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "미국 미시간 법인", "lat": 43.3266, "lon": -84.5361, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 및 공장 (포항)", "lat": 36.0190, "lon": 129.3435, "type": "hq", "color": [17, 24, 39, 220]},
+            {"name": "폴란드 법인", "lat": 51.1079, "lon": 17.0385, "type": "gl", "color": [187, 161, 79, 220]},
+            {"name": "미국 미시간 법인", "lat": 43.3266, "lon": -84.5361, "type": "gl", "color": [187, 161, 79, 220]}
         ]
     },
     {
@@ -175,10 +177,10 @@ suppliers = [
         ],
         "products": [{"name": "TERMINAL", "img": "🔌"}, {"name": "MAGNET WIRE", "img": "🧵"}],
         "locations": [
-            {"name": "본사 (화성)", "lat": 37.1995, "lon": 126.8315, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "평택 R&D", "lat": 36.9921, "lon": 127.1129, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "대만 신주 사무소", "lat": 24.8138, "lon": 120.9675, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "실리콘밸리 지사", "lat": 37.3875, "lon": -122.0575, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (화성)", "lat": 37.1995, "lon": 126.8315, "type": "hq", "color": [17, 24, 39, 220]},
+            {"name": "평택 R&D", "lat": 36.9921, "lon": 127.1129, "type": "kr", "color": [107, 114, 128, 220]},
+            {"name": "대만 신주 사무소", "lat": 24.8138, "lon": 120.9675, "type": "gl", "color": [187, 161, 79, 220]},
+            {"name": "실리콘밸리 지사", "lat": 37.3875, "lon": -122.0575, "type": "gl", "color": [187, 161, 79, 220]}
         ]
     },
     {
@@ -193,8 +195,8 @@ suppliers = [
         ],
         "products": [{"name": "MAGNET", "img": "🧲"}, {"name": "CORE", "img": "🔩"}],
         "locations": [
-            {"name": "본사 (파주)", "lat": 37.7600, "lon": 126.7800, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "하이퐁 공장", "lat": 20.8449, "lon": 106.6881, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (파주)", "lat": 37.7600, "lon": 126.7800, "type": "hq", "color": [17, 24, 39, 220]},
+            {"name": "하이퐁 공장", "lat": 20.8449, "lon": 106.6881, "type": "gl", "color": [187, 161, 79, 220]}
         ]
     },
     {
@@ -209,17 +211,17 @@ suppliers = [
         ],
         "products": [{"name": "CASE", "img": "📦"}, {"name": "BRUSH", "img": "🖌️"}],
         "locations": [
-            {"name": "본사 (수원)", "lat": 37.2636, "lon": 127.0286, "type": "hq", "color": [220, 38, 38, 220]},
-            {"name": "화성 시험장", "lat": 37.2100, "lon": 126.8100, "type": "kr", "color": [37, 99, 235, 220]},
-            {"name": "멕시코 몬테레이", "lat": 25.6866, "lon": -100.3161, "type": "gl", "color": [16, 185, 129, 220]},
-            {"name": "헝가리 부다페스트", "lat": 47.4979, "lon": 19.0402, "type": "gl", "color": [16, 185, 129, 220]}
+            {"name": "본사 (수원)", "lat": 37.2636, "lon": 127.0286, "type": "hq", "color": [17, 24, 39, 220]},
+            {"name": "화성 시험장", "lat": 37.2100, "lon": 126.8100, "type": "kr", "color": [107, 114, 128, 220]},
+            {"name": "멕시코 몬테레이", "lat": 25.6866, "lon": -100.3161, "type": "gl", "color": [187, 161, 79, 220]},
+            {"name": "헝가리 부다페스트", "lat": 47.4979, "lon": 19.0402, "type": "gl", "color": [187, 161, 79, 220]}
         ]
     }
 ]
 
 # 5. 사이드바 (필터 고도화)
 with st.sidebar:
-    st.markdown("<h3 style='color:#0f172a; margin-bottom:20px; font-weight:900;'>🏢 파트너사 상세 검색</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#111827; margin-bottom:20px; font-weight:900;'>🏢 파트너사 상세 검색</h3>", unsafe_allow_html=True)
     
     # 5-1. 업종 필터 
     all_industries = [
@@ -276,7 +278,7 @@ with st.sidebar:
         st.warning("조건에 맞는 업체가 없습니다.")
         selected = None
     else:
-        st.markdown("<hr style='margin: 20px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border-color: #e5e7eb; margin: 20px 0;'>", unsafe_allow_html=True)
         selected_name = st.radio("📊 상세 분석할 업체 선택", [s["name"] for s in filtered])
         selected = next((s for s in filtered if s["name"] == selected_name), None)
 
@@ -284,8 +286,9 @@ with st.sidebar:
 if selected:
     # --- 타이틀 및 개요 ---
     st.markdown(
-        f"<div style='margin-bottom:20px;'><h2 style='margin:0; color:#0f172a; font-weight:900; font-size:40px;'>{selected['name']}</h2>"
-        f"<p style='margin:8px 0 0 0; color:#475569; font-size:18px; font-weight:500;'>업종 : <span style='color:#3b82f6; font-weight:800;'>{selected['industry']}</span></p></div>",
+        f"<div style='margin-bottom:25px; display:flex; align-items:baseline; gap: 15px;'>"
+        f"<h2 style='margin:0; color:#111827; font-weight:900; font-size:42px; letter-spacing: -1px;'>{selected['name']}</h2>"
+        f"<span style='background:#111827; color:#bba14f; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 2px;'>{selected['industry']}</span></div>",
         unsafe_allow_html=True
     )
 
@@ -305,7 +308,7 @@ if selected:
         </div>
         """
         if i < len(selected["chain"]) - 1:
-            chain_html += "<div class='vc-arrow'>➔</div>"
+            chain_html += "<div class='vc-arrow'>▶</div>"
     chain_html += "</div>"
     
     st.markdown(chain_html, unsafe_allow_html=True)
@@ -353,12 +356,13 @@ if selected:
             ))
 
     with text_col:
-        st.markdown(f"<div class='info-card' style='border-top-color:#dc2626;'><div class='info-card-title'>🏢 Headquarter (본사)</div><div class='info-card-value'>{selected['hq']}</div></div>", unsafe_allow_html=True)
+        # 테두리 색상을 묵직한 테마 컬러로 변경
+        st.markdown(f"<div class='info-card' style='border-left: 5px solid #111827;'><div class='info-card-title'>🏢 Headquarter (본사)</div><div class='info-card-value'>{selected['hq']}</div></div>", unsafe_allow_html=True)
         st.write("") 
-        st.markdown(f"<div class='info-card' style='border-top-color:#2563eb;'><div class='info-card-title'>🇰🇷 Domestic (국내 공장/지사)</div><div class='info-card-value'>{selected['kr']}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='info-card' style='border-left: 5px solid #6b7280;'><div class='info-card-title'>🇰🇷 Domestic (국내 공장/지사)</div><div class='info-card-value'>{selected['kr']}</div></div>", unsafe_allow_html=True)
         st.write("") 
-        gl_color = "#10b981" if selected['gl'] != "해당 없음" else "#94a3b8"
-        st.markdown(f"<div class='info-card' style='border-top-color:{gl_color};'><div class='info-card-title'>🌐 Global (해외 법인/지사)</div><div class='info-card-value'>{selected['gl']}</div></div>", unsafe_allow_html=True)
+        gl_color = "#bba14f" if selected['gl'] != "해당 없음" else "#d1d5db"
+        st.markdown(f"<div class='info-card' style='border-left: 5px solid {gl_color};'><div class='info-card-title'>🌐 Global (해외 법인/지사)</div><div class='info-card-value'>{selected['gl']}</div></div>", unsafe_allow_html=True)
 
     # --- 📦 핵심 생산 품목 ---
     st.markdown("<div class='section-title'>핵심 생산 품목</div>", unsafe_allow_html=True)
