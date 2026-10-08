@@ -265,10 +265,12 @@ if selected:
     # [순서 4] 주요 거점 네트워크 (지도)
     st.markdown("<div class='section-title'>주요 거점 네트워크</div>", unsafe_allow_html=True)
     
+    # 문구 삭제(label_visibility="collapsed") 및 이모티콘 변경(🇰🇷 -> 🏭)
     highlight_opt = st.radio(
-        "📍 지도에서 강조할 지역을 선택하세요:", 
-        ["전체 보기", "🏢 국내(본사)", "🇰🇷 국내(지사)", "🌐 해외"], 
-        horizontal=True
+        "지도 강조 지역 선택", 
+        ["전체 보기", "🏢 국내(본사)", "🏭 국내(지사)", "🌐 해외"], 
+        horizontal=True,
+        label_visibility="collapsed"
     )
     
     map_col, text_col = st.columns([1.5, 1])
@@ -283,14 +285,14 @@ if selected:
             
             if highlight_opt == "전체 보기": return base_colors[row['type']]
             elif highlight_opt == "🏢 국내(본사)" and row['type'] == 'hq': return hi_colors['hq']
-            elif highlight_opt == "🇰🇷 국내(지사)" and row['type'] == 'kr': return hi_colors['kr']
+            elif highlight_opt == "🏭 국내(지사)" and row['type'] == 'kr': return hi_colors['kr']
             elif highlight_opt == "🌐 해외" and row['type'] == 'gl': return hi_colors['gl']
             else: return dim_color
 
         def get_radius(row):
             if highlight_opt == "전체 보기": return 120000
             if highlight_opt == "🏢 국내(본사)" and row['type'] == 'hq': return 350000
-            if highlight_opt == "🇰🇷 국내(지사)" and row['type'] == 'kr': return 350000
+            if highlight_opt == "🏭 국내(지사)" and row['type'] == 'kr': return 350000
             if highlight_opt == "🌐 해외" and row['type'] == 'gl': return 350000
             return 40000 
 
@@ -352,12 +354,13 @@ if selected:
         gl_border = "#10b981" if "해외" in highlight_opt else ("#bba14f" if selected['gl'] != "해당 없음" else "var(--faded-text-color)")
         
         hq_opacity = "1" if highlight_opt in ["전체 보기", "🏢 국내(본사)"] else "0.4"
-        kr_opacity = "1" if highlight_opt in ["전체 보기", "🇰🇷 국내(지사)"] else "0.4"
+        kr_opacity = "1" if highlight_opt in ["전체 보기", "🏭 국내(지사)"] else "0.4"
         gl_opacity = "1" if highlight_opt in ["전체 보기", "🌐 해외"] else "0.4"
 
         st.markdown(f"<div class='info-card' style='border-left: 6px solid {hq_border}; opacity: {hq_opacity};'><div class='info-card-title'>🏢 국내(본사)</div><div class='info-card-value'>{selected['hq']}</div></div>", unsafe_allow_html=True)
         st.write("") 
-        st.markdown(f"<div class='info-card' style='border-left: 6px solid {kr_border}; opacity: {kr_opacity};'><div class='info-card-title'>🇰🇷 국내(지사)</div><div class='info-card-value'>{selected['kr']}</div></div>", unsafe_allow_html=True)
+        # 이모티콘 변경 적용
+        st.markdown(f"<div class='info-card' style='border-left: 6px solid {kr_border}; opacity: {kr_opacity};'><div class='info-card-title'>🏭 국내(지사)</div><div class='info-card-value'>{selected['kr']}</div></div>", unsafe_allow_html=True)
         st.write("") 
         st.markdown(f"<div class='info-card' style='border-left: 6px solid {gl_border}; opacity: {gl_opacity};'><div class='info-card-title'>🌐 해외</div><div class='info-card-value'>{selected['gl']}</div></div>", unsafe_allow_html=True)
 
