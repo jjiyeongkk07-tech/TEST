@@ -1,10 +1,3 @@
-요청하신 대로 **'지역 필터'**의 항목을 기존 동적 생성 방식에서 **지정해주신 고정 텍스트(국내, 중국, 인도, 유럽, 베트남)로만** 나타나도록 수정했습니다.
-
-*(참고: 샘플 데이터에 있는 '폴란드', '헝가리' 거점 기업들도 '유럽'을 선택했을 때 정상적으로 검색되도록 내부 필터 로직에 예외 처리를 조금 추가해 두었습니다.)*
-
-아래의 코드 중 **`import streamlit as st`** 부터 맨 아래 끝까지만 정확히 드래그(또는 복사)하여 기존 `app.py`에 덮어쓰기 해주세요!
-
-```python
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
@@ -377,4 +370,3 @@ if selected:
         )
 
     st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
-```
