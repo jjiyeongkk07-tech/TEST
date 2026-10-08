@@ -1,3 +1,4 @@
+# === 여기서부터 복사하세요 ===
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
@@ -90,7 +91,7 @@ st.markdown(css, unsafe_allow_html=True)
 # 3. 헤더
 st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터 (요청하신 업종 리스트에 맞춰 기존 샘플들의 industry 값 수정)
+# 4. 데이터 (요청하신 세부품목 12종을 각 업체에 알맞게 매핑)
 suppliers = [
     {
         "name": "A업체", "industry": "PCB", 
@@ -102,7 +103,7 @@ suppliers = [
             {"stage": "대량 양산 (조립)", "loc": "🇻🇳 베트남 하노이", "desc": "인건비 절감형 대규모 조립 라인"},
             {"stage": "최종 납품", "loc": "🇺🇸 미국 산호세", "desc": "북미 주요 IT 고객사 직납"}
         ],
-        "products": [{"name": "서버용 PCB", "img": "🖲️"}, {"name": "통신 컨트롤러", "img": "🔌"}, {"name": "고성능 칩셋", "img": "💾"}],
+        "products": [{"name": "PCB", "img": "🖲️"}, {"name": "원재료", "img": "🪨"}],
         "locations": [
             {"name": "본사 (서울)", "lat": 37.4836, "lon": 127.0326, "type": "hq", "color": [220, 38, 38, 220]},
             {"name": "천안 공장", "lat": 36.8151, "lon": 127.1138, "type": "kr", "color": [37, 99, 235, 220]},
@@ -121,7 +122,7 @@ suppliers = [
             {"stage": "최종 조립", "loc": "🇺🇸 미국 텍사스", "desc": "IRA 대응 현지 조립 라인 가동"},
             {"stage": "고객 납품", "loc": "🌎 북미 전역", "desc": "장비사 1차 벤더 납품"}
         ],
-        "products": [{"name": "정밀 모터", "img": "⚙️"}, {"name": "로봇 암", "img": "🤖"}],
+        "products": [{"name": "SHAFT", "img": "⚙️"}, {"name": "Bearing", "img": "🔄"}, {"name": "GEAR", "img": "🛞"}],
         "locations": [
             {"name": "본사 (부산)", "lat": 35.1044, "lon": 128.9748, "type": "hq", "color": [220, 38, 38, 220]},
             {"name": "창원 공장", "lat": 35.2279, "lon": 128.6811, "type": "kr", "color": [37, 99, 235, 220]},
@@ -139,7 +140,7 @@ suppliers = [
             {"stage": "품질 검수", "loc": "🇰🇷 인천 본사", "desc": "최종 패키징 및 R&D 검수"},
             {"stage": "내수 납품", "loc": "🚚 국내 전역", "desc": "국내 주요 대기업 납품"}
         ],
-        "products": [{"name": "합성수지", "img": "🧪"}, {"name": "특수 코팅액", "img": "💧"}, {"name": "산업용 접착제", "img": "🍯"}],
+        "products": [{"name": "RUBBER", "img": "🧤"}],
         "locations": [
             {"name": "본사 (인천)", "lat": 37.4473, "lon": 126.7315, "type": "hq", "color": [220, 38, 38, 220]},
             {"name": "울산 공장", "lat": 35.5383, "lon": 129.3113, "type": "kr", "color": [37, 99, 235, 220]},
@@ -156,7 +157,7 @@ suppliers = [
             {"stage": "현지 조달", "loc": "🇵🇱 폴란드 / 🇺🇸 미국", "desc": "유럽/북미 권역별 물류기지"},
             {"stage": "고객사 직납", "loc": "🔋 글로벌 셀메이커", "desc": "완성차 및 배터리 3사 납품"}
         ],
-        "products": [{"name": "하이니켈 양극재", "img": "🔋"}, {"name": "실리콘 음극재", "img": "⚡"}, {"name": "전해액 첨가제", "img": "🧪"}],
+        "products": [{"name": "원재료", "img": "🪨"}],
         "locations": [
             {"name": "본사 및 공장 (포항)", "lat": 36.0190, "lon": 129.3435, "type": "hq", "color": [220, 38, 38, 220]},
             {"name": "폴란드 법인", "lat": 51.1079, "lon": 17.0385, "type": "gl", "color": [16, 185, 129, 220]},
@@ -173,7 +174,7 @@ suppliers = [
             {"stage": "해외 CS 지원", "loc": "🇹🇼 대만 / 🇺🇸 미국", "desc": "고객사 인접 현지 기술 지원"},
             {"stage": "고객 인도", "loc": "💻 글로벌 파운드리", "desc": "TSMC, Intel 등 메인 팹 반입"}
         ],
-        "products": [{"name": "CVD 증착장비", "img": "🏭"}, {"name": "웨이퍼 세정기", "img": "🧽"}],
+        "products": [{"name": "TERMINAL", "img": "🔌"}, {"name": "MAGNET WIRE", "img": "🧵"}],
         "locations": [
             {"name": "본사 (화성)", "lat": 37.1995, "lon": 126.8315, "type": "hq", "color": [220, 38, 38, 220]},
             {"name": "평택 R&D", "lat": 36.9921, "lon": 127.1129, "type": "kr", "color": [37, 99, 235, 220]},
@@ -186,12 +187,12 @@ suppliers = [
         "hq": "경기 파주시", "kr": "파주 LCD/OLED 라인", "gl": "베트남 하이퐁 조립공장",
         "desc": "파주 본사에서 고부가가치 하이엔드 OLED 패널 부품을 생산하고, 노동 집약적인 후공정 및 모듈 조립은 베트남 하이퐁 공장으로 이관하여 원가 경쟁력을 크게 확보하고 있습니다.",
         "chain": [
-            {"stage": "기초소재 수입", "loc": "🇯🇵 일본 / 🇹🇼 대만", "desc": "유리 기판 및 코팅 소재 수입"},
+            {"stage": "기초소재 수입", "loc": "🇯퉁 일본 / 🇹🇼 대만", "desc": "유리 기판 및 코팅 소재 수입"},
             {"stage": "하이엔드 가공", "loc": "🇰🇷 한국 파주", "desc": "고도화된 OLED 패널 코어 가공"},
             {"stage": "모듈 조립(후공정)", "loc": "🇻🇳 베트남 하이퐁", "desc": "원가 절감형 노동집약 후공정"},
             {"stage": "최종 납품", "loc": "📱 스마트폰 제조사", "desc": "글로벌 모바일 제조 공장 납품"}
         ],
-        "products": [{"name": "초박형 글라스", "img": "📱"}, {"name": "터치 IC 센서", "img": "👆"}],
+        "products": [{"name": "MAGNET", "img": "🧲"}, {"name": "CORE", "img": "🔩"}],
         "locations": [
             {"name": "본사 (파주)", "lat": 37.7600, "lon": 126.7800, "type": "hq", "color": [220, 38, 38, 220]},
             {"name": "하이퐁 공장", "lat": 20.8449, "lon": 106.6881, "type": "gl", "color": [16, 185, 129, 220]}
@@ -207,7 +208,7 @@ suppliers = [
             {"stage": "권역별 현지 조립", "loc": "🇲🇽 멕시코 / 🇭🇺 헝가리", "desc": "미주/유럽 타겟 현지 공장 가동"},
             {"stage": "완성차 납품", "loc": "🚗 주요 자동차 메이커", "desc": "글로벌 Top 5 완성차 라인 납품"}
         ],
-        "products": [{"name": "자율주행 라이다", "img": "📡"}, {"name": "차량용 카메라", "img": "📷"}, {"name": "인포테인먼트", "img": "🖥️"}],
+        "products": [{"name": "CASE", "img": "📦"}, {"name": "BRUSH", "img": "🖌️"}],
         "locations": [
             {"name": "본사 (수원)", "lat": 37.2636, "lon": 127.0286, "type": "hq", "color": [220, 38, 38, 220]},
             {"name": "화성 시험장", "lat": 37.2100, "lon": 126.8100, "type": "kr", "color": [37, 99, 235, 220]},
@@ -221,7 +222,7 @@ suppliers = [
 with st.sidebar:
     st.markdown("<h3 style='color:#0f172a; margin-bottom:20px; font-weight:900;'>🏢 파트너사 상세 검색</h3>", unsafe_allow_html=True)
     
-    # 5-1. 업종 필터 (이미지에서 추출한 25종 고정)
+    # 5-1. 업종 필터 
     all_industries = [
         "PCB", "PRESS(CASE)", "PRESS(CORE)", "PRESS(TERMINAL)", "RUBBER",
         "가공(COMM;Y)", "가공(DIECASTING)", "가공(MAGNET WIRE)", "가공(SHAFT)", "가공(일반)",
