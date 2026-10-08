@@ -91,7 +91,7 @@ st.markdown(css, unsafe_allow_html=True)
 # 3. 헤더
 st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
 
-# 4. 데이터 (요청하신 세부품목 12종을 각 업체에 알맞게 매핑)
+# 4. 데이터 
 suppliers = [
     {
         "name": "A업체", "industry": "PCB", 
@@ -187,7 +187,7 @@ suppliers = [
         "hq": "경기 파주시", "kr": "파주 LCD/OLED 라인", "gl": "베트남 하이퐁 조립공장",
         "desc": "파주 본사에서 고부가가치 하이엔드 OLED 패널 부품을 생산하고, 노동 집약적인 후공정 및 모듈 조립은 베트남 하이퐁 공장으로 이관하여 원가 경쟁력을 크게 확보하고 있습니다.",
         "chain": [
-            {"stage": "기초소재 수입", "loc": "🇯퉁 일본 / 🇹🇼 대만", "desc": "유리 기판 및 코팅 소재 수입"},
+            {"stage": "기초소재 수입", "loc": "🇯🇵 일본 / 🇹🇼 대만", "desc": "유리 기판 및 코팅 소재 수입"},
             {"stage": "하이엔드 가공", "loc": "🇰🇷 한국 파주", "desc": "고도화된 OLED 패널 코어 가공"},
             {"stage": "모듈 조립(후공정)", "loc": "🇻🇳 베트남 하이퐁", "desc": "원가 절감형 노동집약 후공정"},
             {"stage": "최종 납품", "loc": "📱 스마트폰 제조사", "desc": "글로벌 모바일 제조 공장 납품"}
@@ -252,15 +252,24 @@ with st.sidebar:
     if selected_product != "전체":
         filtered = [s for s in filtered if any(p["name"] == selected_product for p in s["products"])]
         
-    # 5-3. 지역(국내/해외) 필터
-    region_list = ["전체", "국내 전용", "글로벌 (해외 거점 보유)"]
+    # 5-3. 지역(국내/해외) 필터 (해외 국가명 동적 추출)
+    country_set = set()
+    for s in filtered:
+        if s["gl"] != "해당 없음":
+            # "베트남 하노이 공장, 미국 산호세 영업소" -> ['베트남', '미국']
+            for loc in s["gl"].split(","):
+                country = loc.strip().split(" ")[0]
+                country_set.add(country)
+                
+    region_list = ["전체", "국내 전용"] + sorted(list(country_set))
     selected_region = st.selectbox("🌍 지역 필터", region_list)
     
     # 지역 필터 3차 적용
     if selected_region == "국내 전용":
         filtered = [s for s in filtered if s["gl"] == "해당 없음"]
-    elif selected_region == "글로벌 (해외 거점 보유)":
-        filtered = [s for s in filtered if s["gl"] != "해당 없음"]
+    elif selected_region != "전체":
+        # 선택한 국가명이 gl 텍스트에 포함되어 있는지 확인
+        filtered = [s for s in filtered if selected_region in s["gl"]]
 
     # 5-4. 업체명 검색어
     search_term = st.text_input("🔍 업체명 검색", placeholder="예: A업체").strip()
