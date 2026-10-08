@@ -1,8 +1,3 @@
-요청하신 세 가지 수정 사항(SCM Flow 삭제, 인증/ESG 경영 섹션 추가, 다크 모드 호환 및 묵직한 디자인 개편)을 반영한 전체 코드입니다. 
-
-기존에 흰색/검은색으로 강제되어 다크 모드에서 글씨가 안 보이던 현상을 해결하기 위해, Streamlit의 기본 테마 변수(`var(--text-color)`, `var(--secondary-background-color)` 등)를 적극 활용하였습니다. 이를 통해 라이트 모드와 다크 모드 양쪽에서 모두 깔끔하고 묵직한 컨설팅 톤의 UI가 유지됩니다.
-
-```python
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
@@ -366,4 +361,3 @@ if selected:
         )
 
     st.markdown("<div style='height: 50px;'></div>", unsafe_allow_html=True)
-```
