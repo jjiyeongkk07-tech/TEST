@@ -259,17 +259,18 @@ else:
     st.markdown("</div>", unsafe_allow_html=True) # 바깥쪽 컨테이너 닫기
 
 
-    # 🚀 거점 네트워크 (상단 탭 삭제 + 우측에 '전체 뷰' 복원)
+    # 🚀 거점 네트워크
     st.markdown("<div class='section-title'>주요 거점 네트워크</div>", unsafe_allow_html=True)
     
     map_col, text_col = st.columns([1.8, 1])
     df_loc = pd.DataFrame(selected["locations"])
 
-    # 우측 동기화 버튼 (전체 뷰 버튼 포함)
+    # 우측 동기화 버튼 (요청하신 대로 '전체 뷰' 텍스트 심플하게 변경)
     with text_col:
         st.markdown("<p style='color:#bba14f !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
         
-        st.button(f"🌍 전체 뷰\n\n모든 거점을 한눈에 확인합니다.", on_click=set_view, args=("전체 뷰",), use_container_width=True)
+        # '전체 뷰' 심플하게 수정
+        st.button("🌍 전체 뷰", on_click=set_view, args=("전체 뷰",), use_container_width=True)
         st.write("")
         st.button(f"🏢 본사\n\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
         st.write("")
