@@ -15,7 +15,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 고급스러운 딥 슬레이트 네이비 테마 (Black 제외, 강제 텍스트 화이트)
+# 2. 고급스러운 딥 슬레이트 네이비 테마
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -218,14 +218,9 @@ else:
         unsafe_allow_html=True
     )
 
-    # 🚀 핵심 생산 품목과 품질 인증 (Streamlit Columns 기반 좌우 대칭 레이아웃 적용)
+    # 🚀 핵심 역량 및 품질 인증 (불필요한 빈 상자 코드 삭제 후 깔끔하게 정렬)
     st.markdown("<div class='section-title'>핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
     
-    # 바깥쪽 컨테이너 디자인
-    st.markdown("""
-        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 30px; margin-bottom: 20px;">
-    """, unsafe_allow_html=True)
-
     col_prod, col_cert = st.columns([1, 1])
 
     # 좌측: 생산 품목
@@ -256,20 +251,17 @@ else:
             )
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True) # 바깥쪽 컨테이너 닫기
 
-
-    # 🚀 거점 네트워크
-    st.markdown("<div class='section-title'>주요 거점 네트워크</div>", unsafe_allow_html=True)
+    # 🚀 거점 네트워크 
+    st.markdown("<div class='section-title' style='margin-top: 50px;'>주요 거점 네트워크</div>", unsafe_allow_html=True)
     
     map_col, text_col = st.columns([1.8, 1])
     df_loc = pd.DataFrame(selected["locations"])
 
-    # 우측 동기화 버튼 (요청하신 대로 '전체 뷰' 텍스트 심플하게 변경)
+    # 우측 동기화 버튼 ('전체 뷰' 심플하게 유지)
     with text_col:
         st.markdown("<p style='color:#bba14f !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
         
-        # '전체 뷰' 심플하게 수정
         st.button("🌍 전체 뷰", on_click=set_view, args=("전체 뷰",), use_container_width=True)
         st.write("")
         st.button(f"🏢 본사\n\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
