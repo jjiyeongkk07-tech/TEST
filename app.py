@@ -1,13 +1,13 @@
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
-import base64
-import os
 
-# 1. 페이지 설정 (사이드바 기본 열림)
+# 💡 다운받은 image_data.py 파일에서 이미지 코드(문자열)를 불러옵니다.
+from image_data import IMAGE_DATA
+
+# 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 
-# [세션 상태 초기화]
 if "map_view" not in st.session_state:
     st.session_state.map_view = "전체 뷰"
 
@@ -47,7 +47,7 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. Z드라이브 이미지 연동 함수
+# 3. 텍스트 코드 연동 함수 (폴더 안 뒤지고 코드 안에서 바로 해결!)
 def get_media_html(filename):
     if not filename or pd.isna(filename) or str(filename).strip() == "":
         return "<div class='product-emoji'>📦</div>"
@@ -58,26 +58,17 @@ def get_media_html(filename):
     if ext in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']:
         return "<div class='product-emoji'>📜</div>"
         
-    LOCAL_IMG_DIR = r"Z:\★업  무★\Ai\images"
-    CLOUD_IMG_DIR = "images"
-    IMG_BASE_PATH = LOCAL_IMG_DIR if os.path.exists(LOCAL_IMG_DIR) else CLOUD_IMG_DIR
-    filepath = os.path.join(IMG_BASE_PATH, filename)
-    
-    if os.path.exists(filepath):
-        try:
-            with open(filepath, "rb") as f:
-                encoded = base64.b64encode(f.read()).decode("utf-8")
-            mime = "image/png" if ext == "png" else "image/jpeg"
-            img_b64 = f"data:{mime};base64,{encoded}"
-            return f"<img src='{img_b64}' style='width:100%; height:90px; object-fit:contain; margin-bottom:12px;'/>"
-        except:
-            pass
-    return "<div class='product-emoji'>🖼️</div>"
+    # image_data.py 에서 변환된 이미지 코드를 꺼내옵니다
+    if filename in IMAGE_DATA:
+        mime = "image/png" if ext == "png" else "image/jpeg"
+        # 텍스트 데이터를 웹용 이미지(HTML)로 즉석 조립!
+        img_b64 = f"data:{mime};base64,{IMAGE_DATA[filename]}"
+        return f"<img src='{img_b64}' style='width:100%; height:90px; object-fit:contain; margin-bottom:12px;'/>"
+    else:
+        # 코드를 못 찾으면 기본 🖼️ 이모지 표시
+        return "<div class='product-emoji'>🖼️</div>"
 
-# =====================================================================
-# 🎯 [엑셀 데이터 내장] 
-# 원본 엑셀 데이터의 내용(E열 품목명 및 J~N열 인증 파일명)을 100% 반영했습니다.
-# =====================================================================
+# 4. 공급사 데이터 설정
 suppliers = [
     {
         'name': '(주)한성전장',
@@ -87,7 +78,9 @@ suppliers = [
         'gl': '-',
         'desc': '(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.',
         'products': [
-            {'name': 'PCB ASM. COVER ASM, WIRE ASM', 'file': '(주)한성전장-PCB ASM.jpg'}
+            {'name': 'PCB ASM', 'file': '(주)한성전장-PCB ASM.jpg'},
+            {'name': 'COVER ASM', 'file': '(주)한성전장-PCB ASM.jpg'},
+            {'name': 'WIRE ASM', 'file': '(주)한성전장-PCB ASM.jpg'}
         ],
         'certs': [
             {'name': 'SQ 인증', 'file': '(주)한성전장-SQ인증서.jpg'}
@@ -127,7 +120,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 6. 사이드바 (필터 및 검색 구성)
+# 6. 사이드바 구성
 with st.sidebar:
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🏢 필터 및 검색</h3>", unsafe_allow_html=True)
     
