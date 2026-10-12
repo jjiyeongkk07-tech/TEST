@@ -52,6 +52,8 @@ def get_icon_html(name, category="product"):
             emoji = "🔌"
         elif "CASE" in name.upper() or "COVER" in name.upper():
             emoji = "🗜️"
+        elif "CORE" in name.upper():
+            emoji = "⚙️"
         else:
             emoji = "📦"
     # 인증 관련 아이콘
@@ -65,35 +67,98 @@ def get_icon_html(name, category="product"):
             
     return f"<div class='product-emoji'>{emoji}</div>"
 
-# 4. 공급사 데이터 설정
+# 4. 공급사 데이터 설정 (엑셀 내용 업데이트 반영)
 suppliers = [
     {
-        'name': '(주)한성전장',
-        'industry': '임가공(조립)',
-        'hq': '양산 본사',
-        'kr': '부산 공장',
-        'gl': '-',
-        'desc': '(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.',
-        'products': ['PCB ASM', 'COVER ASM', 'WIRE ASM'],
-        'certs': ['SQ 인증'],
-        'locations': [
-            {'name': '양산 본사', 'type': 'hq', 'address': '경남 양산시 상북면 소토로 23', 'lat': 35.398579, 'lon': 129.056037},
-            {'name': '부산 공장', 'type': 'kr', 'address': '부산 금정구 팔송로 53번길 43', 'lat': 35.281146, 'lon': 129.085023}
+        "name": "(주)한성전장",
+        "industry": "임가공(조립)",
+        "hq": "양산 본사",
+        "kr": "부산 공장",
+        "gl": "-",
+        "desc": "(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
+        "products": [
+            "PCB ASM",
+            "COVER ASM",
+            "WIRE ASM"
+        ],
+        "certs": [
+            "SQ 인증"
+        ],
+        "locations": [
+            {
+                "name": "양산 본사",
+                "type": "hq",
+                "address": "경남 양산시 상북면 소토로 23",
+                "lat": 35.398579,
+                "lon": 129.056037
+            },
+            {
+                "name": "부산 공장",
+                "type": "kr",
+                "address": "부산 금정구 팔송로 53번길 43",
+                "lat": 35.281146,
+                "lon": 129.085023
+            }
         ]
     },
     {
-        'name': '성우',
-        'industry': 'PRESS(CASE)',
-        'hq': '구미 본사',
-        'kr': '천안 2공장',
-        'gl': '중국 남경 공장',
-        'desc': '(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.',
-        'products': ['CASE'],
-        'certs': ['IATF 16949', 'ISO 14001', 'SQ 인증'],
-        'locations': [
-            {'name': '구미 본사', 'type': 'hq', 'address': '경상북도 구미시', 'lat': 36.119485, 'lon': 128.344573},
-            {'name': '천안 2공장', 'type': 'kr', 'address': '충청남도 천안시', 'lat': 36.815129, 'lon': 127.113893},
-            {'name': '중국 남경 공장', 'type': 'gl', 'address': '중국 남경', 'lat': 32.060255, 'lon': 118.796877}
+        "name": "(주)성우",
+        "industry": "PRESS(CASE)",
+        "hq": "구미 본사",
+        "kr": "천안 2공장",
+        "gl": "중국 남경 공장",
+        "desc": "(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.",
+        "products": [
+            "CASE"
+        ],
+        "certs": [
+            "IATF 16949",
+            "ISO 14001",
+            "SQ 인증"
+        ],
+        "locations": [
+            {
+                "name": "구미 본사",
+                "type": "hq",
+                "address": "경상북도 구미시",
+                "lat": 36.119485,
+                "lon": 128.344573
+            },
+            {
+                "name": "천안 2공장",
+                "type": "kr",
+                "address": "충청남도 천안시",
+                "lat": 36.815129,
+                "lon": 127.113893
+            },
+            {
+                "name": "중국 남경 공장",
+                "type": "gl",
+                "address": "중국 남경",
+                "lat": 32.060255,
+                "lon": 118.796877
+            }
+        ]
+    },
+    {
+        "name": "(주)엠제이텍",
+        "industry": "PRESS(CORE)",
+        "hq": "경기도 본사",
+        "kr": "-",
+        "gl": "-",
+        "desc": "(주)엠제이텍은 자동차 및 가전용 초정밀 모터 코어와 \n전기·전자 부품을 전문적으로 생산하는 제조기업입니다",
+        "products": [
+            "CORE"
+        ],
+        "certs": [],
+        "locations": [
+            {
+                "name": "경기도 본사",
+                "type": "hq",
+                "address": "경기도 안성시 죽산면 장원공단길59 장원산업단지",
+                "lat": 37.0862,
+                "lon": 127.3879
+            }
         ]
     }
 ]
@@ -122,7 +187,6 @@ with st.sidebar:
 
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     
-    # 💡 이 부분을 수정했습니다! 괄호 안의 (업종명)을 제거하고 순수하게 이름만 나오도록 변경
     options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
     for s in filtered:
         options_sidebar_map[s['name']] = s['name']
@@ -209,13 +273,13 @@ elif selected_name:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
             st.button("🌍 전체 뷰", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
-            if selected['hq'] and selected['hq'] != "-" and selected['hq'] != "nan":
+            if selected['hq'] and selected['hq'] not in ["해당 없음", "-", "", "nan"]:
                 st.write("")
                 st.button(f"🏢 본사\n\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
-            if selected['kr'] and selected['kr'] != "-" and selected['kr'] != "nan":
+            if selected['kr'] and selected['kr'] not in ["해당 없음", "-", "", "nan"]:
                 st.write("")
                 st.button(f"🏭 지사\n\n{selected['kr']}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
-            if selected['gl'] not in ["해당 없음", "-", "", "nan"]:
+            if selected['gl'] and selected['gl'] not in ["해당 없음", "-", "", "nan"]:
                 st.write("")
                 st.button(f"🌐 해외 지점\n\n{selected['gl']}", on_click=set_view, args=("🌐 해외",), use_container_width=True)
 
