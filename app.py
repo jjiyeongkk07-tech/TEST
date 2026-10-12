@@ -44,7 +44,7 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 아이콘 매핑 함수 (품목이나 인증서 이름에 따라 적절한 아이콘을 반환합니다)
+# 3. 아이콘 매핑 함수
 def get_icon_html(name, category="product"):
     # 품목 관련 아이콘
     if category == "product":
@@ -65,7 +65,7 @@ def get_icon_html(name, category="product"):
             
     return f"<div class='product-emoji'>{emoji}</div>"
 
-# 4. 공급사 데이터 설정 (이미지 파일명 삭제, 이름만 유지)
+# 4. 공급사 데이터 설정
 suppliers = [
     {
         'name': '(주)한성전장',
@@ -122,10 +122,10 @@ with st.sidebar:
 
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     
+    # 💡 이 부분을 수정했습니다! 괄호 안의 (업종명)을 제거하고 순수하게 이름만 나오도록 변경
     options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
     for s in filtered:
-        display_label = f"{s['name']} ({s['industry']})"
-        options_sidebar_map[display_label] = s['name']
+        options_sidebar_map[s['name']] = s['name']
         
     selected_display_name = st.radio("📊 분석할 업체 선택", list(options_sidebar_map.keys()), on_change=reset_map_view)
     selected_name = options_sidebar_map[selected_display_name]
