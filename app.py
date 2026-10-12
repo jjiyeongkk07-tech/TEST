@@ -46,28 +46,46 @@ st.markdown(css, unsafe_allow_html=True)
 
 # 3. 아이콘 매핑 함수
 def get_icon_html(name, category="product"):
-    # 품목 관련 아이콘
     if category == "product":
-        if "PCB" in name.upper() or "WIRE" in name.upper():
-            emoji = "🔌"
-        elif "CASE" in name.upper() or "COVER" in name.upper():
-            emoji = "🗜️"
-        elif "CORE" in name.upper():
-            emoji = "⚙️"
-        else:
-            emoji = "📦"
-    # 인증 관련 아이콘
+        if "PCB" in name.upper() or "WIRE" in name.upper(): emoji = "🔌"
+        elif "CASE" in name.upper() or "COVER" in name.upper(): emoji = "🗜️"
+        elif "CORE" in name.upper(): emoji = "⚙️"
+        elif "TERMINAL" in name.upper(): emoji = "🔩"
+        else: emoji = "📦"
     elif category == "cert":
-        if "IATF" in name.upper() or "ISO" in name.upper():
-            emoji = "🏅"
-        elif "SQ" in name.upper():
-            emoji = "🛡️"
-        else:
-            emoji = "📜"
-            
+        if "IATF" in name.upper() or "ISO" in name.upper(): emoji = "🏅"
+        elif "SQ" in name.upper(): emoji = "🛡️"
+        else: emoji = "📜"
     return f"<div class='product-emoji'>{emoji}</div>"
 
-# 4. 공급사 데이터 설정 (엑셀 내용 업데이트 반영)
+# 4. 주요 고객사 시각화 HTML 생성 함수 (비율 자동조정 추가)
+def get_customer_bar_html(customers):
+    if not customers:
+        return "<p style='color: #8A817C;'>등록된 고객사 비중 정보가 없습니다.</p>"
+    
+    colors = ["#2C2A29", "#C4A47C", "#8A817C", "#B0A8A0", "#D5CEC4"]
+    total_val = sum(customers.values()) if sum(customers.values()) > 0 else 1
+    
+    bar_html = "<div style='width: 100%; height: 36px; display: flex; border-radius: 8px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);'>"
+    legend_html = "<div style='display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;'>"
+    
+    for idx, (comp, val) in enumerate(customers.items()):
+        color = colors[idx % len(colors)]
+        width_ratio = (val / total_val) * 100  # 비중이 100%를 초과/미달해도 바(bar)는 꽉 차도록 보정
+        
+        display_val = f"{val}%" if isinstance(val, (int, float)) else val
+        text_in_bar = display_val if width_ratio > 10 else "" # 너무 좁은 영역엔 텍스트 숨김 처리
+        
+        bar_html += f"<div style='width: {width_ratio}%; background-color: {color}; color: white; text-align: center; line-height: 36px; font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden;' title='{comp} {display_val}'>{text_in_bar}</div>"
+        legend_html += f"<div style='display: flex; align-items: center; gap: 8px;'><div style='width: 14px; height: 14px; background-color: {color}; border-radius: 3px;'></div><span style='font-size: 15px; font-weight: 700; color: #4A4441;'>{comp} <span style='color: #8A817C;'>({display_val})</span></span></div>"
+        
+    bar_html += "</div>"
+    legend_html += "</div>"
+    
+    return f"<div style='padding: 25px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{bar_html}{legend_html}</div>"
+
+
+# 5. 원본 엑셀파일 데이터 완벽 매핑
 suppliers = [
     {
         "name": "(주)한성전장",
@@ -76,29 +94,12 @@ suppliers = [
         "kr": "부산 공장",
         "gl": "-",
         "desc": "(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
-        "products": [
-            "PCB ASM",
-            "COVER ASM",
-            "WIRE ASM"
-        ],
-        "certs": [
-            "SQ 인증"
-        ],
+        "products": ["PCB ASM", "COVER ASM", "WIRE ASM"],
+        "certs": ["SQ 인증"],
+        "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "기타": 21}, # 100% 비율 맞춤
         "locations": [
-            {
-                "name": "양산 본사",
-                "type": "hq",
-                "address": "경남 양산시 상북면 소토로 23",
-                "lat": 35.398579,
-                "lon": 129.056037
-            },
-            {
-                "name": "부산 공장",
-                "type": "kr",
-                "address": "부산 금정구 팔송로 53번길 43",
-                "lat": 35.281146,
-                "lon": 129.085023
-            }
+            {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토로 23", "lat": 35.398579, "lon": 129.056037},
+            {"name": "부산 공장", "type": "kr", "address": "부산 금정구 팔송로 53번길 43", "lat": 35.281146, "lon": 129.085023}
         ]
     },
     {
@@ -108,36 +109,13 @@ suppliers = [
         "kr": "천안 2공장",
         "gl": "중국 남경 공장",
         "desc": "(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.",
-        "products": [
-            "CASE"
-        ],
-        "certs": [
-            "IATF 16949",
-            "ISO 14001",
-            "SQ 인증"
-        ],
+        "products": ["CASE"],
+        "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
+        "customers": {"효성전기": 50, "LG 이노텍": 50}, # 텍스트만 존재하여 5:5 비율 부여
         "locations": [
-            {
-                "name": "구미 본사",
-                "type": "hq",
-                "address": "경상북도 구미시",
-                "lat": 36.119485,
-                "lon": 128.344573
-            },
-            {
-                "name": "천안 2공장",
-                "type": "kr",
-                "address": "충청남도 천안시",
-                "lat": 36.815129,
-                "lon": 127.113893
-            },
-            {
-                "name": "중국 남경 공장",
-                "type": "gl",
-                "address": "중국 남경",
-                "lat": 32.060255,
-                "lon": 118.796877
-            }
+            {"name": "구미 본사", "type": "hq", "address": "경상북도 구미시", "lat": 36.119485, "lon": 128.344573},
+            {"name": "천안 2공장", "type": "kr", "address": "충청남도 천안시", "lat": 36.815129, "lon": 127.113893},
+            {"name": "중국 남경 공장", "type": "gl", "address": "중국 남경", "lat": 32.060255, "lon": 118.796877}
         ]
     },
     {
@@ -146,31 +124,38 @@ suppliers = [
         "hq": "경기도 본사",
         "kr": "-",
         "gl": "-",
-        "desc": "(주)엠제이텍은 자동차 및 가전용 초정밀 모터 코어와 \n전기·전자 부품을 전문적으로 생산하는 제조기업입니다",
-        "products": [
-            "CORE"
-        ],
+        "desc": "(주)엠제이텍은 자동차 및 가전용 초정밀 모터 코어와 \n전기·전자 부품을 전문적으로 생산하는 제조기업입니다.",
+        "products": ["CORE"],
         "certs": [],
+        "customers": {"효성전기": 81, "(주)현대산업": 48, "두원공조": 40}, # 합계 169% 지만 누적막대에 자동 비율 보정되어 표시
         "locations": [
-            {
-                "name": "경기도 본사",
-                "type": "hq",
-                "address": "경기도 안성시 죽산면 장원공단길59 장원산업단지",
-                "lat": 37.0862,
-                "lon": 127.3879
-            }
+            {"name": "경기도 본사", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길59 장원산업단지", "lat": 37.0862, "lon": 127.3879}
+        ]
+    },
+    {
+        "name": "(주)대광오토텍",
+        "industry": "PRESS(TERMINAL)",
+        "hq": "부산 본사",
+        "kr": "-",
+        "gl": "-",
+        "desc": "(주)대광오토텍은 부산 강서구 미음산업단지에 위치한 자동차 부품 제조 전문기업으로, \n자동차 모터용 정밀 부품 및 프레스 금형 설계·제작 기술을 보유하고 있습니다. \n현대·기아자동차 등 글로벌 완성차 공급망에 참여하고 있으며, 전기차 구동 모터 부품 생산 역량 강화와 고정밀 금형 기술 내재화를 통해 지속 성장하고 있습니다.",
+        "products": ["TERMINAL"],
+        "certs": [],
+        "customers": {"효성전기": 65, "진흥공업사": 15, "삼풍하이텍": 9, "기타": 11},
+        "locations": [
+            {"name": "부산 본사", "type": "hq", "address": "부산 강서구 미음산단로 76번길 29", "lat": 35.132, "lon": 128.847}
         ]
     }
 ]
 
-# 5. 헤더 타이틀
+# 6. 헤더 타이틀
 st.markdown("""
 <div style="background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 20px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
     <div class="main-title">🌍 글로벌 SCM 및 파트너사 인프라 분석</div>
 </div>
 """, unsafe_allow_html=True)
 
-# 6. 사이드바 구성
+# 7. 사이드바 구성
 with st.sidebar:
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🏢 필터 및 검색</h3>", unsafe_allow_html=True)
     
@@ -194,7 +179,7 @@ with st.sidebar:
     selected_display_name = st.radio("📊 분석할 업체 선택", list(options_sidebar_map.keys()), on_change=reset_map_view)
     selected_name = options_sidebar_map[selected_display_name]
 
-# 7. 메인 화면 출력
+# 8. 메인 화면 출력
 if selected_name == "🏠 종합 메인 화면":
     st.markdown("<div class='section-title' style='margin-top:0;'>글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
     
@@ -231,6 +216,10 @@ elif selected_name:
 
         st.markdown("<div class='section-title' style='margin-top:10px;'>기업 개요</div>", unsafe_allow_html=True)
         st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
+        
+        # [신규] 고객사 비중 시각화 영역 추가
+        st.markdown("<div class='section-title'>🤝 주요 고객사 비중</div>", unsafe_allow_html=True)
+        st.markdown(get_customer_bar_html(selected.get('customers', {})), unsafe_allow_html=True)
 
         st.markdown("<div class='section-title'>핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         col_prod, col_cert = st.columns([1, 1])
