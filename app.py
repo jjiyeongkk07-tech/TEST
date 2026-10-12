@@ -7,8 +7,8 @@ import re
 import requests
 import traceback
 
-# 1. 페이지 설정
-st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide")
+# 1. 페이지 설정 (사이드바 기본으로 열리도록 설정: initial_sidebar_state="expanded")
+st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 
 # [세션 상태 초기화]
 if "map_view" not in st.session_state:
@@ -94,7 +94,6 @@ def geocode_korean_address(address):
     return 37.5665, 126.9780 
 
 def load_and_parse_excel(file_source):
-    """엑셀 로딩 오류를 감지하는 핵심 함수"""
     try:
         df_company = pd.read_excel(file_source, sheet_name="업체 정보", header=1)
         df_location = pd.read_excel(file_source, sheet_name="거점 정보", header=1)
@@ -156,7 +155,7 @@ def load_and_parse_excel(file_source):
         error_details = traceback.format_exc()
         return [], str(e) + "\n\n" + error_details
 
-# 4. 헤더 타이틀 강제 출력 (에러가 나도 타이틀은 무조건 뜨게 수정)
+# 4. 헤더 타이틀 강제 출력
 st.markdown("""
 <div style="background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 40px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
     <div class="main-title">🌍 글로벌 SCM 및 파트너사 인프라 분석</div>
@@ -174,23 +173,20 @@ if os.path.exists(excel_path):
 else:
     file_status = "❌ Z드라이브 엑셀 파일 찾기 실패"
 
-# 6. 사이드바 구성
-with st.sidebar:
-    st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>📂 데이터 연동 상태</h3>", unsafe_allow_html=True)
-    
-    if "✅" in file_status:
-        st.success(file_status)
-    else:
-        st.error(file_status)
-        st.markdown(f"<p style='font-size:13px; color:#666;'>경로: {excel_path}<br>(네트워크 드라이브 접근이 차단되었을 수 있습니다.)</p>", unsafe_allow_html=True)
-        uploaded_file = st.file_uploader("수동으로 엑셀 파일 업로드 (대체 방법)", type=['xlsx'])
-        if uploaded_file:
-            suppliers, error_msg = load_and_parse_excel(uploaded_file)
+# 🚀 6. 데이터가 없을 경우 메인 화면 중앙에 업로더 표시
+if not suppliers and not error_msg:
+    st.info("💡 파이썬이 Z드라이브의 엑셀 파일을 자동으로 찾지 못했습니다. 아래 영역에 엑셀 파일을 드래그하여 올려주세요.")
+    uploaded_file_main = st.file_uploader("📂 수동으로 엑셀 파일(.xlsx) 업로드", type=['xlsx'])
+    if uploaded_file_main:
+        suppliers, error_msg = load_and_parse_excel(uploaded_file_main)
+        if suppliers:
+            st.rerun()  # 파일 정상 업로드 시 화면 새로고침
 
-    st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
-    st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🏢 필터 및 검색</h3>", unsafe_allow_html=True)
-    
-    if suppliers:
+# 7. 사이드바 구성 (데이터가 있을 때만 렌더링)
+if suppliers:
+    with st.sidebar:
+        st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🏢 필터 및 검색</h3>", unsafe_allow_html=True)
+        
         industry_list = ["전체"] + list(set(s["industry"] for s in suppliers if s["industry"] != "미분류"))
         selected_industry = st.selectbox("🏷️ 업종 필터", industry_list, on_change=reset_map_view)
         
@@ -205,22 +201,17 @@ with st.sidebar:
         st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
         options_sidebar = ["🏠 종합 메인 화면"] + [s["name"] for s in filtered]
         selected_name = st.radio("📊 분석할 업체 선택", options_sidebar, on_change=reset_map_view)
-    else:
-        selected_name = None
-        filtered = []
+else:
+    selected_name = None
+    filtered = []
 
-# 7. 메인 중앙 화면 처리 (에러 또는 정상 결과 출력)
+# 8. 메인 중앙 화면 처리 (에러 또는 정상 결과 출력)
 if error_msg:
-    st.error("🚨 엑셀 파일을 읽고 분석하는 중 치명적인 오류가 발생했습니다. 아래 정보를 확인해주세요.")
-    st.warning("가능성 1: 파이썬에 'openpyxl' 라이브러리가 안 깔려있을 수 있습니다. (터미널에서 `pip install openpyxl` 실행 요망)")
-    st.warning("가능성 2: 엑셀 파일의 시트 이름이나 구조가 변경되었을 수 있습니다.")
+    st.error("🚨 엑셀 파일을 읽고 분석하는 중 치명적인 오류가 발생했습니다.")
     with st.expander("🔍 개발자용 에러 상세 로그 보기"):
         st.code(error_msg)
         
-elif not suppliers:
-    st.info("👈 데이터가 없습니다. 좌측 사이드바에서 수동으로 엑셀 파일을 업로드해 보세요.")
-    
-else:
+elif suppliers:
     # --- 정상적으로 데이터를 불러온 경우 아래 코드 실행 ---
     if selected_name == "🏠 종합 메인 화면":
         st.markdown("<div class='section-title' style='margin-top:0;'>글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
