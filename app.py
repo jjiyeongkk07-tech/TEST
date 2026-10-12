@@ -2,128 +2,113 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 
-# 1. 페이지 설정
+# 1. 페이지 설정 (라이트 테마 기반)
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide")
 
-# [세션 상태 초기화] 지도 뷰 상태 및 선택 초기화
+# [세션 상태 초기화] 지도 뷰 상태 관리
 if "map_view" not in st.session_state:
     st.session_state.map_view = "all"
 
 def reset_map_view():
     st.session_state.map_view = "all"
 
-# 2. 가독성을 완벽하게 개선한 CSS 주입
+# 2. 눈에 확 띄는 깔끔한 프리미엄 라이트(Light) CSS 주입
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 
-/* 🌍 전체 배경화면 - 메인 영역에만 무거운 우주/지구 느낌 적용 */
+/* 배경 및 기본 레이아웃 - 눈에 띄는 밝은 톤 (연한 그레이) */
 .stApp { 
-    background-image: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), 
-                      url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-color: #f4f6f9; 
 }
-
-/* ⬜ 사이드바 배경 분리 (사이드바는 가독성을 위해 스트림릿 기본 테마를 따르게 둠) */
-[data-testid="stSidebar"] {
-    background-color: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-}
-
-/* ⬛ 메인 컨텐츠 영역 (글래스모피즘 박스) */
 .block-container { 
-    background: rgba(17, 24, 39, 0.7);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
+    background-color: #ffffff;
     padding: 3rem 4rem !important; 
-    margin-top: 3rem;
+    margin-top: 2rem;
     margin-bottom: 3rem;
+    border-radius: 16px;
     max-width: 1400px; 
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 header { visibility: hidden; } footer { visibility: hidden; }
 
-/* 💡 핵심 수정: 메인 영역 내부의 글씨만 선명한 흰색으로 강제 지정 */
-.block-container p, .block-container span, .block-container label, 
-.block-container h1, .block-container h2, .block-container h3, 
-[data-testid="stMetricValue"] {
-    color: #f8fafc !important;
-}
-[data-testid="stMetricLabel"] {
-    color: #cbd5e1 !important; /* 메트릭 보조 라벨은 살짝 옅은 색 */
-}
-
-/* 메인 타이틀 배너 */
+/* 메인 타이틀 배너 - 다크 네이비 + 골드 포인트 유지 (가장 눈에 잘 띔) */
 .dashboard-header { 
-    background: rgba(0, 0, 0, 0.5);
+    background: #111827; 
     padding: 35px 40px; 
     border-radius: 12px; 
     margin-bottom: 40px; 
+    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2); 
     border-bottom: 4px solid #bba14f; 
 }
 .dashboard-header h1 { 
-    margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -1px; 
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.8); color: #ffffff !important; 
+    margin: 0; font-size: 34px; font-weight: 800; color: #ffffff !important; 
+    letter-spacing: -1px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 
-/* 섹션 타이틀 - 명시적으로 화이트 색상 적용 */
+/* 텍스트 컬러 강제 지정 해제 - 사이드바 및 메인 텍스트가 자연스럽게 검은색으로 보이도록 설정 */
+p, span, label, li { color: #1e293b !important; }
+
+/* 섹션 타이틀 - 묵직한 검은색 밑줄 포인트 */
 .section-title { 
-    font-size: 24px; font-weight: 800; margin-top: 50px; margin-bottom: 25px; 
-    display: inline-block; padding-bottom: 8px; border-bottom: 3px solid #bba14f;
-    color: #ffffff !important;
+    font-size: 22px; font-weight: 900; color: #0f172a !important; margin-top: 50px; margin-bottom: 25px; 
+    display: inline-block; padding-bottom: 8px; border-bottom: 3px solid #0f172a;
+    letter-spacing: -0.5px;
 }
 
-/* 기업 개요 박스 */
+/* 기업 개요 박스 - 원본 느낌 복구 */
 .desc-box {
-    background: rgba(0, 0, 0, 0.4); 
-    border: 1px solid rgba(255, 255, 255, 0.1); 
-    border-radius: 12px; padding: 30px;
+    background-color: #f8fafc; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 8px; padding: 30px;
     border-left: 6px solid #bba14f;
-    font-size: 17px; line-height: 1.8; font-weight: 400; color: #e2e8f0 !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
+    font-size: 17px; color: #334155 !important; line-height: 1.8; font-weight: 500;
 }
 
-/* 제품 및 인증서 카드 */
+/* 제품 및 인증서 카드 - 원본 복구 */
 .product-card { 
-    background: rgba(255, 255, 255, 0.05); 
-    border: 1px solid rgba(255, 255, 255, 0.15); 
-    border-radius: 12px; padding: 30px 15px; text-align: center; height: 100%; 
-    transition: all 0.3s ease;
+    background: #ffffff; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 8px; padding: 30px 15px; text-align: center; height: 100%; 
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.2s;
 }
-.product-card:hover { transform: translateY(-5px); border-color: #bba14f; background: rgba(255, 255, 255, 0.15); }
-.product-emoji { font-size: 48px; margin-bottom: 15px; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.5)); }
-.product-title { font-size: 16px; font-weight: 700; color: #ffffff !important; }
+.product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #bba14f; }
+.product-emoji { font-size: 50px; line-height: 1; margin-bottom: 15px; filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.15)); }
+.product-title { font-size: 16px; font-weight: 800; color: #1e293b !important; letter-spacing: -0.5px; }
 
-/* 🚀 우측 지도 이동 버튼 커스텀 (흰색 글씨 고정) */
+/* 🚀 [가장 중요한 부분] 오른쪽 정보 카드를 클릭 가능한 '버튼'으로 변환하면서 카드 스타일 유지 */
 .stButton > button {
-    background: rgba(30, 41, 59, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 12px !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
     padding: 20px 25px !important;
+    width: 100% !important;
     text-align: left !important;
     display: flex !important;
     justify-content: flex-start !important;
-    font-size: 16px !important;
-    font-weight: 700 !important;
-    color: #ffffff !important; 
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+    white-space: pre-wrap !important; /* 글씨 줄바꿈 허용 */
+    line-height: 1.6 !important;
+    transition: all 0.2s ease !important;
 }
 .stButton > button:hover {
-    background: rgba(30, 41, 59, 1) !important;
+    background-color: #f8fafc !important;
     border-color: #bba14f !important;
-    transform: translateX(-5px);
+    box-shadow: 0 10px 15px rgba(0,0,0,0.1) !important;
+    transform: translateY(-2px) !important;
 }
+.stButton > button:active { transform: scale(0.98) !important; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
 
 # 3. 헤더
-st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 모니터링</h1></div>", unsafe_allow_html=True)
+st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
 
 # 4. 데이터
 base_certs = [{"name": "IATF 16949", "img": "📜"}, {"name": "SQ 인증", "img": "🎖️"}, {"name": "ISO 9001/14001", "img": "🏅"}, {"name": "ESG 경영 우수", "img": "🌱"}]
@@ -181,9 +166,9 @@ suppliers = [
     }
 ]
 
-# 5. 사이드바 구성
+# 5. 사이드바 (기본 테마 적용으로 글씨가 완벽하게 보입니다)
 with st.sidebar:
-    st.markdown("<h3 style='color:#bba14f; font-weight:900;'>🏢 필터 및 업체 검색</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#1e293b; font-weight:900;'>🏢 필터 및 업체 검색</h3>", unsafe_allow_html=True)
     
     industry_list = ["전체", "PCB", "PRESS(CASE)", "PRESS(CORE)", "사출", "임가공(조립)"]
     selected_industry = st.selectbox("🏷️ 업종 필터", industry_list, on_change=reset_map_view)
@@ -196,14 +181,13 @@ with st.sidebar:
     if search_term:
         filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
 
-    st.markdown("<hr style='border-color: rgba(100,100,100,0.3); margin: 20px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color: #cbd5e1; margin: 20px 0;'>", unsafe_allow_html=True)
     
     options = ["🏠 종합 메인 화면"] + [s["name"] for s in filtered]
     selected_name = st.radio("📊 상세 분석할 업체 선택", options, on_change=reset_map_view)
 
-# 6. 화면 출력 로직 분기
+# 6. 메인 화면 출력 로직
 if selected_name == "🏠 종합 메인 화면":
-    # --- [메인 화면 대시보드] ---
     st.markdown("<div class='section-title' style='margin-top:0;'>글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
     
     total_companies = len(filtered)
@@ -226,8 +210,8 @@ if selected_name == "🏠 종합 메인 화면":
             stroked=True, line_width_min_pixels=1, get_radius=100000, 
             radius_min_pixels=6, radius_max_pixels=15, pickable=True,
         )
-        # 내장 dark 테마 사용 (API 토큰 불필요)
-        st.pydeck_chart(pdk.Deck(map_style="dark", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}"}))
+        # 맵 스타일을 가장 깔끔한 'light' 모드로 적용
+        st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}"}))
     else:
         st.info("해당 조건의 거점 데이터가 없습니다.")
 
@@ -237,8 +221,8 @@ else:
     
     st.markdown(
         f"<div style='margin-bottom:25px; display:flex; align-items:baseline; gap: 15px;'>"
-        f"<h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#ffffff;'>{selected['name']}</h2>"
-        f"<span style='background:rgba(255,255,255,0.1); border: 1px solid #bba14f; color:#bba14f !important; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 4px;'>{selected['industry']}</span></div>",
+        f"<h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#0f172a;'>{selected['name']}</h2>"
+        f"<span style='background:#f1f5f9; border: 1px solid #bba14f; color:#bba14f !important; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 4px;'>{selected['industry']}</span></div>",
         unsafe_allow_html=True
     )
 
@@ -259,33 +243,48 @@ else:
     map_col, text_col = st.columns([1.8, 1])
     df_loc = pd.DataFrame(selected["locations"])
 
+    # 🚀 우측 정보 카드 (버튼으로 동작하여 지도를 움직임)
     with text_col:
-        st.markdown("<p style='color:#bba14f !important; font-weight:700; font-size:15px; margin-bottom:10px;'>🖱️ 아래 카드를 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#bba14f !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 아래 카드를 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
         
-        if st.button(f"🌍 전체 뷰 복귀", use_container_width=True):
+        # 버튼 텍스트에 줄바꿈(\n\n)을 넣어서 원본 카드의 Title/Value 느낌을 그대로 재현
+        if st.button(f"🌍 전체 뷰 복귀\n\n모든 거점을 한눈에 확인합니다.", use_container_width=True):
             st.session_state.map_view = "all"
         st.write("")
-        if st.button(f"🏢 본사 : {selected['hq']}", use_container_width=True):
+        if st.button(f"🏢 국내(본사)\n\n{selected['hq']}", use_container_width=True):
             st.session_state.map_view = "hq"
         st.write("")
-        if st.button(f"🏭 지사 : {selected['kr']}", use_container_width=True):
+        if st.button(f"🏭 국내(지사)\n\n{selected['kr']}", use_container_width=True):
             st.session_state.map_view = "kr"
         st.write("")
         if selected['gl'] != "해당 없음":
-            if st.button(f"🌐 해외 : {selected['gl']}", use_container_width=True):
+            if st.button(f"🌐 해외 지사\n\n{selected['gl']}", use_container_width=True):
                 st.session_state.map_view = "gl"
 
+    # 🚀 지도 랜더링 (원본 디자인 컬러 + 클릭 연동)
     with map_col:
         current_view = st.session_state.map_view
         
+        # 원본에서 썼던 강조 색상 로직 복구
         def get_color(row):
-            hi_colors = {'hq': [239, 68, 68, 255], 'kr': [59, 130, 246, 255], 'gl': [16, 185, 129, 255]}
-            if current_view == "all": return [187, 161, 79, 200]
+            base_colors = {'hq': [31, 41, 55, 220], 'kr': [107, 114, 128, 220], 'gl': [187, 161, 79, 220]}
+            hi_colors = {'hq': [220, 38, 38, 255], 'kr': [37, 99, 235, 255], 'gl': [16, 185, 129, 255]}
+            dim_color = [156, 163, 175, 100]
+            
+            if current_view == "all": return base_colors[row['type']]
             elif current_view == row['type']: return hi_colors[row['type']]
-            else: return [100, 100, 100, 80]
+            else: return dim_color
+
+        # 원본에서 썼던 점 크기(반경) 확대 로직 복구
+        def get_radius(row):
+            if current_view == "all": return 120000
+            if current_view == row['type']: return 350000
+            return 40000 
 
         df_loc['color'] = df_loc.apply(get_color, axis=1)
+        df_loc['radius'] = df_loc.apply(get_radius, axis=1)
         
+        # 카메라 자동 이동 로직
         if current_view == "all":
             center_lat, center_lon = df_loc['lat'].mean(), df_loc['lon'].mean()
             zoom_lvl = 1.2 if (df_loc['lon'].max() - df_loc['lon'].min()) > 100 else 5.0
@@ -306,14 +305,14 @@ else:
         layer = pdk.Layer(
             "ScatterplotLayer", data=df_loc,
             get_position='[lon, lat]', get_fill_color='color', get_line_color=[255, 255, 255], 
-            stroked=True, line_width_min_pixels=2, get_radius=100000, 
-            radius_min_pixels=8, radius_max_pixels=25, pickable=True,
+            stroked=True, line_width_min_pixels=2, get_radius='radius', 
+            radius_min_pixels=6, radius_max_pixels=30, pickable=True,
         )
         
-        with st.container():
-            # 내장 dark 테마 사용
+        with st.container(border=True):
+            # 원본 요청대로 밝고 깔끔한 light 맵 적용
             st.pydeck_chart(pdk.Deck(
-                map_style="dark", 
+                map_style="light", 
                 initial_view_state=view_state,
                 layers=[layer],
                 tooltip={"text": "{name}"} 
