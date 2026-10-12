@@ -32,7 +32,17 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 [data-testid="stMetricValue"] { color: #2C2A29 !important; font-weight: 900 !important; }
 [data-testid="stMetricLabel"] { color: #8A817C !important; font-weight: 700 !important; }
 .main-title { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; }
-.section-title { font-size: 22px; font-weight: 900; color: #2C2A29 !important; margin-top: 40px; margin-bottom: 25px; display: inline-block; padding-bottom: 8px; border-bottom: 3px solid #C4A47C; }
+
+/* 🌟 섹션 타이틀에 순번(Numbering) 스타일 적용 */
+.section-title { 
+    font-size: 24px; font-weight: 900; color: #2C2A29 !important; 
+    margin-top: 45px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;
+    padding-bottom: 12px; border-bottom: 3px solid #E5E0D8; 
+}
+.section-num {
+    color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px;
+}
+
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; }
 .product-card { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 30px 20px !important; text-align: center !important; height: 100% !important; transition: all 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .product-card:hover { transform: translateY(-4px) !important; border-color: #C4A47C !important; box-shadow: 0 10px 15px rgba(0,0,0,0.06) !important; }
@@ -58,34 +68,26 @@ def get_icon_html(name, category="product"):
         else: emoji = "📜"
     return f"<div class='product-emoji'>{emoji}</div>"
 
-# 4. 주요 고객사 [태그/뱃지 형태] HTML 생성 함수 (새로 작성됨)
+# 4. 주요 고객사 강조형 뱃지 HTML 생성 함수 (비중 제거, 글씨 크기 확대)
 def get_customer_tags_html(customers):
     if not customers:
         return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
     
-    tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 12px;'>"
+    tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 15px;'>"
     
-    # 데이터가 딕셔너리 형태 (예: {"고객사": 40}) 일 때
-    if isinstance(customers, dict):
-        for comp, val in customers.items():
-            if val is not None and val != "":
-                # 값이 있을 경우 골드 색상으로 % 표시
-                display_text = f"🏢 {comp} &nbsp;<span style='color:#C4A47C; font-weight:900;'>{val}%</span>"
-            else:
-                display_text = f"🏢 {comp}"
-            tags_html += f"<div style='padding: 10px 22px; background: #ffffff; border: 1px solid #E5E0D8; border-radius: 30px; font-size: 15px; font-weight: 700; color: #4A4441; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; align-items: center;'>{display_text}</div>"
-            
-    # 데이터가 리스트 형태 (예: ["고객사1", "고객사2"]) 일 때
-    elif isinstance(customers, list):
-        for comp in customers:
-            tags_html += f"<div style='padding: 10px 22px; background: #ffffff; border: 1px solid #E5E0D8; border-radius: 30px; font-size: 15px; font-weight: 700; color: #4A4441; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; align-items: center;'>🏢 {comp}</div>"
+    # 딕셔너리로 들어오더라도 key(업체명)만 추출하여 동일하게 처리
+    customer_list = customers.keys() if isinstance(customers, dict) else customers
+
+    for comp in customer_list:
+        # 폰트 사이즈 키우고 패딩 넓힘, 보더 색상 진하게 하여 강조
+        tags_html += f"<div style='padding: 14px 28px; background: #ffffff; border: 2px solid #C4A47C; border-radius: 40px; font-size: 18px; font-weight: 900; color: #2C2A29; box-shadow: 0 6px 12px rgba(196, 164, 124, 0.15); display: flex; align-items: center;'>🤝 {comp}</div>"
 
     tags_html += "</div>"
     
-    return f"<div style='padding: 25px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
+    return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
 
-# 5. 원본 엑셀파일 데이터 매핑 (비율이 없는 곳은 List 로 처리)
+# 5. 데이터 매핑
 suppliers = [
     {
         "name": "(주)한성전장",
@@ -96,7 +98,7 @@ suppliers = [
         "desc": "(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
         "products": ["PCB ASM", "COVER ASM", "WIRE ASM"],
         "certs": ["SQ 인증"],
-        "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "기타": 21}, # 비율이 있는 경우
+        "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "기타": 21},
         "locations": [
             {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토로 23", "lat": 35.398579, "lon": 129.056037},
             {"name": "부산 공장", "type": "kr", "address": "부산 금정구 팔송로 53번길 43", "lat": 35.281146, "lon": 129.085023}
@@ -111,7 +113,7 @@ suppliers = [
         "desc": "(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.",
         "products": ["CASE"],
         "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
-        "customers": ["효성전기", "LG 이노텍"], # 비율 데이터가 없는 경우 (List 형태로 자동 처리)
+        "customers": ["효성전기", "LG 이노텍"],
         "locations": [
             {"name": "구미 본사", "type": "hq", "address": "경상북도 구미시", "lat": 36.119485, "lon": 128.344573},
             {"name": "천안 2공장", "type": "kr", "address": "충청남도 천안시", "lat": 36.815129, "lon": 127.113893},
@@ -181,7 +183,7 @@ with st.sidebar:
 
 # 8. 메인 화면 출력
 if selected_name == "🏠 종합 메인 화면":
-    st.markdown("<div class='section-title' style='margin-top:0;'>글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title' style='margin-top:0;'>📊 글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
     
     total_companies = len(filtered)
     all_locations = [loc for s in filtered for loc in s["locations"]]
@@ -191,7 +193,7 @@ if selected_name == "🏠 종합 메인 화면":
     col2.metric("🏭 총 운영 거점", f"{len(all_locations)} 곳")
     col3.metric("🌐 해외 진출 거점", f"{len([l for l in all_locations if l['type'] == 'gl'])} 곳")
     
-    st.markdown("<div class='section-title'>전 세계 거점 분포도</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>🗺️ 전 세계 거점 분포도</div>", unsafe_allow_html=True)
     if all_locations:
         df_all = pd.DataFrame(all_locations)
         view_state = pdk.ViewState(latitude=35.0, longitude=127.0, zoom=1.5, pitch=0)
@@ -214,19 +216,21 @@ elif selected_name:
             unsafe_allow_html=True
         )
 
-        st.markdown("<div class='section-title' style='margin-top:10px;'>기업 개요</div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
+        # [변경] 순번 적용: 01. 기업 개요
+        st.markdown("<div class='section-title' style='margin-top:10px;'><span class='section-num'>01.</span> 기업 개요</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='desc-box'>📖 {selected['desc']}</div>", unsafe_allow_html=True)
         
-        # [수정] 태그 형태의 고객사 UI 출력
-        st.markdown("<div class='section-title'>🤝 주요 고객사</div>", unsafe_allow_html=True)
+        # [변경] 순번 적용: 02. 주요 고객사 (내부 UI 강조됨)
+        st.markdown("<div class='section-title'><span class='section-num'>02.</span> 주요 고객사</div>", unsafe_allow_html=True)
         st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
-        st.markdown("<div class='section-title'>핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
+        # [변경] 순번 적용: 03. 핵심 역량 및 품질 인증
+        st.markdown("<div class='section-title'><span class='section-num'>03.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         col_prod, col_cert = st.columns([1, 1])
 
         with col_prod:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
-            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>⚙️ 핵심 생산 품목</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
             if selected['products']:
                 p_cols = st.columns(2)
                 for idx, prod_name in enumerate(selected['products']):
@@ -241,7 +245,7 @@ elif selected_name:
 
         with col_cert:
             st.markdown("<div style='padding-left: 10px; height: 100%;'>", unsafe_allow_html=True)
-            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📋 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             if selected['certs']:
                 c_cols = st.columns(2)
                 for idx, cert_name in enumerate(selected['certs']):
@@ -254,7 +258,8 @@ elif selected_name:
                 st.info("등록된 품질 및 인증 내역이 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
-        st.markdown("<div class='section-title' style='margin-top: 50px;'>주요 거점 네트워크</div>", unsafe_allow_html=True)
+        # [변경] 순번 적용: 04. 주요 거점 네트워크
+        st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 주요 거점 네트워크</div>", unsafe_allow_html=True)
         map_col, text_col = st.columns([1.8, 1])
         df_loc = pd.DataFrame(selected["locations"])
 
