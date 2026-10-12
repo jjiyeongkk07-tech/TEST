@@ -4,40 +4,8 @@ import pydeck as pdk
 import base64
 import os
 
-# 💡 geopy 라이브러리가 설치되지 않았을 때 웹사이트가 멈추는 현상(에러) 완벽 방지
-try:
-    from geopy.geocoders import Nominatim
-    GEOPY_INSTALLED = True
-except ModuleNotFoundError:
-    GEOPY_INSTALLED = False
-
 # 1. 페이지 설정 (사이드바 기본 열림)
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
-
-# =====================================================================
-# 🎯 [엑셀 및 이미지 경로 자동 탐색 설정]
-# 내 PC(Z드라이브)에서 실행할 때와 웹(Streamlit Cloud)에서 실행할 때를 자동으로 구분합니다.
-# =====================================================================
-LOCAL_EXCEL = r"Z:\★업  무★\Ai\글로벌 SCM 및 파트너사 인프라 분석.xlsx"
-CLOUD_EXCEL = "글로벌 SCM 및 파트너사 인프라 분석.xlsx"
-
-# 엑셀 파일 자동 탐색
-if os.path.exists(LOCAL_EXCEL):
-    EXCEL_PATH = LOCAL_EXCEL
-elif os.path.exists(CLOUD_EXCEL):
-    EXCEL_PATH = CLOUD_EXCEL
-else:
-    EXCEL_PATH = None
-
-# 이미지 폴더 자동 탐색
-LOCAL_IMG_DIR = r"Z:\★업  무★\Ai\images"
-CLOUD_IMG_DIR = "images"
-
-if os.path.exists(LOCAL_IMG_DIR):
-    IMG_BASE_PATH = LOCAL_IMG_DIR
-else:
-    IMG_BASE_PATH = CLOUD_IMG_DIR
-
 
 # [세션 상태 초기화]
 if "map_view" not in st.session_state:
@@ -90,6 +58,9 @@ def get_media_html(filename):
     if ext in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']:
         return "<div class='product-emoji'>📜</div>"
         
+    LOCAL_IMG_DIR = r"Z:\★업  무★\Ai\images"
+    CLOUD_IMG_DIR = "images"
+    IMG_BASE_PATH = LOCAL_IMG_DIR if os.path.exists(LOCAL_IMG_DIR) else CLOUD_IMG_DIR
     filepath = os.path.join(IMG_BASE_PATH, filename)
     
     if os.path.exists(filepath):
@@ -103,79 +74,47 @@ def get_media_html(filename):
             pass
     return "<div class='product-emoji'>🖼️</div>"
 
-# 4. 주소를 위도/경도로 변환하는 함수 (Geocoding)
-@st.cache_data
-def get_lat_lon(address):
-    if not address or pd.isna(address):
-        return 37.5665, 126.9780 
-        
-    if GEOPY_INSTALLED:
-        try:
-            geolocator = Nominatim(user_agent="scm_dashboard_agent")
-            location = geolocator.geocode(address, timeout=5)
-            if location:
-                return location.latitude, location.longitude
-        except Exception:
-            pass
-            
-    # 에러 방지용 임시 기본값(서울)
-    return 37.5665, 126.9780
 
-# 엑셀 데이터 파싱
-@st.cache_data
-def load_data(file_path):
-    df_company = pd.read_excel(file_path, sheet_name='업체 정보')
-    df_location = pd.read_excel(file_path, sheet_name='거점 정보')
-    
-    parsed_suppliers = []
-    
-    for _, row in df_company.iterrows():
-        comp_name = str(row.get('업체명', '')).strip()
-        industry = str(row.get('업종', '미분류')).strip()
-        if not comp_name or comp_name == 'nan':
-            continue
-            
-        products = []
-        if pd.notna(row.get('핵심 생산 품목_파일명')) and str(row.get('핵심 생산 품목_파일명')).strip():
-            products.append({"name": "핵심 생산 품목", "file": str(row['핵심 생산 품목_파일명']).strip()})
-            
-        certs = []
-        cert_columns = {'IATF 16949_파일명': 'IATF 16949', 'ISO14001_파일명': 'ISO 14001', 'SQ인증_파일명': 'SQ 인증', 'ESG 경영 우수_파일명': 'ESG 경영 우수'}
-        for col, cert_name in cert_columns.items():
-            if pd.notna(row.get(col)) and str(row.get(col)).strip():
-                certs.append({"name": cert_name, "file": str(row[col]).strip()})
-                
-        comp_locs = df_location[df_location['업체명'].astype(str).str.strip() == comp_name]
-        locations = []
-        for _, loc_row in comp_locs.iterrows():
-            address = str(loc_row.get('주소', '')).strip()
-            
-            if '위도' in loc_row and '경도' in loc_row and pd.notna(loc_row['위도']) and pd.notna(loc_row['경도']):
-                lat, lon = float(loc_row['위도']), float(loc_row['경도'])
-            else:
-                lat, lon = get_lat_lon(address) 
-                
-            locations.append({
-                "name": str(loc_row.get('거점명', '')).strip(),
-                "lat": lat,
-                "lon": lon,
-                "type": str(loc_row.get('구분', 'kr')).strip(),
-                "address": address
-            })
-            
-        parsed_suppliers.append({
-            "name": comp_name,
-            "industry": industry,
-            "hq": str(row.get('본사', '-')).strip(),
-            "kr": str(row.get('지사', '-')).strip(),
-            "gl": str(row.get('해외 지점', '-')).strip(),
-            "desc": str(row.get('기업 개요', '')).strip(),
-            "products": products,
-            "certs": certs,
-            "locations": locations
-        })
-        
-    return parsed_suppliers
+# =====================================================================
+# 🎯 [엑셀 데이터 내장] 
+# 첨부해주신 원본 엑셀 데이터를 코드 안에 100% 반영해 두었습니다.
+# 이제 파일 업로드나 주소 변환(geopy) 없이 지도가 아주 빠르게 로딩됩니다!
+# =====================================================================
+suppliers = [
+    {
+        'name': '(주)한성전장',
+        'industry': '임가공(조립)',
+        'hq': '양산 본사',
+        'kr': '부산 공장',
+        'gl': '-',
+        'desc': '(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.',
+        'products': [{'name': '핵심 생산 품목', 'file': '(주)한성전장-PCB ASM.jpg'}],
+        'certs': [{'name': 'SQ 인증', 'file': '(주)한성전장-SQ인증서.jpg'}],
+        'locations': [
+            {'name': '양산 본사', 'type': 'hq', 'address': '경남 양산시 상북면 소토로 23', 'lat': 35.398579, 'lon': 129.056037},
+            {'name': '부산 공장', 'type': 'kr', 'address': '부산 금정구 팔송로 53번길 43', 'lat': 35.281146, 'lon': 129.085023}
+        ]
+    },
+    {
+        'name': '성우',
+        'industry': 'PRESS(CASE)',
+        'hq': '구미 본사',
+        'kr': '천안 2공장',
+        'gl': '중국 남경 공장',
+        'desc': '(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.',
+        'products': [{'name': '핵심 생산 품목', 'file': '(주)성우-CASE.jpg'}],
+        'certs': [
+            {'name': 'IATF 16949', 'file': '(주)성우-IATF16949.jpg'},
+            {'name': 'ISO 14001', 'file': '(주)성우-ISO14001.jpg'},
+            {'name': 'SQ 인증', 'file': '(주)성우-SQ인증서.jpg'}
+        ],
+        'locations': [
+            {'name': '구미 본사', 'type': 'hq', 'address': '경상북도 구미시', 'lat': 36.119485, 'lon': 128.344573},
+            {'name': '천안 2공장', 'type': 'kr', 'address': '충청남도 천안시', 'lat': 36.815129, 'lon': 127.113893},
+            {'name': '중국 남경 공장', 'type': 'gl', 'address': '중국 남경', 'lat': 32.060255, 'lon': 118.796877}
+        ]
+    }
+]
 
 # 5. 헤더 타이틀
 st.markdown("""
@@ -184,16 +123,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-if not GEOPY_INSTALLED:
-    st.warning("⚠️ 주소를 지도로 변환하는 기능(`geopy`)이 설치되지 않아 임시 좌표(서울)로 표시됩니다. 완벽한 지도를 보시려면 깃허브에 `requirements.txt` 파일을 추가해주세요.")
-
-# 엑셀 파일 로드 및 에러 처리
-if not EXCEL_PATH:
-    st.error("⚠️ 엑셀 파일을 찾을 수 없습니다.\n\n웹(Streamlit)에서 실행 중이시라면 깃허브 저장소에 `글로벌 SCM 및 파트너사 인프라 분석.xlsx` 파일을 엑셀 파일 형태로 꼭 함께 업로드해주세요.")
-    st.stop()
-
-with st.spinner("엑셀 데이터를 분석하고 지도 좌표를 생성 중입니다..."):
-    suppliers = load_data(EXCEL_PATH)
 
 # 6. 사이드바 (필터 및 검색 구성)
 with st.sidebar:
