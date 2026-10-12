@@ -2,9 +2,6 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 
-# 💡 다운받은 image_data.py 파일에서 이미지 코드(문자열)를 불러옵니다.
-from image_data import IMAGE_DATA
-
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 
@@ -37,38 +34,38 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .main-title { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; }
 .section-title { font-size: 22px; font-weight: 900; color: #2C2A29 !important; margin-top: 40px; margin-bottom: 25px; display: inline-block; padding-bottom: 8px; border-bottom: 3px solid #C4A47C; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; }
-.product-card { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 25px 15px !important; text-align: center !important; height: 100% !important; transition: all 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.product-card { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 30px 20px !important; text-align: center !important; height: 100% !important; transition: all 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .product-card:hover { transform: translateY(-4px) !important; border-color: #C4A47C !important; box-shadow: 0 10px 15px rgba(0,0,0,0.06) !important; }
-.product-emoji { font-size: 42px !important; margin-bottom: 12px !important; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.05)) !important; }
-.product-title { font-size: 15px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4;}
+.product-emoji { font-size: 48px !important; margin-bottom: 15px !important; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.05)) !important; }
+.product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4;}
 .stButton > button { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 20px 25px !important; width: 100% !important; text-align: left !important; display: flex !important; justify-content: flex-start !important; font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; white-space: pre-wrap !important; line-height: 1.6 !important; transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; }
 .stButton > button:hover { background-color: #FDFCFB !important; border-color: #C4A47C !important; transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 텍스트 코드 연동 함수 (폴더 안 뒤지고 코드 안에서 바로 해결!)
-def get_media_html(filename):
-    if not filename or pd.isna(filename) or str(filename).strip() == "":
-        return "<div class='product-emoji'>📦</div>"
-    
-    filename = str(filename).strip()
-    ext = filename.split('.')[-1].lower()
-    
-    if ext in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']:
-        return "<div class='product-emoji'>📜</div>"
-        
-    # image_data.py 에서 변환된 이미지 코드를 꺼내옵니다
-    if filename in IMAGE_DATA:
-        mime = "image/png" if ext == "png" else "image/jpeg"
-        # 텍스트 데이터를 웹용 이미지(HTML)로 즉석 조립!
-        img_b64 = f"data:{mime};base64,{IMAGE_DATA[filename]}"
-        return f"<img src='{img_b64}' style='width:100%; height:90px; object-fit:contain; margin-bottom:12px;'/>"
-    else:
-        # 코드를 못 찾으면 기본 🖼️ 이모지 표시
-        return "<div class='product-emoji'>🖼️</div>"
+# 3. 아이콘 매핑 함수 (품목이나 인증서 이름에 따라 적절한 아이콘을 반환합니다)
+def get_icon_html(name, category="product"):
+    # 품목 관련 아이콘
+    if category == "product":
+        if "PCB" in name.upper() or "WIRE" in name.upper():
+            emoji = "🔌"
+        elif "CASE" in name.upper() or "COVER" in name.upper():
+            emoji = "🗜️"
+        else:
+            emoji = "📦"
+    # 인증 관련 아이콘
+    elif category == "cert":
+        if "IATF" in name.upper() or "ISO" in name.upper():
+            emoji = "🏅"
+        elif "SQ" in name.upper():
+            emoji = "🛡️"
+        else:
+            emoji = "📜"
+            
+    return f"<div class='product-emoji'>{emoji}</div>"
 
-# 4. 공급사 데이터 설정
+# 4. 공급사 데이터 설정 (이미지 파일명 삭제, 이름만 유지)
 suppliers = [
     {
         'name': '(주)한성전장',
@@ -77,14 +74,8 @@ suppliers = [
         'kr': '부산 공장',
         'gl': '-',
         'desc': '(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.',
-        'products': [
-            {'name': 'PCB ASM', 'file': '(주)한성전장-PCB ASM.jpg'},
-            {'name': 'COVER ASM', 'file': '(주)한성전장-PCB ASM.jpg'},
-            {'name': 'WIRE ASM', 'file': '(주)한성전장-PCB ASM.jpg'}
-        ],
-        'certs': [
-            {'name': 'SQ 인증', 'file': '(주)한성전장-SQ인증서.jpg'}
-        ],
+        'products': ['PCB ASM', 'COVER ASM', 'WIRE ASM'],
+        'certs': ['SQ 인증'],
         'locations': [
             {'name': '양산 본사', 'type': 'hq', 'address': '경남 양산시 상북면 소토로 23', 'lat': 35.398579, 'lon': 129.056037},
             {'name': '부산 공장', 'type': 'kr', 'address': '부산 금정구 팔송로 53번길 43', 'lat': 35.281146, 'lon': 129.085023}
@@ -97,14 +88,8 @@ suppliers = [
         'kr': '천안 2공장',
         'gl': '중국 남경 공장',
         'desc': '(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.',
-        'products': [
-            {'name': 'CASE', 'file': '(주)성우-CASE.jpg'}
-        ],
-        'certs': [
-            {'name': 'IATF 16949', 'file': '(주)성우-IATF16949.jpg'},
-            {'name': 'ISO 14001', 'file': '(주)성우-ISO14001.jpg'},
-            {'name': 'SQ 인증', 'file': '(주)성우-SQ인증서.jpg'}
-        ],
+        'products': ['CASE'],
+        'certs': ['IATF 16949', 'ISO 14001', 'SQ 인증'],
         'locations': [
             {'name': '구미 본사', 'type': 'hq', 'address': '경상북도 구미시', 'lat': 36.119485, 'lon': 128.344573},
             {'name': '천안 2공장', 'type': 'kr', 'address': '충청남도 천안시', 'lat': 36.815129, 'lon': 127.113893},
@@ -188,13 +173,13 @@ elif selected_name:
 
         with col_prod:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
-            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📦 핵심 생산 품목</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>⚙️ 핵심 생산 품목</h4>", unsafe_allow_html=True)
             if selected['products']:
                 p_cols = st.columns(2)
-                for idx, p in enumerate(selected['products']):
-                    media_html = get_media_html(p['file'])
+                for idx, prod_name in enumerate(selected['products']):
+                    icon_html = get_icon_html(prod_name, "product")
                     p_cols[idx % 2].markdown(
-                        f"<div class='product-card' style='margin-bottom:15px;'>{media_html}<div class='product-title'>{p['name']}</div></div>",
+                        f"<div class='product-card' style='margin-bottom:15px;'>{icon_html}<div class='product-title'>{prod_name}</div></div>",
                         unsafe_allow_html=True
                     )
             else:
@@ -203,13 +188,13 @@ elif selected_name:
 
         with col_cert:
             st.markdown("<div style='padding-left: 10px; height: 100%;'>", unsafe_allow_html=True)
-            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📜 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📋 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             if selected['certs']:
                 c_cols = st.columns(2)
-                for idx, c in enumerate(selected['certs']):
-                    media_html = get_media_html(c['file'])
+                for idx, cert_name in enumerate(selected['certs']):
+                    icon_html = get_icon_html(cert_name, "cert")
                     c_cols[idx % 2].markdown(
-                        f"<div class='product-card' style='margin-bottom:15px;'>{media_html}<div class='product-title'>{c['name']}</div></div>",
+                        f"<div class='product-card' style='margin-bottom:15px;'>{icon_html}<div class='product-title'>{cert_name}</div></div>",
                         unsafe_allow_html=True
                     )
             else:
