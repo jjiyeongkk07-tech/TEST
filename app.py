@@ -15,18 +15,18 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 고급스러운 웜 베이지 & 샴페인 골드 테마 (블랙/블루 배제)
+# 2. 고급스러운 웜 베이지 & 샴페인 골드 테마
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 
-/* 🌟 배경 - 고급스러운 샴페인 골드 & 웜 베이지 그라데이션 */
+/* 배경 - 고급스러운 샴페인 골드 & 웜 베이지 그라데이션 */
 .stApp { 
     background: linear-gradient(135deg, #F9F8F6 0%, #EFEBE5 100%); 
 }
 
-/* 메인 대시보드 컨테이너 - 깔끔한 퓨어 화이트 패널 */
+/* 메인 대시보드 컨테이너 */
 .block-container { 
     background-color: #ffffff;
     padding: 3rem 4rem !important; 
@@ -40,18 +40,28 @@ html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 
 header { visibility: hidden; } footer { visibility: hidden; }
 
-/* 사이드바 스타일 - 배경과 어우러지는 웜톤 */
+/* 사이드바 스타일 */
 [data-testid="stSidebar"] {
     background-color: #Fdfcfb !important;
     border-right: 1px solid #E5E0D8 !important;
 }
 
-/* 🚀 텍스트 컬러 최적화 - 블랙 대신 진한 브라운/차콜 계열로 부드러움 강조 */
+/* 텍스트 컬러 최적화 */
 h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 [data-testid="stMetricValue"] { color: #2C2A29 !important; font-weight: 900 !important; }
 [data-testid="stMetricLabel"] { color: #8A817C !important; font-weight: 700 !important; }
 
-/* 섹션 타이틀 - 브라운 톤과 골드 밑줄 */
+/* 🚀 메인 타이틀 전용 클래스 (h1 태그 사용 안 함 - 스트림릿 테마 충돌 원천 차단) */
+.main-title {
+    font-size: 34px !important;
+    font-weight: 900 !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -1px !important;
+}
+
+/* 섹션 타이틀 */
 .section-title { 
     font-size: 22px; font-weight: 900; color: #2C2A29 !important; margin-top: 40px; margin-bottom: 25px; 
     display: inline-block; padding-bottom: 8px; border-bottom: 3px solid #C4A47C;
@@ -66,7 +76,7 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
     font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400;
 }
 
-/* 제품/인증서 카드 - 깔끔한 테두리와 섀도우 */
+/* 제품/인증서 카드 */
 .product-card { 
     background-color: #ffffff !important; 
     border: 1px solid #E5E0D8 !important; 
@@ -121,10 +131,10 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 헤더 (타이틀 배너: 차콜 브라운 바탕에 명확한 흰색 텍스트 고정)
+# 3. 헤더 (h1 태그 제거, 순수 div로 대체하여 강제 화이트 텍스트 구현)
 st.markdown("""
-<div style="background: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 40px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
-    <h1 style="margin: 0 !important; font-size: 34px !important; font-weight: 900 !important; color: #FFFFFF !important; line-height: 1.2 !important;">🌍 글로벌 SCM 및 파트너사 인프라 분석</h1>
+<div style="background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 40px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+    <div class="main-title">🌍 글로벌 SCM 및 파트너사 인프라 분석</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -218,10 +228,9 @@ else:
     st.markdown("<div class='section-title' style='margin-top:10px;'>기업 개요</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
 
-    # 🚀 핵심 역량 및 품질 인증 (빈칸 발생 원인이었던 감싸는 껍데기 박스 완전 삭제)
+    # 🚀 핵심 역량 및 품질 인증
     st.markdown("<div class='section-title'>핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
     
-    # st.columns() 만 독립적으로 사용하여 빈 박스 버그 차단
     col_prod, col_cert = st.columns([1, 1])
 
     with col_prod:
@@ -252,7 +261,6 @@ else:
     map_col, text_col = st.columns([1.8, 1])
     df_loc = pd.DataFrame(selected["locations"])
 
-    # 우측 컨트롤러
     with text_col:
         st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
         
@@ -266,7 +274,6 @@ else:
             st.write("")
             st.button(f"🌐 해외 지점\n\n{selected['gl']}", on_click=set_view, args=("🌐 해외",), use_container_width=True)
 
-    # 지도 렌더링 영역 (라이트 맵 적용)
     with map_col:
         current_view = st.session_state.map_view
         
@@ -274,7 +281,7 @@ else:
             hi_colors = {'hq': [220, 38, 38, 255], 'kr': [37, 99, 235, 255], 'gl': [16, 185, 129, 255]} 
             dim_color = [148, 163, 184, 100]
             
-            if current_view == "전체 뷰": return [196, 164, 124, 220] # 골드 톤 포인트
+            if current_view == "전체 뷰": return [196, 164, 124, 220]
             elif current_view == "🏢 국내(본사)" and row['type'] == 'hq': return hi_colors['hq']
             elif current_view == "🏭 국내(지사)" and row['type'] == 'kr': return hi_colors['kr']
             elif current_view == "🌐 해외" and row['type'] == 'gl': return hi_colors['gl']
