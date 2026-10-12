@@ -7,7 +7,7 @@ import re
 import requests
 import traceback
 
-# 1. 페이지 설정 (사이드바 기본으로 열리도록 설정: initial_sidebar_state="expanded")
+# 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 
 # [세션 상태 초기화]
@@ -48,7 +48,7 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 백엔드 함수 (이미지/지도 변환)
+# 3. 백엔드 함수
 def get_media_html(filename):
     if pd.isna(filename) or not str(filename).strip():
         return "<div class='product-emoji'>📦</div>"
@@ -77,8 +77,6 @@ def get_media_html(filename):
 def geocode_korean_address(address):
     address = str(address).strip()
     if not address or address == "nan": return 37.5665, 126.9780 
-    
-    # 엑셀 내 기존 데이터 빠른 매칭
     if "소토로" in address and "23" in address: return 35.3986, 129.0560
     if "팔송로" in address and "53" in address: return 35.2811, 129.0850
     
@@ -90,14 +88,12 @@ def geocode_korean_address(address):
             return float(res.json()[0]['lat']), float(res.json()[0]['lon'])
     except:
         pass
-            
     return 37.5665, 126.9780 
 
 def load_and_parse_excel(file_source):
     try:
         df_company = pd.read_excel(file_source, sheet_name="업체 정보", header=1)
         df_location = pd.read_excel(file_source, sheet_name="거점 정보", header=1)
-        
         df_company = df_company.dropna(subset=['업체명'])
         df_location = df_location.dropna(subset=['업체명'])
         
@@ -116,7 +112,6 @@ def load_and_parse_excel(file_source):
                 if lclean and (lclean in clean_name or clean_name in lclean):
                     lat, lon = lrow.get('위도(lat)', None), lrow.get('경도(lon)', None)
                     address = str(lrow.get('주소', ''))
-                    
                     if pd.isna(lat) or pd.isna(lon):
                         lat, lon = geocode_korean_address(address)
                         
@@ -149,76 +144,79 @@ def load_and_parse_excel(file_source):
                 "certs": certs,
                 "locations": locs
             })
-            
         return suppliers, None
     except Exception as e:
         error_details = traceback.format_exc()
+        # DRM 에러 안내 문구 추가
+        if "BadZipFile" in str(e) or "PermissionError" in str(e):
+            return [], "🚨 사내 보안(DRM)으로 인해 암호화된 파일입니다. 엑셀을 열고 '보안 해제(외부 반출용)'로 재저장 후 올려주세요."
         return [], str(e) + "\n\n" + error_details
 
-# 4. 헤더 타이틀 강제 출력
+# 4. 헤더 타이틀 출력
 st.markdown("""
 <div style="background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 40px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
     <div class="main-title">🌍 글로벌 SCM 및 파트너사 인프라 분석</div>
 </div>
 """, unsafe_allow_html=True)
 
-# 5. 데이터 읽기 처리
-excel_path = r"Z:\★업  무★\Ai\글로벌 SCM 및 파트너사 인프라 분석.xlsx"
+# 5. 데이터 읽기 처리 (보안 정책 회피 로직)
+# 우선순위: 1. 파이썬 앱 폴더 안의 엑셀 (보안우회용) -> 2. Z드라이브 엑셀
+local_excel = "글로벌 SCM 및 파트너사 인프라 분석.xlsx"
+network_excel = r"Z:\★업  무★\Ai\글로벌 SCM 및 파트너사 인프라 분석.xlsx"
 suppliers = []
 error_msg = None
 
-if os.path.exists(excel_path):
-    suppliers, error_msg = load_and_parse_excel(excel_path)
-    file_status = "✅ Z드라이브 자동 연동됨"
+if os.path.exists(local_excel):
+    suppliers, error_msg = load_and_parse_excel(local_excel)
+    file_status = "✅ 로컬 폴더 파일 연동됨"
+elif os.path.exists(network_excel):
+    suppliers, error_msg = load_and_parse_excel(network_excel)
+    file_status = "✅ Z드라이브 파일 연동됨"
 else:
-    file_status = "❌ Z드라이브 엑셀 파일 찾기 실패"
+    file_status = "❌ 엑셀 파일을 찾을 수 없습니다."
 
-# 🚀 6. 데이터가 없을 경우 메인 화면 중앙에 업로더 표시
+# 🚀 6. 업로더 표시
 if not suppliers and not error_msg:
-    st.info("💡 파이썬이 Z드라이브의 엑셀 파일을 자동으로 찾지 못했습니다. 아래 영역에 엑셀 파일을 드래그하여 올려주세요.")
-    uploaded_file_main = st.file_uploader("📂 수동으로 엑셀 파일(.xlsx) 업로드", type=['xlsx'])
+    st.error("💡 사내 보안(DRM)으로 인해 엑셀 자동 연동이 차단되었습니다.")
+    st.info("해결방법: 원본 엑셀 파일을 열고 [보안 해제/외부저장]을 한 뒤, 아래 버튼에 그 파일을 올려주세요!")
+    uploaded_file_main = st.file_uploader("📂 보안 해제된 엑셀 파일(.xlsx) 수동 업로드", type=['xlsx'])
     if uploaded_file_main:
         suppliers, error_msg = load_and_parse_excel(uploaded_file_main)
         if suppliers:
-            st.rerun()  # 파일 정상 업로드 시 화면 새로고침
+            st.rerun() 
 
-# 7. 사이드바 구성 (데이터가 있을 때만 렌더링)
+# 에러 메시지 별도 출력
+if error_msg:
+    st.error(error_msg)
+    if "보안" not in error_msg:
+        with st.expander("🔍 에러 상세 로그 보기"):
+            st.code(error_msg)
+    
+    st.info("👇 보안이 해제된 파일을 여기에 올려주세요.")
+    uploaded_file_main = st.file_uploader("📂 보안 해제된 엑셀 파일(.xlsx) 수동 업로드", type=['xlsx'])
+    if uploaded_file_main:
+        suppliers, error_msg = load_and_parse_excel(uploaded_file_main)
+        if suppliers:
+            st.rerun() 
+
+# 7. 정상 출력 로직
 if suppliers:
     with st.sidebar:
         st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🏢 필터 및 검색</h3>", unsafe_allow_html=True)
-        
         industry_list = ["전체"] + list(set(s["industry"] for s in suppliers if s["industry"] != "미분류"))
         selected_industry = st.selectbox("🏷️ 업종 필터", industry_list, on_change=reset_map_view)
-        
         filtered = suppliers
-        if selected_industry != "전체":
-            filtered = [s for s in filtered if s["industry"] == selected_industry]
-            
+        if selected_industry != "전체": filtered = [s for s in filtered if s["industry"] == selected_industry]
         search_term = st.text_input("🔍 업체명 검색", placeholder="예: 한성전장").strip()
-        if search_term:
-            filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
-
+        if search_term: filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
         st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
         options_sidebar = ["🏠 종합 메인 화면"] + [s["name"] for s in filtered]
         selected_name = st.radio("📊 분석할 업체 선택", options_sidebar, on_change=reset_map_view)
-else:
-    selected_name = None
-    filtered = []
 
-# 8. 메인 중앙 화면 처리 (에러 또는 정상 결과 출력)
-if error_msg:
-    st.error("🚨 엑셀 파일을 읽고 분석하는 중 치명적인 오류가 발생했습니다.")
-    with st.expander("🔍 개발자용 에러 상세 로그 보기"):
-        st.code(error_msg)
-        
-elif suppliers:
-    # --- 정상적으로 데이터를 불러온 경우 아래 코드 실행 ---
     if selected_name == "🏠 종합 메인 화면":
         st.markdown("<div class='section-title' style='margin-top:0;'>글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
-        
         total_companies = len(filtered)
         all_locations = [loc for s in filtered for loc in s["locations"]]
-        
         col1, col2, col3 = st.columns(3)
         col1.metric("📌 검색된 파트너사", f"{total_companies} 개사")
         col2.metric("🏭 총 운영 거점", f"{len(all_locations)} 곳")
@@ -228,53 +226,30 @@ elif suppliers:
         if all_locations:
             df_all = pd.DataFrame(all_locations)
             view_state = pdk.ViewState(latitude=35.0, longitude=127.0, zoom=1.5, pitch=0)
-            layer = pdk.Layer(
-                "ScatterplotLayer", data=df_all, get_position='[lon, lat]',
-                get_fill_color=[196, 164, 124, 200], get_line_color=[255, 255, 255], 
-                stroked=True, line_width_min_pixels=1, get_radius=100000, 
-                radius_min_pixels=6, radius_max_pixels=15, pickable=True,
-            )
+            layer = pdk.Layer("ScatterplotLayer", data=df_all, get_position='[lon, lat]', get_fill_color=[196, 164, 124, 200], get_line_color=[255, 255, 255], stroked=True, line_width_min_pixels=1, get_radius=100000, radius_min_pixels=6, radius_max_pixels=15, pickable=True)
             st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}\n{address}"}))
 
     elif selected_name:
         selected = next((s for s in filtered if s["name"] == selected_name), None)
-        
         if selected:
-            st.markdown(
-                f"<div style='margin-bottom:25px; display:flex; align-items:baseline; gap: 15px;'>"
-                f"<h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#2C2A29 !important;'>{selected['name']}</h2>"
-                f"<span style='background:#FDFCFB; border: 1px solid #C4A47C; color:#C4A47C !important; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 4px;'>{selected['industry']}</span></div>",
-                unsafe_allow_html=True
-            )
-
+            st.markdown(f"<div style='margin-bottom:25px; display:flex; align-items:baseline; gap: 15px;'><h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#2C2A29 !important;'>{selected['name']}</h2><span style='background:#FDFCFB; border: 1px solid #C4A47C; color:#C4A47C !important; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 4px;'>{selected['industry']}</span></div>", unsafe_allow_html=True)
             st.markdown("<div class='section-title' style='margin-top:10px;'>기업 개요</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
-
             st.markdown("<div class='section-title'>핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
             col_prod, col_cert = st.columns([1, 1])
 
             with col_prod:
-                st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
-                st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📦 핵심 생산 품목</h4>", unsafe_allow_html=True)
+                st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'><h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📦 핵심 생산 품목</h4>", unsafe_allow_html=True)
                 p_cols = st.columns(2)
                 for idx, p in enumerate(selected['products']):
-                    media_html = get_media_html(p['file'])
-                    p_cols[idx % 2].markdown(
-                        f"<div class='product-card' style='margin-bottom:15px;'>{media_html}<div class='product-title'>{p['name']}</div></div>",
-                        unsafe_allow_html=True
-                    )
+                    p_cols[idx % 2].markdown(f"<div class='product-card' style='margin-bottom:15px;'>{get_media_html(p['file'])}<div class='product-title'>{p['name']}</div></div>", unsafe_allow_html=True)
                 st.markdown("</div>", unsafe_allow_html=True)
 
             with col_cert:
-                st.markdown("<div style='padding-left: 10px; height: 100%;'>", unsafe_allow_html=True)
-                st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📜 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
+                st.markdown("<div style='padding-left: 10px; height: 100%;'><h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📜 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
                 c_cols = st.columns(2)
                 for idx, c in enumerate(selected['certs']):
-                    media_html = get_media_html(c['file'])
-                    c_cols[idx % 2].markdown(
-                        f"<div class='product-card' style='margin-bottom:15px;'>{media_html}<div class='product-title'>{c['name']}</div></div>",
-                        unsafe_allow_html=True
-                    )
+                    c_cols[idx % 2].markdown(f"<div class='product-card' style='margin-bottom:15px;'>{get_media_html(c['file'])}<div class='product-title'>{c['name']}</div></div>", unsafe_allow_html=True)
                 st.markdown("</div>", unsafe_allow_html=True)
 
             st.markdown("<div class='section-title' style='margin-top: 50px;'>주요 거점 네트워크</div>", unsafe_allow_html=True)
@@ -284,71 +259,37 @@ elif suppliers:
             with text_col:
                 st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
                 st.button("🌍 전체 뷰", on_click=set_view, args=("전체 뷰",), use_container_width=True)
-                
-                if selected['hq'] != "-":
-                    st.write("")
-                    st.button(f"🏢 본사\n\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
-                if selected['kr'] != "-":
-                    st.write("")
-                    st.button(f"🏭 지사\n\n{selected['kr']}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
-                if selected['gl'] not in ["해당 없음", "-", ""]:
-                    st.write("")
-                    st.button(f"🌐 해외 지점\n\n{selected['gl']}", on_click=set_view, args=("🌐 해외",), use_container_width=True)
+                if selected['hq'] != "-": st.button(f"🏢 본사\n\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
+                if selected['kr'] != "-": st.button(f"🏭 지사\n\n{selected['kr']}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
+                if selected['gl'] not in ["해당 없음", "-", ""]: st.button(f"🌐 해외 지점\n\n{selected['gl']}", on_click=set_view, args=("🌐 해외",), use_container_width=True)
 
             with map_col:
                 current_view = st.session_state.map_view
-                
                 def get_color(row):
-                    hi_colors = {'hq': [220, 38, 38, 255], 'kr': [37, 99, 235, 255], 'gl': [16, 185, 129, 255]} 
-                    dim_color = [148, 163, 184, 100]
-                    if current_view == "전체 뷰": return [196, 164, 124, 220]
-                    elif current_view == "🏢 국내(본사)" and row['type'] == 'hq': return hi_colors['hq']
-                    elif current_view == "🏭 국내(지사)" and row['type'] == 'kr': return hi_colors['kr']
-                    elif current_view == "🌐 해외" and row['type'] == 'gl': return hi_colors['gl']
-                    else: return dim_color
+                    hi = {'hq': [220,38,38,255], 'kr': [37,99,235,255], 'gl': [16,185,129,255]} 
+                    if current_view == "전체 뷰": return [196,164,124,220]
+                    elif current_view == "🏢 국내(본사)" and row['type'] == 'hq': return hi['hq']
+                    elif current_view == "🏭 국내(지사)" and row['type'] == 'kr': return hi['kr']
+                    elif current_view == "🌐 해외" and row['type'] == 'gl': return hi['gl']
+                    return [148,163,184,100]
 
                 def get_radius(row):
                     if current_view == "전체 뷰": return 120000
-                    if current_view == "🏢 국내(본사)" and row['type'] == 'hq': return 350000
-                    if current_view == "🏭 국내(지사)" and row['type'] == 'kr': return 350000
-                    if current_view == "🌐 해외" and row['type'] == 'gl': return 350000
+                    if current_view in ["🏢 국내(본사)", "🏭 국내(지사)", "🌐 해외"] and ((current_view=="🏢 국내(본사)" and row['type']=='hq') or (current_view=="🏭 국내(지사)" and row['type']=='kr') or (current_view=="🌐 해외" and row['type']=='gl')): return 350000
                     return 40000 
 
                 if not df_loc.empty:
                     df_loc['color'] = df_loc.apply(get_color, axis=1)
                     df_loc['radius'] = df_loc.apply(get_radius, axis=1)
-                    
-                    if current_view == "전체 뷰":
-                        center_lat, center_lon = df_loc['lat'].mean(), df_loc['lon'].mean()
-                        zoom_lvl = 1.2 if (df_loc['lon'].max() - df_loc['lon'].min()) > 100 else 6.0
+                    if current_view == "전체 뷰": center_lat, center_lon, zoom_lvl = df_loc['lat'].mean(), df_loc['lon'].mean(), (1.2 if (df_loc['lon'].max()-df_loc['lon'].min())>100 else 6.0)
                     else:
-                        target_type = 'hq' if "본사" in current_view else ('kr' if "지사" in current_view else 'gl')
-                        target_df = df_loc[df_loc['type'] == target_type]
-                        if not target_df.empty:
-                            center_lat, center_lon = target_df['lat'].mean(), target_df['lon'].mean()
-                            zoom_lvl = 5.0 if len(target_df) > 1 else 11.0 
-                        else:
-                            center_lat, center_lon = df_loc['lat'].mean(), df_loc['lon'].mean()
-                            zoom_lvl = 1.5
+                        t = 'hq' if "본사" in current_view else ('kr' if "지사" in current_view else 'gl')
+                        td = df_loc[df_loc['type'] == t]
+                        if not td.empty: center_lat, center_lon, zoom_lvl = td['lat'].mean(), td['lon'].mean(), (5.0 if len(td)>1 else 11.0)
+                        else: center_lat, center_lon, zoom_lvl = df_loc['lat'].mean(), df_loc['lon'].mean(), 1.5
             
-                    view_state = pdk.ViewState(
-                        latitude=center_lat, longitude=center_lon, 
-                        zoom=zoom_lvl, pitch=0, transition_duration=1200
-                    )
-                    
-                    layer = pdk.Layer(
-                        "ScatterplotLayer", data=df_loc,
-                        get_position='[lon, lat]', get_fill_color='color', get_line_color=[255, 255, 255], 
-                        stroked=True, line_width_min_pixels=2, get_radius='radius', 
-                        radius_min_pixels=6, radius_max_pixels=30, pickable=True,
-                    )
-                    
-                    with st.container():
-                        st.pydeck_chart(pdk.Deck(
-                            map_style="light",
-                            initial_view_state=view_state,
-                            layers=[layer],
-                            tooltip={"text": "{name}\n{address}"} 
-                        ))
+                    view_state = pdk.ViewState(latitude=center_lat, longitude=center_lon, zoom=zoom_lvl, pitch=0, transition_duration=1200)
+                    layer = pdk.Layer("ScatterplotLayer", data=df_loc, get_position='[lon, lat]', get_fill_color='color', get_line_color=[255, 255, 255], stroked=True, line_width_min_pixels=2, get_radius='radius', radius_min_pixels=6, radius_max_pixels=30, pickable=True)
+                    st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}\n{address}"}))
                 else:
-                    st.info("해당 업체의 등록된 거점 정보가 없습니다.")
+                    st.info("등록된 거점 정보가 없습니다.")
