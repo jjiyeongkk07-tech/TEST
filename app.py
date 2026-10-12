@@ -2,116 +2,102 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 
-# 1. 페이지 설정 (라이트 테마 기반)
+# 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide")
 
-# [세션 상태 초기화] 지도 뷰 상태 관리
+# [세션 상태 초기화] 지도 뷰 동기화 관리
+if "radio_view" not in st.session_state:
+    st.session_state.radio_view = "전체 뷰"
 if "map_view" not in st.session_state:
-    st.session_state.map_view = "all"
+    st.session_state.map_view = "전체 뷰"
+
+def update_radio():
+    st.session_state.map_view = st.session_state.radio_view
+
+def set_view(view):
+    st.session_state.map_view = view
+    st.session_state.radio_view = view
 
 def reset_map_view():
-    st.session_state.map_view = "all"
+    st.session_state.map_view = "전체 뷰"
+    st.session_state.radio_view = "전체 뷰"
 
-# 2. 눈에 확 띄는 깔끔한 프리미엄 라이트(Light) CSS 주입
+# 2. 고급스러운 딥 슬레이트 네이비 테마 (Black 제외, 강제 텍스트 화이트)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 
-/* 배경 및 기본 레이아웃 - 눈에 띄는 밝은 톤 (연한 그레이) */
-.stApp { 
-    background-color: #f4f6f9; 
-}
+/* 🌟 배경 - 블랙 대신 가장 묵직하고 고급스러운 딥 네이비(Slate 900) */
+.stApp { background-color: #0f172a; }
+
+/* 메인 대시보드 컨테이너 (Slate 800) */
 .block-container { 
-    background-color: #ffffff;
+    background-color: #1e293b;
     padding: 3rem 4rem !important; 
     margin-top: 2rem;
     margin-bottom: 3rem;
     border-radius: 16px;
     max-width: 1400px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid #334155;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.7);
 }
+
 header { visibility: hidden; } footer { visibility: hidden; }
 
-/* 메인 타이틀 배너 - 다크 네이비 + 골드 포인트 유지 (가장 눈에 잘 띔) */
-.dashboard-header { 
-    background: #111827; 
-    padding: 35px 40px; 
-    border-radius: 12px; 
-    margin-bottom: 40px; 
-    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2); 
-    border-bottom: 4px solid #bba14f; 
-}
-.dashboard-header h1 { 
-    margin: 0; font-size: 34px; font-weight: 800; color: #ffffff !important; 
-    letter-spacing: -1px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+/* 사이드바 스타일 강제 적용 */
+[data-testid="stSidebar"] {
+    background-color: #0f172a !important;
+    border-right: 1px solid #1e293b !important;
 }
 
-/* 텍스트 컬러 강제 지정 해제 - 사이드바 및 메인 텍스트가 자연스럽게 검은색으로 보이도록 설정 */
-p, span, label, li { color: #1e293b !important; }
+/* 🚀 강제 글자색 고정 - 제목 안보임 완벽 해결 */
+h1, h2, h3, h4, p, span, div, label, li { color: #f8fafc !important; }
+[data-testid="stMetricValue"], [data-testid="stMetricLabel"] { color: #ffffff !important; }
 
-/* 섹션 타이틀 - 묵직한 검은색 밑줄 포인트 */
+/* 섹션 타이틀 */
 .section-title { 
-    font-size: 22px; font-weight: 900; color: #0f172a !important; margin-top: 50px; margin-bottom: 25px; 
-    display: inline-block; padding-bottom: 8px; border-bottom: 3px solid #0f172a;
-    letter-spacing: -0.5px;
+    font-size: 22px; font-weight: 900; color: #ffffff !important; margin-top: 40px; margin-bottom: 20px; 
+    display: inline-block; padding-bottom: 8px; border-bottom: 3px solid #bba14f;
 }
 
-/* 기업 개요 박스 - 원본 느낌 복구 */
-.desc-box {
-    background-color: #f8fafc; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 8px; padding: 30px;
-    border-left: 6px solid #bba14f;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
-    font-size: 17px; color: #334155 !important; line-height: 1.8; font-weight: 500;
-}
-
-/* 제품 및 인증서 카드 - 원본 복구 */
-.product-card { 
-    background: #ffffff; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 8px; padding: 30px 15px; text-align: center; height: 100%; 
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.2s;
-}
-.product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #bba14f; }
-.product-emoji { font-size: 50px; line-height: 1; margin-bottom: 15px; filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.15)); }
-.product-title { font-size: 16px; font-weight: 800; color: #1e293b !important; letter-spacing: -0.5px; }
-
-/* 🚀 [가장 중요한 부분] 오른쪽 정보 카드를 클릭 가능한 '버튼'으로 변환하면서 카드 스타일 유지 */
+/* 우측 인터랙티브 카드(버튼) 스타일 */
 .stButton > button {
-    background-color: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 8px !important;
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 12px !important;
     padding: 20px 25px !important;
     width: 100% !important;
     text-align: left !important;
     display: flex !important;
     justify-content: flex-start !important;
-    font-size: 17px !important;
-    font-weight: 800 !important;
-    color: #0f172a !important; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-    white-space: pre-wrap !important; /* 글씨 줄바꿈 허용 */
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important; 
+    white-space: pre-wrap !important;
     line-height: 1.6 !important;
     transition: all 0.2s ease !important;
 }
 .stButton > button:hover {
-    background-color: #f8fafc !important;
+    background-color: #334155 !important;
     border-color: #bba14f !important;
-    box-shadow: 0 10px 15px rgba(0,0,0,0.1) !important;
-    transform: translateY(-2px) !important;
 }
-.stButton > button:active { transform: scale(0.98) !important; }
+
+/* 탭(Radio) 버튼 스타일 강제 적용 */
+div[role="radiogroup"] { padding-bottom: 15px; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 헤더
-st.markdown("<div class='dashboard-header'><h1>🌍 글로벌 SCM 및 파트너사 인프라 분석</h1></div>", unsafe_allow_html=True)
+# 3. 헤더 (인라인 스타일을 주입하여 글씨가 100% 보이게 설정)
+st.markdown("""
+<div style="background: #0f172a; padding: 30px 40px; border-radius: 12px; margin-bottom: 40px; border-bottom: 4px solid #bba14f; border: 1px solid #334155; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+    <h1 style="margin: 0; font-size: 34px; font-weight: 900; color: #ffffff !important;">🌍 글로벌 SCM 및 파트너사 인프라 분석</h1>
+</div>
+""", unsafe_allow_html=True)
 
 # 4. 데이터
-base_certs = [{"name": "IATF 16949", "img": "📜"}, {"name": "SQ 인증", "img": "🎖️"}, {"name": "ISO 9001/14001", "img": "🏅"}, {"name": "ESG 경영 우수", "img": "🌱"}]
+base_certs = [{"name": "IATF 16949", "img": "📜"}, {"name": "SQ 인증", "img": "🎖️"}, {"name": "ISO 9001", "img": "🏅"}, {"name": "ESG 우수", "img": "🌱"}]
 suppliers = [
     {
         "name": "한성전장부산공장", "industry": "PCB", 
@@ -139,38 +125,14 @@ suppliers = [
             {"name": "칭다오 공장", "lat": 36.0671, "lon": 120.3826, "type": "gl"},
             {"name": "텍사스 법인", "lat": 31.9685, "lon": -99.9018, "type": "gl"}
         ]
-    },
-    {
-        "name": "(주)성우", "industry": "PRESS(CASE)",
-        "hq": "인천 남동구", "kr": "울산 공장, 여수 공장", "gl": "해당 없음",
-        "desc": "해외 지사는 없으나, 국내 핵심 화학 단지인 울산과 여수에 대규모 생산 플랜트를 운영하여 매우 안정적인 내수 공급망을 확보하고 있는 건실한 기업입니다.",
-        "products": [{"name": "ROTORCASE", "img": "🛢️"}, {"name": "CASE ASM", "img": "📦"}],
-        "certs": base_certs,
-        "locations": [
-            {"name": "본사 (인천)", "lat": 37.4473, "lon": 126.7315, "type": "hq"},
-            {"name": "울산 공장", "lat": 35.5383, "lon": 129.3113, "type": "kr"},
-            {"name": "여수 공장", "lat": 34.7603, "lon": 127.6622, "type": "kr"}
-        ]
-    },
-    {
-        "name": "ZEB", "industry": "PRESS(CORE)",
-        "hq": "경북 포항시", "kr": "포항 1, 2공장", "gl": "폴란드 브로츠와프 법인, 미국 미시간 법인",
-        "desc": "글로벌 전기차 배터리 수요 증가에 대응하기 위해 포항에 대규모 양극재 라인을 증설하였으며, 유럽(폴란드)과 북미(미시간)에 핵심 생산 거점을 구축해 현지 조달 역량을 극대화했습니다.",
-        "products": [{"name": "CORE", "img": "🔩"}, {"name": "ROTORCASE", "img": "🛢️"}],
-        "certs": base_certs,
-        "locations": [
-            {"name": "본사 및 공장 (포항)", "lat": 36.0190, "lon": 129.3435, "type": "hq"},
-            {"name": "폴란드 법인", "lat": 51.1079, "lon": 17.0385, "type": "gl"},
-            {"name": "미국 미시간 법인", "lat": 43.3266, "lon": -84.5361, "type": "gl"}
-        ]
     }
 ]
 
-# 5. 사이드바 (기본 테마 적용으로 글씨가 완벽하게 보입니다)
+# 5. 사이드바
 with st.sidebar:
-    st.markdown("<h3 style='color:#1e293b; font-weight:900;'>🏢 필터 및 업체 검색</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#bba14f !important; font-weight:900;'>🏢 필터 및 업체 검색</h3>", unsafe_allow_html=True)
     
-    industry_list = ["전체", "PCB", "PRESS(CASE)", "PRESS(CORE)", "사출", "임가공(조립)"]
+    industry_list = ["전체", "PCB", "사출"]
     selected_industry = st.selectbox("🏷️ 업종 필터", industry_list, on_change=reset_map_view)
     
     filtered = suppliers
@@ -181,24 +143,22 @@ with st.sidebar:
     if search_term:
         filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
 
-    st.markdown("<hr style='border-color: #cbd5e1; margin: 20px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color: #334155; margin: 20px 0;'>", unsafe_allow_html=True)
     
-    options = ["🏠 종합 메인 화면"] + [s["name"] for s in filtered]
-    selected_name = st.radio("📊 상세 분석할 업체 선택", options, on_change=reset_map_view)
+    options_sidebar = ["🏠 종합 메인 화면"] + [s["name"] for s in filtered]
+    selected_name = st.radio("📊 상세 분석할 업체 선택", options_sidebar, on_change=reset_map_view)
 
-# 6. 메인 화면 출력 로직
+# 6. 메인 화면 출력
 if selected_name == "🏠 종합 메인 화면":
     st.markdown("<div class='section-title' style='margin-top:0;'>글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
     
     total_companies = len(filtered)
     all_locations = [loc for s in filtered for loc in s["locations"]]
-    total_locs = len(all_locations)
-    global_locs = len([l for l in all_locations if l["type"] == "gl"])
     
     col1, col2, col3 = st.columns(3)
     col1.metric("📌 검색된 파트너사", f"{total_companies} 개사")
-    col2.metric("🏭 총 운영 거점", f"{total_locs} 곳")
-    col3.metric("🌐 해외 진출 거점", f"{global_locs} 곳")
+    col2.metric("🏭 총 운영 거점", f"{len(all_locations)} 곳")
+    col3.metric("🌐 해외 진출 거점", f"{len([l for l in all_locations if l['type'] == 'gl'])} 곳")
     
     st.markdown("<div class='section-title'>전 세계 거점 분포도</div>", unsafe_allow_html=True)
     if all_locations:
@@ -210,10 +170,7 @@ if selected_name == "🏠 종합 메인 화면":
             stroked=True, line_width_min_pixels=1, get_radius=100000, 
             radius_min_pixels=6, radius_max_pixels=15, pickable=True,
         )
-        # 맵 스타일을 가장 깔끔한 'light' 모드로 적용
-        st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}"}))
-    else:
-        st.info("해당 조건의 거점 데이터가 없습니다.")
+        st.pydeck_chart(pdk.Deck(map_style="dark", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}"}))
 
 else:
     # --- [상세 업체 화면] ---
@@ -221,75 +178,114 @@ else:
     
     st.markdown(
         f"<div style='margin-bottom:25px; display:flex; align-items:baseline; gap: 15px;'>"
-        f"<h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#0f172a;'>{selected['name']}</h2>"
-        f"<span style='background:#f1f5f9; border: 1px solid #bba14f; color:#bba14f !important; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 4px;'>{selected['industry']}</span></div>",
+        f"<h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#ffffff !important;'>{selected['name']}</h2>"
+        f"<span style='background:#0f172a; border: 1px solid #bba14f; color:#bba14f !important; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 4px;'>{selected['industry']}</span></div>",
         unsafe_allow_html=True
     )
 
     st.markdown("<div class='section-title' style='margin-top:10px;'>기업 개요</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div style='background-color:#0f172a; border:1px solid #334155; border-radius:12px; padding:30px; border-left:6px solid #bba14f; font-size:17px; color:#cbd5e1 !important; line-height:1.8;'>"
+        f"{selected['desc']}</div>", 
+        unsafe_allow_html=True
+    )
 
-    st.markdown("<div class='section-title'>핵심 생산 품목 및 인증</div>", unsafe_allow_html=True)
-    cols = st.columns(max(len(selected['products']), len(selected['certs'])))
+    # 🚀 핵심 생산 품목과 품질 인증을 완벽한 좌우 대칭(Flexbox)과 구분선(Border)으로 구성
+    st.markdown("<div class='section-title'>핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
     
-    for idx, p in enumerate(selected['products']):
-        cols[idx].markdown(f"<div class='product-card'><div class='product-emoji'>{p['img']}</div><div class='product-title'>{p['name']}</div></div>", unsafe_allow_html=True)
-    for idx, c in enumerate(selected['certs']):
-        if idx < len(cols): 
-            cols[idx].markdown(f"<div class='product-card' style='margin-top:20px;'><div class='product-emoji'>{c['img']}</div><div class='product-title'>{c['name']}</div></div>", unsafe_allow_html=True)
+    # 1) 품목(Products) HTML 생성
+    prod_cards = "".join([
+        f"<div style='background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 25px 15px; text-align: center;'>"
+        f"<div style='font-size: 40px; margin-bottom: 10px;'>{p['img']}</div>"
+        f"<div style='color: #ffffff !important; font-weight: 700; font-size: 15px;'>{p['name']}</div>"
+        f"</div>" for p in selected['products']
+    ])
+    
+    # 2) 인증(Certs) HTML 생성
+    cert_cards = "".join([
+        f"<div style='background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 25px 15px; text-align: center;'>"
+        f"<div style='font-size: 40px; margin-bottom: 10px;'>{c['img']}</div>"
+        f"<div style='color: #ffffff !important; font-weight: 700; font-size: 15px;'>{c['name']}</div>"
+        f"</div>" for c in selected['certs']
+    ])
 
+    # 3) Flexbox 레이아웃 적용 (중간 점선 구분선 포함)
+    layout_html = f"""
+    <div style="display: flex; flex-direction: row; background: #0f172a; padding: 30px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 40px;">
+        
+        <!-- 좌측: 핵심 생산 품목 -->
+        <div style="flex: 1; padding-right: 35px; border-right: 2px dashed #475569;">
+            <h4 style="color: #cbd5e1 !important; text-align: center; margin-bottom: 25px; font-weight: 800;">📦 핵심 생산 품목</h4>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                {prod_cards}
+            </div>
+        </div>
+        
+        <!-- 우측: 품질 및 인증 -->
+        <div style="flex: 1; padding-left: 35px;">
+            <h4 style="color: #cbd5e1 !important; text-align: center; margin-bottom: 25px; font-weight: 800;">📜 품질 및 ESG 인증</h4>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                {cert_cards}
+            </div>
+        </div>
+
+    </div>
+    """
+    st.markdown(layout_html, unsafe_allow_html=True)
+
+    # 🚀 거점 네트워크 (상단 탭 조작 + 우측 버튼 동기화)
     st.markdown("<div class='section-title'>주요 거점 네트워크</div>", unsafe_allow_html=True)
     
+    options_map = ["전체 뷰", "🏢 국내(본사)", "🏭 국내(지사)", "🌐 해외"]
+    st.radio("지도 뷰 조작", options_map, horizontal=True, key="radio_view", on_change=update_radio, label_visibility="collapsed")
+    st.write("") 
+
     map_col, text_col = st.columns([1.8, 1])
     df_loc = pd.DataFrame(selected["locations"])
 
-    # 🚀 우측 정보 카드 (버튼으로 동작하여 지도를 움직임)
+    # 우측 동기화 버튼 ('전체 뷰 복귀' 버튼 제거됨)
     with text_col:
-        st.markdown("<p style='color:#bba14f !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 아래 카드를 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#bba14f !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
         
-        # 버튼 텍스트에 줄바꿈(\n\n)을 넣어서 원본 카드의 Title/Value 느낌을 그대로 재현
-        if st.button(f"🌍 전체 뷰 복귀\n\n모든 거점을 한눈에 확인합니다.", use_container_width=True):
-            st.session_state.map_view = "all"
+        st.button(f"🏢 본사\n\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
         st.write("")
-        if st.button(f"🏢 국내(본사)\n\n{selected['hq']}", use_container_width=True):
-            st.session_state.map_view = "hq"
-        st.write("")
-        if st.button(f"🏭 국내(지사)\n\n{selected['kr']}", use_container_width=True):
-            st.session_state.map_view = "kr"
-        st.write("")
+        st.button(f"🏭 지사\n\n{selected['kr']}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
+        
         if selected['gl'] != "해당 없음":
-            if st.button(f"🌐 해외 지사\n\n{selected['gl']}", use_container_width=True):
-                st.session_state.map_view = "gl"
+            st.write("")
+            st.button(f"🌐 해외 지점\n\n{selected['gl']}", on_click=set_view, args=("🌐 해외",), use_container_width=True)
 
-    # 🚀 지도 랜더링 (원본 디자인 컬러 + 클릭 연동)
+    # 지도 렌더링 영역
     with map_col:
         current_view = st.session_state.map_view
         
-        # 원본에서 썼던 강조 색상 로직 복구
         def get_color(row):
-            base_colors = {'hq': [31, 41, 55, 220], 'kr': [107, 114, 128, 220], 'gl': [187, 161, 79, 220]}
-            hi_colors = {'hq': [220, 38, 38, 255], 'kr': [37, 99, 235, 255], 'gl': [16, 185, 129, 255]}
-            dim_color = [156, 163, 175, 100]
+            hi_colors = {'hq': [248, 113, 113, 255], 'kr': [56, 189, 248, 255], 'gl': [52, 211, 153, 255]} 
+            dim_color = [51, 65, 85, 120]
             
-            if current_view == "all": return base_colors[row['type']]
-            elif current_view == row['type']: return hi_colors[row['type']]
+            if current_view == "전체 뷰": return [187, 161, 79, 200]
+            elif current_view == "🏢 국내(본사)" and row['type'] == 'hq': return hi_colors['hq']
+            elif current_view == "🏭 국내(지사)" and row['type'] == 'kr': return hi_colors['kr']
+            elif current_view == "🌐 해외" and row['type'] == 'gl': return hi_colors['gl']
             else: return dim_color
 
-        # 원본에서 썼던 점 크기(반경) 확대 로직 복구
         def get_radius(row):
-            if current_view == "all": return 120000
-            if current_view == row['type']: return 350000
+            if current_view == "전체 뷰": return 120000
+            if current_view == "🏢 국내(본사)" and row['type'] == 'hq': return 350000
+            if current_view == "🏭 국내(지사)" and row['type'] == 'kr': return 350000
+            if current_view == "🌐 해외" and row['type'] == 'gl': return 350000
             return 40000 
 
         df_loc['color'] = df_loc.apply(get_color, axis=1)
         df_loc['radius'] = df_loc.apply(get_radius, axis=1)
         
-        # 카메라 자동 이동 로직
-        if current_view == "all":
+        if current_view == "전체 뷰":
             center_lat, center_lon = df_loc['lat'].mean(), df_loc['lon'].mean()
             zoom_lvl = 1.2 if (df_loc['lon'].max() - df_loc['lon'].min()) > 100 else 5.0
         else:
-            target_df = df_loc[df_loc['type'] == current_view]
+            target_type = 'hq' if "본사" in current_view else ('kr' if "지사" in current_view else 'gl')
+            target_df = df_loc[df_loc['type'] == target_type]
+            
             if not target_df.empty:
                 center_lat, center_lon = target_df['lat'].mean(), target_df['lon'].mean()
                 zoom_lvl = 4.5 if len(target_df) > 1 else 10.0 
@@ -309,10 +305,9 @@ else:
             radius_min_pixels=6, radius_max_pixels=30, pickable=True,
         )
         
-        with st.container(border=True):
-            # 원본 요청대로 밝고 깔끔한 light 맵 적용
+        with st.container():
             st.pydeck_chart(pdk.Deck(
-                map_style="light", 
+                map_style="dark",
                 initial_view_state=view_state,
                 layers=[layer],
                 tooltip={"text": "{name}"} 
