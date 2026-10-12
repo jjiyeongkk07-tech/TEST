@@ -3,9 +3,17 @@ import pandas as pd
 import pydeck as pdk
 import base64
 import os
+from geopy.geocoders import Nominatim
 
 # 1. 페이지 설정 (사이드바 기본 열림)
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
+
+# =====================================================================
+# 🎯 [엑셀 파일 경로 지정] 
+# 알려주신 실제 파일명으로 경로를 설정했습니다.
+# =====================================================================
+EXCEL_PATH = r"Z:\★업  무★\Ai\글로벌 SCM 및 파트너사 인프라 분석.xlsx" 
+
 
 # [세션 상태 초기화]
 if "map_view" not in st.session_state:
@@ -17,7 +25,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (🔥 헤더 숨김 코드 제거하여 사이드바 버튼 복구)
+# 2. 테마 CSS 설정
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -27,11 +35,9 @@ html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
     background-color: #ffffff; padding: 3rem 4rem !important; margin-top: 1rem; margin-bottom: 3rem;
     border-radius: 16px; max-width: 1400px; border: 1px solid #E5E0D8; box-shadow: 0 15px 35px rgba(100, 90, 80, 0.08);
 }
-/* 우측 상단 기본 메뉴와 하단 워터마크만 숨기고, 사이드바 버튼은 살려둠 */
 #MainMenu { visibility: hidden; } 
 footer { visibility: hidden; }
 header { background-color: transparent !important; }
-
 [data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
 h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 [data-testid="stMetricValue"] { color: #2C2A29 !important; font-weight: 900 !important; }
@@ -51,7 +57,7 @@ st.markdown(css, unsafe_allow_html=True)
 
 # 3. Z드라이브 이미지 연동 함수
 def get_media_html(filename):
-    if not filename or filename == "nan":
+    if not filename or pd.isna(filename) or str(filename).strip() == "":
         return "<div class='product-emoji'>📦</div>"
     
     filename = str(filename).strip()
@@ -74,45 +80,75 @@ def get_media_html(filename):
             pass
     return "<div class='product-emoji'>🖼️</div>"
 
-# 4. 내장 데이터 (보안 회피)
-suppliers = [
-    {
-        "name": "한성전장(주)", "industry": "PCB",
-        "hq": "경상남도 양산시", "kr": "경상남도 양산시", "gl": "해당 없음",
-        "desc": "한성전장은 1993년 설립되어 자동차 부품, 가전 부품용 PCB 어셈블리 전문 기업입니다. 우수한 품질 관리 능력을 바탕으로 SQ 인증을 보유하고 있으며, 국내 주요 고객사에 핵심 전장 부품을 안정적으로 공급하고 있습니다.",
-        "products": [
-            {"name": "PCB", "file": "PCB.png"},
-            {"name": "임가공(조립)", "file": "임가공(조립).png"}
-        ],
-        "certs": [{"name": "SQ 인증", "file": "SQ 인증.png"}],
-        "locations": [
-            {"name": "본사", "lat": 35.398579, "lon": 129.056037, "type": "hq", "address": "경남 양산시 상북면 소토로 23"},
-            {"name": "양산공장", "lat": 35.398579, "lon": 129.056037, "type": "kr", "address": "경남 양산시 상북면 소토로 23"}
-        ]
-    },
-    {
-        "name": "효성전기(주)", "industry": "모터/제어기",
-        "hq": "부산광역시 기장군", "kr": "충남 천안시", "gl": "중국 강소성, 인도 안드라프라데시, 베트남 하이퐁",
-        "desc": "1973년 설립된 효성전기는 자동차용 모터 분야의 글로벌 선도 기업입니다. 브로워 모터, EPS 모터 등을 주력으로 생산하며, 국내는 물론 중국, 인도, 멕시코, 폴란드, 베트남 등 글로벌 네트워크를 구축하여 전 세계 고객 요구에 대응하고 있습니다.",
-        "products": [
-            {"name": "Blower Motor", "file": "Blower Motor.png"},
-            {"name": "ABS Motor", "file": "ABS Motor.png"},
-            {"name": "EPS Motor", "file": "EPS Motor.png"}
-        ],
-        "certs": [
-            {"name": "IATF16949", "file": "IATF 16949 인증서-효성전기_국문.pdf"},
-            {"name": "ISO 9001", "file": "ISO 9001 인증서_효성전기.pdf"}
-        ],
-        "locations": [
-            {"name": "본사(명례공장)", "lat": 35.326756, "lon": 129.262846, "type": "hq", "address": "부산광역시 기장군 장안읍 명례산단5로 40"},
-            {"name": "정관공장", "lat": 35.318413, "lon": 129.176662, "type": "kr", "address": "부산광역시 기장군 정관읍 산단4로 95-21"},
-            {"name": "청계공장", "lat": 35.281146, "lon": 129.085023, "type": "kr", "address": "부산 금정구 팔송로 53 (청룡동)"},
-            {"name": "중국 강소성", "lat": 31.984090, "lon": 118.739794, "type": "gl", "address": "중국 강소성 난징"},
-            {"name": "인도 법인", "lat": 16.506174, "lon": 80.648015, "type": "gl", "address": "인도 안드라프라데시 비자야와다"},
-            {"name": "베트남 하이퐁", "lat": 20.844911, "lon": 106.688084, "type": "gl", "address": "베트남 하이퐁"}
-        ]
-    }
-]
+# 4. 주소를 위도/경도로 변환하는 함수 (Geocoding)
+@st.cache_data
+def get_lat_lon(address):
+    if not address or pd.isna(address):
+        return 37.5665, 126.9780 
+    try:
+        geolocator = Nominatim(user_agent="scm_dashboard_agent")
+        location = geolocator.geocode(address, timeout=5)
+        if location:
+            return location.latitude, location.longitude
+    except Exception as e:
+        pass
+    return 37.5665, 126.9780
+
+# 엑셀 데이터 파싱
+@st.cache_data
+def load_data(file_path):
+    df_company = pd.read_excel(file_path, sheet_name='업체 정보')
+    df_location = pd.read_excel(file_path, sheet_name='거점 정보')
+    
+    parsed_suppliers = []
+    
+    for _, row in df_company.iterrows():
+        comp_name = str(row.get('업체명', '')).strip()
+        industry = str(row.get('업종', '미분류')).strip()
+        if not comp_name or comp_name == 'nan':
+            continue
+            
+        products = []
+        if pd.notna(row.get('핵심 생산 품목_파일명')) and str(row.get('핵심 생산 품목_파일명')).strip():
+            products.append({"name": "핵심 생산 품목", "file": str(row['핵심 생산 품목_파일명']).strip()})
+            
+        certs = []
+        cert_columns = {'IATF 16949_파일명': 'IATF 16949', 'ISO14001_파일명': 'ISO 14001', 'SQ인증_파일명': 'SQ 인증', 'ESG 경영 우수_파일명': 'ESG 경영 우수'}
+        for col, cert_name in cert_columns.items():
+            if pd.notna(row.get(col)) and str(row.get(col)).strip():
+                certs.append({"name": cert_name, "file": str(row[col]).strip()})
+                
+        comp_locs = df_location[df_location['업체명'].astype(str).str.strip() == comp_name]
+        locations = []
+        for _, loc_row in comp_locs.iterrows():
+            address = str(loc_row.get('주소', '')).strip()
+            
+            if '위도' in loc_row and '경도' in loc_row and pd.notna(loc_row['위도']) and pd.notna(loc_row['경도']):
+                lat, lon = float(loc_row['위도']), float(loc_row['경도'])
+            else:
+                lat, lon = get_lat_lon(address) 
+                
+            locations.append({
+                "name": str(loc_row.get('거점명', '')).strip(),
+                "lat": lat,
+                "lon": lon,
+                "type": str(loc_row.get('구분', 'kr')).strip(),
+                "address": address
+            })
+            
+        parsed_suppliers.append({
+            "name": comp_name,
+            "industry": industry,
+            "hq": str(row.get('본사', '-')).strip(),
+            "kr": str(row.get('지사', '-')).strip(),
+            "gl": str(row.get('해외 지점', '-')).strip(),
+            "desc": str(row.get('기업 개요', '')).strip(),
+            "products": products,
+            "certs": certs,
+            "locations": locations
+        })
+        
+    return parsed_suppliers
 
 # 5. 헤더 타이틀
 st.markdown("""
@@ -121,7 +157,15 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 6. 사이드바(조회란) 구성
+# 엑셀 파일 로드 및 에러 처리
+if not os.path.exists(EXCEL_PATH):
+    st.error(f"⚠️ 지정된 경로에 엑셀 파일이 없습니다: `{EXCEL_PATH}`\n\n해당 경로에 파일이 정확히 있는지 확인해주세요. (확장자가 .xls일 경우 코드의 경로를 수정해야 합니다.)")
+    st.stop()
+
+with st.spinner("엑셀 데이터를 분석 및 지도 좌표를 생성 중입니다..."):
+    suppliers = load_data(EXCEL_PATH)
+
+# 6. 사이드바 (필터 및 검색 구성)
 with st.sidebar:
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🏢 필터 및 검색</h3>", unsafe_allow_html=True)
     
@@ -137,8 +181,14 @@ with st.sidebar:
         filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
 
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
-    options_sidebar = ["🏠 종합 메인 화면"] + [s["name"] for s in filtered]
-    selected_name = st.radio("📊 분석할 업체 선택", options_sidebar, on_change=reset_map_view)
+    
+    options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
+    for s in filtered:
+        display_label = f"{s['name']} ({s['industry']})"
+        options_sidebar_map[display_label] = s['name']
+        
+    selected_display_name = st.radio("📊 분석할 업체 선택", list(options_sidebar_map.keys()), on_change=reset_map_view)
+    selected_name = options_sidebar_map[selected_display_name]
 
 # 7. 메인 화면 출력
 if selected_name == "🏠 종합 메인 화면":
@@ -184,25 +234,31 @@ elif selected_name:
         with col_prod:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📦 핵심 생산 품목</h4>", unsafe_allow_html=True)
-            p_cols = st.columns(2)
-            for idx, p in enumerate(selected['products']):
-                media_html = get_media_html(p['file'])
-                p_cols[idx % 2].markdown(
-                    f"<div class='product-card' style='margin-bottom:15px;'>{media_html}<div class='product-title'>{p['name']}</div></div>",
-                    unsafe_allow_html=True
-                )
+            if selected['products']:
+                p_cols = st.columns(2)
+                for idx, p in enumerate(selected['products']):
+                    media_html = get_media_html(p['file'])
+                    p_cols[idx % 2].markdown(
+                        f"<div class='product-card' style='margin-bottom:15px;'>{media_html}<div class='product-title'>{p['name']}</div></div>",
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.info("등록된 핵심 생산 품목 파일이 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
         with col_cert:
             st.markdown("<div style='padding-left: 10px; height: 100%;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📜 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
-            c_cols = st.columns(2)
-            for idx, c in enumerate(selected['certs']):
-                media_html = get_media_html(c['file'])
-                c_cols[idx % 2].markdown(
-                    f"<div class='product-card' style='margin-bottom:15px;'>{media_html}<div class='product-title'>{c['name']}</div></div>",
-                    unsafe_allow_html=True
-                )
+            if selected['certs']:
+                c_cols = st.columns(2)
+                for idx, c in enumerate(selected['certs']):
+                    media_html = get_media_html(c['file'])
+                    c_cols[idx % 2].markdown(
+                        f"<div class='product-card' style='margin-bottom:15px;'>{media_html}<div class='product-title'>{c['name']}</div></div>",
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.info("등록된 품질 및 인증 파일이 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("<div class='section-title' style='margin-top: 50px;'>주요 거점 네트워크</div>", unsafe_allow_html=True)
@@ -213,13 +269,13 @@ elif selected_name:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
             st.button("🌍 전체 뷰", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
-            if selected['hq'] != "-":
+            if selected['hq'] and selected['hq'] != "-" and selected['hq'] != "nan":
                 st.write("")
                 st.button(f"🏢 본사\n\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
-            if selected['kr'] != "-":
+            if selected['kr'] and selected['kr'] != "-" and selected['kr'] != "nan":
                 st.write("")
                 st.button(f"🏭 지사\n\n{selected['kr']}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
-            if selected['gl'] not in ["해당 없음", "-", ""]:
+            if selected['gl'] not in ["해당 없음", "-", "", "nan"]:
                 st.write("")
                 st.button(f"🌐 해외 지점\n\n{selected['gl']}", on_click=set_view, args=("🌐 해외",), use_container_width=True)
 
