@@ -10,10 +10,10 @@ st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="
 
 # =====================================================================
 # 🎯 [엑셀 파일 경로 지정] 
-# 알려주신 실제 파일명으로 경로를 설정했습니다.
+# (주의) 웹(Streamlit Cloud)에서 배포할 경우 Z드라이브를 인식할 수 없으므로, 
+# 파일을 깃허브에 올리고 "글로벌 SCM 및 파트너사 인프라 분석.xlsx" 로 변경해야 합니다.
 # =====================================================================
 EXCEL_PATH = r"Z:\★업  무★\Ai\글로벌 SCM 및 파트너사 인프라 분석.xlsx" 
-
 
 # [세션 상태 초기화]
 if "map_view" not in st.session_state:
@@ -66,6 +66,8 @@ def get_media_html(filename):
     if ext in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']:
         return "<div class='product-emoji'>📜</div>"
         
+    # (주의) 웹(Streamlit Cloud)에서 배포할 경우 로컬 Z드라이브 접근이 불가능합니다.
+    # 웹 배포 시에는 base_path = "./images" 등으로 변경하고 깃허브에 폴더를 올려야 합니다.
     base_path = r"Z:\★업  무★\Ai\images"
     filepath = os.path.join(base_path, filename)
     
@@ -159,7 +161,7 @@ st.markdown("""
 
 # 엑셀 파일 로드 및 에러 처리
 if not os.path.exists(EXCEL_PATH):
-    st.error(f"⚠️ 지정된 경로에 엑셀 파일이 없습니다: `{EXCEL_PATH}`\n\n해당 경로에 파일이 정확히 있는지 확인해주세요. (확장자가 .xls일 경우 코드의 경로를 수정해야 합니다.)")
+    st.error(f"⚠️ 지정된 경로에 엑셀 파일이 없습니다: `{EXCEL_PATH}`\n\n해당 경로에 파일이 정확히 있는지 확인해주세요. (웹 배포 시 Z드라이브는 읽을 수 없습니다.)")
     st.stop()
 
 with st.spinner("엑셀 데이터를 분석 및 지도 좌표를 생성 중입니다..."):
