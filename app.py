@@ -4,7 +4,7 @@ import pydeck as pdk
 import base64
 import os
 
-# 💡 geopy 라이브러리가 설치되지 않았을 때 웹사이트가 멈추는 현상(에러) 방지
+# 💡 geopy 라이브러리가 설치되지 않았을 때 웹사이트가 멈추는 현상(에러) 완벽 방지
 try:
     from geopy.geocoders import Nominatim
     GEOPY_INSTALLED = True
@@ -16,12 +16,12 @@ st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="
 
 # =====================================================================
 # 🎯 [엑셀 및 이미지 경로 자동 탐색 설정]
-# 내 PC(Z드라이브)에서 실행할 때와 Streamlit 웹에서 실행할 때를 자동으로 구분합니다.
-# 웹에서 실행하려면 깃허브에 엑셀 파일과 images 폴더를 함께 올려두시면 됩니다.
+# 내 PC(Z드라이브)에서 실행할 때와 웹(Streamlit Cloud)에서 실행할 때를 자동으로 구분합니다.
 # =====================================================================
 LOCAL_EXCEL = r"Z:\★업  무★\Ai\글로벌 SCM 및 파트너사 인프라 분석.xlsx"
 CLOUD_EXCEL = "글로벌 SCM 및 파트너사 인프라 분석.xlsx"
 
+# 엑셀 파일 자동 탐색
 if os.path.exists(LOCAL_EXCEL):
     EXCEL_PATH = LOCAL_EXCEL
 elif os.path.exists(CLOUD_EXCEL):
@@ -29,6 +29,7 @@ elif os.path.exists(CLOUD_EXCEL):
 else:
     EXCEL_PATH = None
 
+# 이미지 폴더 자동 탐색
 LOCAL_IMG_DIR = r"Z:\★업  무★\Ai\images"
 CLOUD_IMG_DIR = "images"
 
@@ -184,14 +185,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if not GEOPY_INSTALLED:
-    st.warning("⚠️ 주소를 지도로 변환하는 기능(`geopy`)이 설치되지 않아 임시 좌표(서울)로 표시됩니다. 깃허브에 `requirements.txt` 파일을 만들고 `geopy`를 추가해주세요.")
+    st.warning("⚠️ 주소를 지도로 변환하는 기능(`geopy`)이 설치되지 않아 임시 좌표(서울)로 표시됩니다. 완벽한 지도를 보시려면 깃허브에 `requirements.txt` 파일을 추가해주세요.")
 
 # 엑셀 파일 로드 및 에러 처리
 if not EXCEL_PATH:
-    st.error("⚠️ 엑셀 파일을 찾을 수 없습니다.\n\n웹(Streamlit)에서 실행 중이시라면 깃허브 저장소에 `글로벌 SCM 및 파트너사 인프라 분석.xlsx` 파일을 업로드해주세요.")
+    st.error("⚠️ 엑셀 파일을 찾을 수 없습니다.\n\n웹(Streamlit)에서 실행 중이시라면 깃허브 저장소에 `글로벌 SCM 및 파트너사 인프라 분석.xlsx` 파일을 엑셀 파일 형태로 꼭 함께 업로드해주세요.")
     st.stop()
 
-with st.spinner("엑셀 데이터를 분석 및 지도 좌표를 생성 중입니다..."):
+with st.spinner("엑셀 데이터를 분석하고 지도 좌표를 생성 중입니다..."):
     suppliers = load_data(EXCEL_PATH)
 
 # 6. 사이드바 (필터 및 검색 구성)
