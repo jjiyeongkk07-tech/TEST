@@ -4,7 +4,7 @@ import pydeck as pdk
 import base64
 import os
 
-# 1. 페이지 설정
+# 1. 페이지 설정 (사이드바 기본 열림)
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 
 # [세션 상태 초기화]
@@ -17,17 +17,21 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정
+# 2. 테마 CSS 설정 (🔥 헤더 숨김 코드 제거하여 사이드바 버튼 복구)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 .stApp { background: linear-gradient(135deg, #F9F8F6 0%, #EFEBE5 100%); }
 .block-container { 
-    background-color: #ffffff; padding: 3rem 4rem !important; margin-top: 2rem; margin-bottom: 3rem;
+    background-color: #ffffff; padding: 3rem 4rem !important; margin-top: 1rem; margin-bottom: 3rem;
     border-radius: 16px; max-width: 1400px; border: 1px solid #E5E0D8; box-shadow: 0 15px 35px rgba(100, 90, 80, 0.08);
 }
-header { visibility: hidden; } footer { visibility: hidden; }
+/* 우측 상단 기본 메뉴와 하단 워터마크만 숨기고, 사이드바 버튼은 살려둠 */
+#MainMenu { visibility: hidden; } 
+footer { visibility: hidden; }
+header { background-color: transparent !important; }
+
 [data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
 h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 [data-testid="stMetricValue"] { color: #2C2A29 !important; font-weight: 900 !important; }
@@ -70,7 +74,7 @@ def get_media_html(filename):
             pass
     return "<div class='product-emoji'>🖼️</div>"
 
-# 4. 내장 데이터 (보안 DRM 회피용 하드코딩)
+# 4. 내장 데이터 (보안 회피)
 suppliers = [
     {
         "name": "한성전장(주)", "industry": "PCB",
@@ -110,14 +114,14 @@ suppliers = [
     }
 ]
 
-# 5. 헤더 타이틀 출력
+# 5. 헤더 타이틀
 st.markdown("""
 <div style="background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 40px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
     <div class="main-title">🌍 글로벌 SCM 및 파트너사 인프라 분석</div>
 </div>
 """, unsafe_allow_html=True)
 
-# 6. 사이드바 구성
+# 6. 사이드바(조회란) 구성
 with st.sidebar:
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🏢 필터 및 검색</h3>", unsafe_allow_html=True)
     
@@ -136,7 +140,7 @@ with st.sidebar:
     options_sidebar = ["🏠 종합 메인 화면"] + [s["name"] for s in filtered]
     selected_name = st.radio("📊 분석할 업체 선택", options_sidebar, on_change=reset_map_view)
 
-# 7. 메인 화면 렌더링
+# 7. 메인 화면 출력
 if selected_name == "🏠 종합 메인 화면":
     st.markdown("<div class='section-title' style='margin-top:0;'>글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
     
