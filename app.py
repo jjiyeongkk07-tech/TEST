@@ -58,34 +58,34 @@ def get_icon_html(name, category="product"):
         else: emoji = "📜"
     return f"<div class='product-emoji'>{emoji}</div>"
 
-# 4. 주요 고객사 시각화 HTML 생성 함수 (비율 자동조정 추가)
-def get_customer_bar_html(customers):
+# 4. 주요 고객사 [태그/뱃지 형태] HTML 생성 함수 (새로 작성됨)
+def get_customer_tags_html(customers):
     if not customers:
-        return "<p style='color: #8A817C;'>등록된 고객사 비중 정보가 없습니다.</p>"
+        return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
     
-    colors = ["#2C2A29", "#C4A47C", "#8A817C", "#B0A8A0", "#D5CEC4"]
-    total_val = sum(customers.values()) if sum(customers.values()) > 0 else 1
+    tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 12px;'>"
     
-    bar_html = "<div style='width: 100%; height: 36px; display: flex; border-radius: 8px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);'>"
-    legend_html = "<div style='display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;'>"
+    # 데이터가 딕셔너리 형태 (예: {"고객사": 40}) 일 때
+    if isinstance(customers, dict):
+        for comp, val in customers.items():
+            if val is not None and val != "":
+                # 값이 있을 경우 골드 색상으로 % 표시
+                display_text = f"🏢 {comp} &nbsp;<span style='color:#C4A47C; font-weight:900;'>{val}%</span>"
+            else:
+                display_text = f"🏢 {comp}"
+            tags_html += f"<div style='padding: 10px 22px; background: #ffffff; border: 1px solid #E5E0D8; border-radius: 30px; font-size: 15px; font-weight: 700; color: #4A4441; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; align-items: center;'>{display_text}</div>"
+            
+    # 데이터가 리스트 형태 (예: ["고객사1", "고객사2"]) 일 때
+    elif isinstance(customers, list):
+        for comp in customers:
+            tags_html += f"<div style='padding: 10px 22px; background: #ffffff; border: 1px solid #E5E0D8; border-radius: 30px; font-size: 15px; font-weight: 700; color: #4A4441; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; align-items: center;'>🏢 {comp}</div>"
+
+    tags_html += "</div>"
     
-    for idx, (comp, val) in enumerate(customers.items()):
-        color = colors[idx % len(colors)]
-        width_ratio = (val / total_val) * 100  # 비중이 100%를 초과/미달해도 바(bar)는 꽉 차도록 보정
-        
-        display_val = f"{val}%" if isinstance(val, (int, float)) else val
-        text_in_bar = display_val if width_ratio > 10 else "" # 너무 좁은 영역엔 텍스트 숨김 처리
-        
-        bar_html += f"<div style='width: {width_ratio}%; background-color: {color}; color: white; text-align: center; line-height: 36px; font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden;' title='{comp} {display_val}'>{text_in_bar}</div>"
-        legend_html += f"<div style='display: flex; align-items: center; gap: 8px;'><div style='width: 14px; height: 14px; background-color: {color}; border-radius: 3px;'></div><span style='font-size: 15px; font-weight: 700; color: #4A4441;'>{comp} <span style='color: #8A817C;'>({display_val})</span></span></div>"
-        
-    bar_html += "</div>"
-    legend_html += "</div>"
-    
-    return f"<div style='padding: 25px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{bar_html}{legend_html}</div>"
+    return f"<div style='padding: 25px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
 
-# 5. 원본 엑셀파일 데이터 완벽 매핑
+# 5. 원본 엑셀파일 데이터 매핑 (비율이 없는 곳은 List 로 처리)
 suppliers = [
     {
         "name": "(주)한성전장",
@@ -96,7 +96,7 @@ suppliers = [
         "desc": "(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
         "products": ["PCB ASM", "COVER ASM", "WIRE ASM"],
         "certs": ["SQ 인증"],
-        "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "기타": 21}, # 100% 비율 맞춤
+        "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "기타": 21}, # 비율이 있는 경우
         "locations": [
             {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토로 23", "lat": 35.398579, "lon": 129.056037},
             {"name": "부산 공장", "type": "kr", "address": "부산 금정구 팔송로 53번길 43", "lat": 35.281146, "lon": 129.085023}
@@ -111,7 +111,7 @@ suppliers = [
         "desc": "(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.",
         "products": ["CASE"],
         "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
-        "customers": {"효성전기": 50, "LG 이노텍": 50}, # 텍스트만 존재하여 5:5 비율 부여
+        "customers": ["효성전기", "LG 이노텍"], # 비율 데이터가 없는 경우 (List 형태로 자동 처리)
         "locations": [
             {"name": "구미 본사", "type": "hq", "address": "경상북도 구미시", "lat": 36.119485, "lon": 128.344573},
             {"name": "천안 2공장", "type": "kr", "address": "충청남도 천안시", "lat": 36.815129, "lon": 127.113893},
@@ -127,7 +127,7 @@ suppliers = [
         "desc": "(주)엠제이텍은 자동차 및 가전용 초정밀 모터 코어와 \n전기·전자 부품을 전문적으로 생산하는 제조기업입니다.",
         "products": ["CORE"],
         "certs": [],
-        "customers": {"효성전기": 81, "(주)현대산업": 48, "두원공조": 40}, # 합계 169% 지만 누적막대에 자동 비율 보정되어 표시
+        "customers": {"효성전기": 81, "(주)현대산업": 48, "두원공조": 40},
         "locations": [
             {"name": "경기도 본사", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길59 장원산업단지", "lat": 37.0862, "lon": 127.3879}
         ]
@@ -217,9 +217,9 @@ elif selected_name:
         st.markdown("<div class='section-title' style='margin-top:10px;'>기업 개요</div>", unsafe_allow_html=True)
         st.markdown(f"<div class='desc-box'>{selected['desc']}</div>", unsafe_allow_html=True)
         
-        # [신규] 고객사 비중 시각화 영역 추가
-        st.markdown("<div class='section-title'>🤝 주요 고객사 비중</div>", unsafe_allow_html=True)
-        st.markdown(get_customer_bar_html(selected.get('customers', {})), unsafe_allow_html=True)
+        # [수정] 태그 형태의 고객사 UI 출력
+        st.markdown("<div class='section-title'>🤝 주요 고객사</div>", unsafe_allow_html=True)
+        st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
         st.markdown("<div class='section-title'>핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         col_prod, col_cert = st.columns([1, 1])
