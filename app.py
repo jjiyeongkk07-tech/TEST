@@ -5,22 +5,15 @@ import pydeck as pdk
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide")
 
-# [세션 상태 초기화] 지도 뷰 동기화 관리
-if "radio_view" not in st.session_state:
-    st.session_state.radio_view = "전체 뷰"
+# [세션 상태 초기화] 지도 뷰 상태 관리
 if "map_view" not in st.session_state:
     st.session_state.map_view = "전체 뷰"
 
-def update_radio():
-    st.session_state.map_view = st.session_state.radio_view
-
 def set_view(view):
     st.session_state.map_view = view
-    st.session_state.radio_view = view
 
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
-    st.session_state.radio_view = "전체 뷰"
 
 # 2. 고급스러운 딥 슬레이트 네이비 테마 (Black 제외, 강제 텍스트 화이트)
 css = """
@@ -51,14 +44,52 @@ header { visibility: hidden; } footer { visibility: hidden; }
     border-right: 1px solid #1e293b !important;
 }
 
-/* 🚀 강제 글자색 고정 - 제목 안보임 완벽 해결 */
+/* 🚀 강제 글자색 고정 */
 h1, h2, h3, h4, p, span, div, label, li { color: #f8fafc !important; }
 [data-testid="stMetricValue"], [data-testid="stMetricLabel"] { color: #ffffff !important; }
 
 /* 섹션 타이틀 */
 .section-title { 
-    font-size: 22px; font-weight: 900; color: #ffffff !important; margin-top: 40px; margin-bottom: 20px; 
+    font-size: 22px; font-weight: 900; color: #ffffff !important; margin-top: 40px; margin-bottom: 25px; 
     display: inline-block; padding-bottom: 8px; border-bottom: 3px solid #bba14f;
+}
+
+/* 제품/인증서 카드 - 완벽한 렌더링을 위한 스타일 */
+.product-card { 
+    background-color: #0f172a !important; 
+    border: 1px solid #334155 !important; 
+    border-radius: 12px !important; 
+    padding: 25px 15px !important; 
+    text-align: center !important; 
+    height: 100% !important; 
+    transition: all 0.2s !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+}
+.product-card:hover { 
+    transform: translateY(-4px) !important; 
+    border-color: #bba14f !important; 
+    background-color: #1e293b !important; 
+}
+.product-emoji { 
+    font-size: 42px !important; 
+    margin-bottom: 12px !important; 
+    filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.3)) !important;
+}
+.product-title { 
+    font-size: 16px !important; 
+    font-weight: 700 !important; 
+    color: #ffffff !important; 
+}
+
+/* 좌우 구분선 커스텀 클래스 (Streamlit 컬럼 내 적용) */
+.vertical-divider {
+    border-right: 2px dashed #475569;
+    padding-right: 30px;
+    height: 100%;
+}
+.right-padding {
+    padding-left: 10px;
+    height: 100%;
 }
 
 /* 우측 인터랙티브 카드(버튼) 스타일 */
@@ -82,14 +113,11 @@ h1, h2, h3, h4, p, span, div, label, li { color: #f8fafc !important; }
     background-color: #334155 !important;
     border-color: #bba14f !important;
 }
-
-/* 탭(Radio) 버튼 스타일 강제 적용 */
-div[role="radiogroup"] { padding-bottom: 15px; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 헤더 (인라인 스타일을 주입하여 글씨가 100% 보이게 설정)
+# 3. 헤더
 st.markdown("""
 <div style="background: #0f172a; padding: 30px 40px; border-radius: 12px; margin-bottom: 40px; border-bottom: 4px solid #bba14f; border: 1px solid #334155; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
     <h1 style="margin: 0; font-size: 34px; font-weight: 900; color: #ffffff !important;">🌍 글로벌 SCM 및 파트너사 인프라 분석</h1>
@@ -190,63 +218,59 @@ else:
         unsafe_allow_html=True
     )
 
-    # 🚀 핵심 생산 품목과 품질 인증을 완벽한 좌우 대칭(Flexbox)과 구분선(Border)으로 구성
+    # 🚀 핵심 생산 품목과 품질 인증 (Streamlit Columns 기반 좌우 대칭 레이아웃 적용)
     st.markdown("<div class='section-title'>핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
     
-    # 1) 품목(Products) HTML 생성
-    prod_cards = "".join([
-        f"<div style='background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 25px 15px; text-align: center;'>"
-        f"<div style='font-size: 40px; margin-bottom: 10px;'>{p['img']}</div>"
-        f"<div style='color: #ffffff !important; font-weight: 700; font-size: 15px;'>{p['name']}</div>"
-        f"</div>" for p in selected['products']
-    ])
-    
-    # 2) 인증(Certs) HTML 생성
-    cert_cards = "".join([
-        f"<div style='background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 25px 15px; text-align: center;'>"
-        f"<div style='font-size: 40px; margin-bottom: 10px;'>{c['img']}</div>"
-        f"<div style='color: #ffffff !important; font-weight: 700; font-size: 15px;'>{c['name']}</div>"
-        f"</div>" for c in selected['certs']
-    ])
+    # 바깥쪽 컨테이너 디자인
+    st.markdown("""
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 30px; margin-bottom: 20px;">
+    """, unsafe_allow_html=True)
 
-    # 3) Flexbox 레이아웃 적용 (중간 점선 구분선 포함)
-    layout_html = f"""
-    <div style="display: flex; flex-direction: row; background: #0f172a; padding: 30px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 40px;">
+    col_prod, col_cert = st.columns([1, 1])
+
+    # 좌측: 생산 품목
+    with col_prod:
+        st.markdown("<div class='vertical-divider'>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #cbd5e1 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📦 핵심 생산 품목</h4>", unsafe_allow_html=True)
         
-        <!-- 좌측: 핵심 생산 품목 -->
-        <div style="flex: 1; padding-right: 35px; border-right: 2px dashed #475569;">
-            <h4 style="color: #cbd5e1 !important; text-align: center; margin-bottom: 25px; font-weight: 800;">📦 핵심 생산 품목</h4>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                {prod_cards}
-            </div>
-        </div>
+        # 품목 카드 2열 배치
+        p_cols = st.columns(2)
+        for idx, p in enumerate(selected['products']):
+            p_cols[idx % 2].markdown(
+                f"<div class='product-card'><div class='product-emoji'>{p['img']}</div><div class='product-title'>{p['name']}</div></div>",
+                unsafe_allow_html=True
+            )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # 우측: 품질 인증
+    with col_cert:
+        st.markdown("<div class='right-padding'>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #cbd5e1 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>📜 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
         
-        <!-- 우측: 품질 및 인증 -->
-        <div style="flex: 1; padding-left: 35px;">
-            <h4 style="color: #cbd5e1 !important; text-align: center; margin-bottom: 25px; font-weight: 800;">📜 품질 및 ESG 인증</h4>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                {cert_cards}
-            </div>
-        </div>
+        # 인증 카드 2열 배치
+        c_cols = st.columns(2)
+        for idx, c in enumerate(selected['certs']):
+            c_cols[idx % 2].markdown(
+                f"<div class='product-card' style='margin-bottom:15px;'><div class='product-emoji'>{c['img']}</div><div class='product-title'>{c['name']}</div></div>",
+                unsafe_allow_html=True
+            )
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    </div>
-    """
-    st.markdown(layout_html, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True) # 바깥쪽 컨테이너 닫기
 
-    # 🚀 거점 네트워크 (상단 탭 조작 + 우측 버튼 동기화)
+
+    # 🚀 거점 네트워크 (상단 탭 삭제 + 우측에 '전체 뷰' 복원)
     st.markdown("<div class='section-title'>주요 거점 네트워크</div>", unsafe_allow_html=True)
     
-    options_map = ["전체 뷰", "🏢 국내(본사)", "🏭 국내(지사)", "🌐 해외"]
-    st.radio("지도 뷰 조작", options_map, horizontal=True, key="radio_view", on_change=update_radio, label_visibility="collapsed")
-    st.write("") 
-
     map_col, text_col = st.columns([1.8, 1])
     df_loc = pd.DataFrame(selected["locations"])
 
-    # 우측 동기화 버튼 ('전체 뷰 복귀' 버튼 제거됨)
+    # 우측 동기화 버튼 (전체 뷰 버튼 포함)
     with text_col:
         st.markdown("<p style='color:#bba14f !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
         
+        st.button(f"🌍 전체 뷰\n\n모든 거점을 한눈에 확인합니다.", on_click=set_view, args=("전체 뷰",), use_container_width=True)
+        st.write("")
         st.button(f"🏢 본사\n\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
         st.write("")
         st.button(f"🏭 지사\n\n{selected['kr']}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
