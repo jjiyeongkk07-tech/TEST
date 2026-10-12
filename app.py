@@ -74,11 +74,9 @@ def get_media_html(filename):
             pass
     return "<div class='product-emoji'>🖼️</div>"
 
-
 # =====================================================================
 # 🎯 [엑셀 데이터 내장] 
-# 첨부해주신 원본 엑셀 데이터를 코드 안에 100% 반영해 두었습니다.
-# 이제 파일 업로드나 주소 변환(geopy) 없이 지도가 아주 빠르게 로딩됩니다!
+# 원본 엑셀 데이터의 내용(E열 품목명 및 J~N열 인증 파일명)을 100% 반영했습니다.
 # =====================================================================
 suppliers = [
     {
@@ -88,8 +86,12 @@ suppliers = [
         'kr': '부산 공장',
         'gl': '-',
         'desc': '(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.',
-        'products': [{'name': '핵심 생산 품목', 'file': '(주)한성전장-PCB ASM.jpg'}],
-        'certs': [{'name': 'SQ 인증', 'file': '(주)한성전장-SQ인증서.jpg'}],
+        'products': [
+            {'name': 'PCB ASM. COVER ASM, WIRE ASM', 'file': '(주)한성전장-PCB ASM.jpg'}
+        ],
+        'certs': [
+            {'name': 'SQ 인증', 'file': '(주)한성전장-SQ인증서.jpg'}
+        ],
         'locations': [
             {'name': '양산 본사', 'type': 'hq', 'address': '경남 양산시 상북면 소토로 23', 'lat': 35.398579, 'lon': 129.056037},
             {'name': '부산 공장', 'type': 'kr', 'address': '부산 금정구 팔송로 53번길 43', 'lat': 35.281146, 'lon': 129.085023}
@@ -102,7 +104,9 @@ suppliers = [
         'kr': '천안 2공장',
         'gl': '중국 남경 공장',
         'desc': '(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.',
-        'products': [{'name': '핵심 생산 품목', 'file': '(주)성우-CASE.jpg'}],
+        'products': [
+            {'name': 'CASE', 'file': '(주)성우-CASE.jpg'}
+        ],
         'certs': [
             {'name': 'IATF 16949', 'file': '(주)성우-IATF16949.jpg'},
             {'name': 'ISO 14001', 'file': '(주)성우-ISO14001.jpg'},
@@ -122,7 +126,6 @@ st.markdown("""
     <div class="main-title">🌍 글로벌 SCM 및 파트너사 인프라 분석</div>
 </div>
 """, unsafe_allow_html=True)
-
 
 # 6. 사이드바 (필터 및 검색 구성)
 with st.sidebar:
@@ -202,7 +205,7 @@ elif selected_name:
                         unsafe_allow_html=True
                     )
             else:
-                st.info("등록된 핵심 생산 품목 파일이 없습니다.")
+                st.info("등록된 핵심 생산 품목이 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
         with col_cert:
@@ -217,7 +220,7 @@ elif selected_name:
                         unsafe_allow_html=True
                     )
             else:
-                st.info("등록된 품질 및 인증 파일이 없습니다.")
+                st.info("등록된 품질 및 인증 내역이 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("<div class='section-title' style='margin-top: 50px;'>주요 거점 네트워크</div>", unsafe_allow_html=True)
