@@ -3,17 +3,40 @@ import pandas as pd
 import pydeck as pdk
 import base64
 import os
-from geopy.geocoders import Nominatim
+
+# 💡 geopy 라이브러리가 설치되지 않았을 때 웹사이트가 멈추는 현상(에러) 방지
+try:
+    from geopy.geocoders import Nominatim
+    GEOPY_INSTALLED = True
+except ModuleNotFoundError:
+    GEOPY_INSTALLED = False
 
 # 1. 페이지 설정 (사이드바 기본 열림)
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 
 # =====================================================================
-# 🎯 [엑셀 파일 경로 지정] 
-# (주의) 웹(Streamlit Cloud)에서 배포할 경우 Z드라이브를 인식할 수 없으므로, 
-# 파일을 깃허브에 올리고 "글로벌 SCM 및 파트너사 인프라 분석.xlsx" 로 변경해야 합니다.
+# 🎯 [엑셀 및 이미지 경로 자동 탐색 설정]
+# 내 PC(Z드라이브)에서 실행할 때와 Streamlit 웹에서 실행할 때를 자동으로 구분합니다.
+# 웹에서 실행하려면 깃허브에 엑셀 파일과 images 폴더를 함께 올려두시면 됩니다.
 # =====================================================================
-EXCEL_PATH = r"Z:\★업  무★\Ai\글로벌 SCM 및 파트너사 인프라 분석.xlsx" 
+LOCAL_EXCEL = r"Z:\★업  무★\Ai\글로벌 SCM 및 파트너사 인프라 분석.xlsx"
+CLOUD_EXCEL = "글로벌 SCM 및 파트너사 인프라 분석.xlsx"
+
+if os.path.exists(LOCAL_EXCEL):
+    EXCEL_PATH = LOCAL_EXCEL
+elif os.path.exists(CLOUD_EXCEL):
+    EXCEL_PATH = CLOUD_EXCEL
+else:
+    EXCEL_PATH = None
+
+LOCAL_IMG_DIR = r"Z:\★업  무★\Ai\images"
+CLOUD_IMG_DIR = "images"
+
+if os.path.exists(LOCAL_IMG_DIR):
+    IMG_BASE_PATH = LOCAL_IMG_DIR
+else:
+    IMG_BASE_PATH = CLOUD_IMG_DIR
+
 
 # [세션 상태 초기화]
 if "map_view" not in st.session_state:
@@ -66,10 +89,7 @@ def get_media_html(filename):
     if ext in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']:
         return "<div class='product-emoji'>📜</div>"
         
-    # (주의) 웹(Streamlit Cloud)에서 배포할 경우 로컬 Z드라이브 접근이 불가능합니다.
-    # 웹 배포 시에는 base_path = "./images" 등으로 변경하고 깃허브에 폴더를 올려야 합니다.
-    base_path = r"Z:\★업  무★\Ai\images"
-    filepath = os.path.join(base_path, filename)
+    filepath = os.path.join(IMG_BASE_PATH, filename)
     
     if os.path.exists(filepath):
         try:
@@ -87,13 +107,17 @@ def get_media_html(filename):
 def get_lat_lon(address):
     if not address or pd.isna(address):
         return 37.5665, 126.9780 
-    try:
-        geolocator = Nominatim(user_agent="scm_dashboard_agent")
-        location = geolocator.geocode(address, timeout=5)
-        if location:
-            return location.latitude, location.longitude
-    except Exception as e:
-        pass
+        
+    if GEOPY_INSTALLED:
+        try:
+            geolocator = Nominatim(user_agent="scm_dashboard_agent")
+            location = geolocator.geocode(address, timeout=5)
+            if location:
+                return location.latitude, location.longitude
+        except Exception:
+            pass
+            
+    # 에러 방지용 임시 기본값(서울)
     return 37.5665, 126.9780
 
 # 엑셀 데이터 파싱
@@ -154,14 +178,17 @@ def load_data(file_path):
 
 # 5. 헤더 타이틀
 st.markdown("""
-<div style="background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 40px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+<div style="background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 20px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
     <div class="main-title">🌍 글로벌 SCM 및 파트너사 인프라 분석</div>
 </div>
 """, unsafe_allow_html=True)
 
+if not GEOPY_INSTALLED:
+    st.warning("⚠️ 주소를 지도로 변환하는 기능(`geopy`)이 설치되지 않아 임시 좌표(서울)로 표시됩니다. 깃허브에 `requirements.txt` 파일을 만들고 `geopy`를 추가해주세요.")
+
 # 엑셀 파일 로드 및 에러 처리
-if not os.path.exists(EXCEL_PATH):
-    st.error(f"⚠️ 지정된 경로에 엑셀 파일이 없습니다: `{EXCEL_PATH}`\n\n해당 경로에 파일이 정확히 있는지 확인해주세요. (웹 배포 시 Z드라이브는 읽을 수 없습니다.)")
+if not EXCEL_PATH:
+    st.error("⚠️ 엑셀 파일을 찾을 수 없습니다.\n\n웹(Streamlit)에서 실행 중이시라면 깃허브 저장소에 `글로벌 SCM 및 파트너사 인프라 분석.xlsx` 파일을 업로드해주세요.")
     st.stop()
 
 with st.spinner("엑셀 데이터를 분석 및 지도 좌표를 생성 중입니다..."):
