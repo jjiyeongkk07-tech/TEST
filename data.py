@@ -1,5 +1,3 @@
-# 💡 새로운 업체가 추가될 때는 아래 리스트에 동일한 양식으로 추가하시면 됩니다.
-
 # 1. 업체 상세 정보 리스트
 suppliers_data = [
     {
@@ -90,11 +88,32 @@ suppliers_data = [
             {"name": "경기 지사", "type": "kr", "address": "경기도 성남시 분당구", "lat": 37.3827, "lon": 127.1189, "country": "대한민국"},
             {"name": "부산 물류창고", "type": "kr", "address": "부산광역시 강서구 대저동", "lat": 35.2155, "lon": 128.9813, "country": "대한민국"}
         ]
+    },
+    # 💡 새롭게 추가된 업체 정보
+    {
+        "name": "한국NMB(주)",
+        "industry": "Bearing",
+        "sub_industry": "Rotary Components/Actuator",
+        "hq": "부산 본사",
+        "kr": "모덕 및 경기 사무소",
+        "gl": "중국 법인",
+        "desc": "글로벌 네트워크를 기반으로 Ball Bearing 및 Rotary Components(Actuator) 등 정밀기계 부품을 전문적으로 생산 및 공급하는 기업입니다.",
+        "products": [
+            "Ball Bearing",
+            "Rotary Components/Actuator"
+        ],
+        "certs": [], 
+        "customers": {}, 
+        "locations": [
+            {"name": "본사", "type": "hq", "address": "부산광역시 사상구 새벽로 167번길 85-6(감전동, 제1,2,3,4층 제에이동호)", "lat": 35.1538, "lon": 128.9830, "country": "대한민국"},
+            {"name": "모덕Office", "type": "kr", "address": "부산광역시 사상구 모덕로 57 3층", "lat": 35.1743, "lon": 128.9822, "country": "대한민국"},
+            {"name": "경기(분당)사무소", "type": "kr", "address": "경기도 성남시 분당구 황새울로 360번길 21 신영펠리스타워11층", "lat": 37.3827, "lon": 127.1189, "country": "대한민국"},
+            {"name": "중국(소주)법인", "type": "gl_cn", "address": "3-103 No.61 Jiepu Road SIP, 215126 Suzhou, China", "lat": 31.3285, "lon": 120.7850, "country": "중국"}
+        ]
     }
 ]
 
 # 2. 업체별 이미지 URL 딕셔너리
-# 💡 업체명(name)과 키값이 정확히 일치해야 이미지를 불러올 수 있습니다.
 excel_img_data = {
     "(주)성우": {
         "prod_imgs": [
@@ -143,11 +162,18 @@ excel_img_data = {
         "cert_imgs": [
             "http://www.kimchunbrg.com/images/sub/cert_01.jpg"
         ]
+    },
+    # 💡 새롭게 추가된 업체 이미지 매핑
+    "한국NMB(주)": {
+        "prod_imgs": [
+            "https://product.minebeamitsumi.com/en/product/category/bearing/spherical/__icsFiles/afieldfile/2026/01/14/file_01_90.png",
+            "https://product.minebeamitsumi.com/en/product/category/rotary/steppingmotor/hybrid/__icsFiles/afieldfile/2024/08/02/hybrid_1.png"
+        ],
+        "cert_imgs": []
     }
 }
 
 # 3. 글로벌 네트워크 (지도 시각화) 관련 설정값 모음
-# 버튼 레이블(View명)과 내부 코드(type) 매핑합니다.
 map_view_mapping = {
     "전체 뷰": "all",
     "🏢 국내(본사)": "hq",
@@ -156,17 +182,15 @@ map_view_mapping = {
     "🌎 해외(북미)": "gl_us"
 }
 
-# 거점 타입별 마커(점) 색상 [R, G, B, A]
 location_colors = {
-    "hq": [220, 38, 38, 255],     # 빨강 (본사)
-    "kr": [37, 99, 235, 255],     # 파랑 (국내 지사)
-    "gl_cn": [16, 185, 129, 255], # 초록 (중국)
-    "gl_us": [245, 158, 11, 255], # 주황 (북미)
-    "default_dim": [148, 163, 184, 100], # 선택되지 않은 거점(희미하게)
-    "all_view": [196, 164, 124, 220]     # 전체 뷰일 때의 공통 색상
+    "hq": [220, 38, 38, 255],     
+    "kr": [37, 99, 235, 255],     
+    "gl_cn": [16, 185, 129, 255], 
+    "gl_us": [245, 158, 11, 255], 
+    "default_dim": [148, 163, 184, 100], 
+    "all_view": [196, 164, 124, 220]     
 }
 
-# 지도 렌더링 시 반경(마커 크기) 설정값
 map_radius_settings = {
     "all_view": 120000,
     "highlighted": 300000,
