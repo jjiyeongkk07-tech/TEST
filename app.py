@@ -25,7 +25,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정
+# 2. 테마 CSS 설정 (버튼 텍스트 가운데 정렬 적용)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -73,18 +73,19 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; line-height: 1.8; font-weight: 400; }
 
-/* ✅ 지도 옆 버튼 스타일 (멀티라인 텍스트 및 버튼 크기 복구) */
+/* ✅ 지도 옆 버튼 스타일 (가운데 정렬) */
 div.stButton > button { 
     background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
     border-radius: 12px !important; color: #2C2A29 !important; 
     padding: 15px 25px !important; width: 100% !important; height: auto !important; 
-    display: block !important; text-align: left !important; 
+    display: block !important; text-align: center !important; /* 🚀 가운데 정렬로 수정 */
     transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
 }
 div.stButton > button p { 
     font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; 
     white-space: pre-wrap !important; line-height: 1.5 !important; 
-    text-align: left !important; margin: 0 !important; display: block !important; 
+    text-align: center !important; /* 🚀 가운데 정렬로 수정 */
+    margin: 0 !important; display: block !important; 
 }
 div.stButton > button:hover { 
     background-color: #FDFCFB !important; border-color: #C4A47C !important; 
