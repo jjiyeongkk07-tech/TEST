@@ -56,14 +56,14 @@ suppliers_data = [
     {
         "name": "한국NMB(주)",
         "industry": "Bearing",
-        "sub_industry": "Rotary Components",
+        "sub_industry": "Rotary Components/Actuator",
         "hq": "부산 본사",
         "kr": "모덕 및 경기 사무소",
         "gl": "중국 법인",
         "desc": "한국NMB(주)는 글로벌 네트워크를 기반으로 Ball Bearing 및 Rotary Components(Actuator) 등 정밀기계 부품을 전문적으로 생산 및 공급하는 기업입니다.",
         "products": [
             "Ball Bearing",
-            "Rotary Components/Actuator"
+            "Hybrid stepping motors"
         ],
         "certs": [], 
         "customers": {}, 
