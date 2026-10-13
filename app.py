@@ -7,7 +7,7 @@ import urllib.request
 import ssl
 import base64
 
-# 🌟 data.py 파일에서 데이터 가져오기
+# 🌟 data.py 파일에서 데이터(업체정보 및 글로벌 위치 정보) 가져오기
 from data import suppliers_data, excel_img_data
 
 # 1. 페이지 설정
@@ -249,7 +249,7 @@ elif selected_name:
             st.markdown("<div style='padding-left: 10px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
-            # ✅ 인증서 이미지가 여러 개일 때 모두 보여주도록 반복문으로 처리
+            # ✅ 인증서 이미지가 여러 개일 때 모두 보여주도록 렌더링
             if company_images.get("cert_imgs"):
                 cert_html = "<div class='custom-card-container'>"
                 for idx, cert_url in enumerate(company_images["cert_imgs"]):
