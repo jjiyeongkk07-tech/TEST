@@ -6,8 +6,8 @@ import urllib.request
 import ssl
 import base64
 
-# 🌟 data.py 파일에서 데이터(업체정보 및 글로벌 위치 정보) 가져오기
-from data import suppliers_data, excel_img_data
+# 🌟 data.py 파일에서 데이터 및 설정 정보 가져오기
+from data import suppliers_data, excel_img_data, map_view_mapping, location_colors, map_radius_settings
 
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
@@ -25,7 +25,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (버튼 텍스트 가운데 정렬 적용)
+# 2. 테마 CSS 설정
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -53,7 +53,7 @@ header { background-color: transparent !important; }
 }
 .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-/* ✅ 하단 태그 가로 정렬 */
+/* ✅ 하단 태그 가로 정렬 (양쪽 모두 동일한 디자인 적용) */
 .tag-wrap-box { 
     display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; 
     align-items: flex-start; padding-top: 20px; margin-top: 20px;
@@ -78,13 +78,13 @@ div.stButton > button {
     background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
     border-radius: 12px !important; color: #2C2A29 !important; 
     padding: 15px 25px !important; width: 100% !important; height: auto !important; 
-    display: block !important; text-align: center !important; /* 🚀 가운데 정렬로 수정 */
+    display: block !important; text-align: center !important; 
     transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
 }
 div.stButton > button p { 
     font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; 
     white-space: pre-wrap !important; line-height: 1.5 !important; 
-    text-align: center !important; /* 🚀 가운데 정렬로 수정 */
+    text-align: center !important; 
     margin: 0 !important; display: block !important; 
 }
 div.stButton > button:hover { 
@@ -153,7 +153,7 @@ with st.sidebar:
     selected_name = options_sidebar_map[selected_display_name]
 
 
-# 🚀 이미지 팝업(모달) 렌더링 영역 (안전하게 화면 상단에 띄움)
+# 🚀 이미지 팝업(모달) 렌더링 영역
 if st.session_state.popup_img:
     st.markdown("<hr style='border: 2px solid #2C2A29;'>", unsafe_allow_html=True)
     pop_col1, pop_col2 = st.columns([8, 2])
@@ -197,14 +197,12 @@ elif selected_name:
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
-        # 🚀 좌우 레이아웃 완전 일치화 (똑같은 컴포넌트 순서 적용)
         col_left, col_right = st.columns(2)
 
         # ---------------- 좌측: 핵심 생산 품목 ----------------
         with col_left:
             st.markdown("<div class='section-header'>🌟 핵심 생산 품목</div>", unsafe_allow_html=True)
             
-            # 1. 이미지 및 버튼 영역
             prod_list = company_images.get("prod_imgs", [])
             if prod_list:
                 img_cols = st.columns(len(prod_list))
@@ -220,7 +218,6 @@ elif selected_name:
             else:
                 st.info("등록된 이미지가 없습니다.")
                 
-            # 2. 태그 영역 (하단에 공통으로 가로 배치)
             all_tags = []
             for prod_name in selected.get('products', []):
                 tags = [t.strip() for t in prod_name.replace(" / ", "/").split("/")]
@@ -237,7 +234,6 @@ elif selected_name:
         with col_right:
             st.markdown("<div class='section-header'>🏅 품질 및 ESG 인증</div>", unsafe_allow_html=True)
             
-            # 1. 이미지 및 버튼 영역
             cert_list = company_images.get("cert_imgs", [])
             if cert_list:
                 cert_cols = st.columns(len(cert_list))
@@ -253,7 +249,6 @@ elif selected_name:
             else:
                 st.info("등록된 인증서 이미지가 없습니다.")
             
-            # 2. 태그 영역 (하단에 공통으로 가로 배치)
             if selected.get('certs'):
                 badges = "".join([f"<div class='unified-tag'>{c}</div>" for c in selected['certs']])
                 st.markdown(f"<div class='tag-wrap-box'>{badges}</div>", unsafe_allow_html=True)
@@ -270,20 +265,19 @@ elif selected_name:
         df_loc = pd.DataFrame(selected.get("locations", []))
 
         with map_col:
+            # 🚀 data.py 에서 설정한 변수들을 활용하여 맵 렌더링
             current_view = st.session_state.map_view
+            target_type_key = map_view_mapping.get(current_view, "all")
+
             def get_color(row):
-                hi_colors = {'hq': [220, 38, 38, 255], 'kr': [37, 99, 235, 255], 'gl_cn': [16, 185, 129, 255], 'gl_us': [245, 158, 11, 255]} 
-                if current_view == "전체 뷰": return [196, 164, 124, 220]
-                elif current_view == "🏢 국내(본사)" and row['type'] == 'hq': return hi_colors['hq']
-                elif current_view == "🏭 국내(지사)" and row['type'] == 'kr': return hi_colors['kr']
-                elif current_view == "🌐 해외(중국)" and row['type'] == 'gl_cn': return hi_colors['gl_cn']
-                elif current_view == "🌎 해외(북미)" and row['type'] == 'gl_us': return hi_colors['gl_us']
-                return [148, 163, 184, 100]
+                if current_view == "전체 뷰": return location_colors["all_view"]
+                if row['type'] == target_type_key: return location_colors.get(row['type'], location_colors["all_view"])
+                return location_colors["default_dim"]
 
             def get_radius(row):
-                if current_view == "전체 뷰": return 120000
-                if row['type'] in ['hq', 'kr', 'gl_cn', 'gl_us'] and current_view != "전체 뷰": return 300000
-                return 40000 
+                if current_view == "전체 뷰": return map_radius_settings["all_view"]
+                if row['type'] == target_type_key: return map_radius_settings["highlighted"]
+                return map_radius_settings["dimmed"]
 
             if not df_loc.empty:
                 df_loc['color'] = df_loc.apply(get_color, axis=1)
@@ -291,9 +285,9 @@ elif selected_name:
                 
                 center_lat, center_lon, zoom_lvl = 35.0, 150.0, 1.0 
                 if current_view != "전체 뷰":
-                    target_type = 'hq' if "본사" in current_view else ('kr' if "지사" in current_view else ('gl_cn' if "중국" in current_view else 'gl_us'))
-                    target_df = df_loc[df_loc['type'] == target_type]
-                    if not target_df.empty: center_lat, center_lon, zoom_lvl = target_df['lat'].mean(), target_df['lon'].mean(), (5.5 if len(target_df) > 1 else 9.0)
+                    target_df = df_loc[df_loc['type'] == target_type_key]
+                    if not target_df.empty: 
+                        center_lat, center_lon, zoom_lvl = target_df['lat'].mean(), target_df['lon'].mean(), (5.5 if len(target_df) > 1 else 9.0)
                 
                 view_state = pdk.ViewState(latitude=center_lat, longitude=center_lon, zoom=zoom_lvl, pitch=0, transition_duration=1200)
                 layer = pdk.Layer("ScatterplotLayer", data=df_loc, get_position='[lon, lat]', get_fill_color='color', get_line_color=[255, 255, 255], stroked=True, line_width_min_pixels=2, get_radius='radius', radius_min_pixels=6, radius_max_pixels=30, pickable=True)
@@ -303,7 +297,6 @@ elif selected_name:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
             st.button("🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
-            # ✅ 버튼 줄바꿈(\n)을 활용해 위아래 두 줄로 표시
             for typ, btn_label in [("hq", "🏢 국내(본사)"), ("kr", "🏭 국내(지사)"), ("gl_cn", "🌐 해외(중국)"), ("gl_us", "🌎 해외(북미)")]:
                 if any(loc.get("type") == typ for loc in selected.get("locations", [])):
                     names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == typ])
