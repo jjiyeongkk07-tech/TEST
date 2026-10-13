@@ -66,7 +66,7 @@ suppliers_data = [
         "products": [
             "에나멜 와이어"
         ],
-        "certs": ["IATF 16949", "ISO 14001", "KS 인증", "UL 규격", "CSA 규격"],
+        "certs": ["IATF 16949", "ISO 14001"],
         "customers": {"국내 가전 및 전장업체": 70, "기타 대리점": 30},
         "locations": [
             {"name": "(주)상농전선 본사 및 공장", "type": "hq", "address": "경상남도 양산시 유산공단9길 6-1", "lat": 35.3560, "lon": 129.0250, "country": "대한민국"}
