@@ -14,7 +14,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (버튼 왼쪽 정렬 규칙 완벽 적용)
+# 2. 테마 CSS 설정
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -33,7 +33,6 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 [data-testid="stMetricLabel"] { color: #8A817C !important; font-weight: 700 !important; }
 .main-title { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; }
 
-/* 섹션 타이틀에 순번(Numbering) 스타일 적용 */
 .section-title { 
     font-size: 24px; font-weight: 900; color: #2C2A29 !important; 
     margin-top: 45px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;
@@ -55,7 +54,7 @@ div.stButton > button {
     padding: 15px 25px !important; 
     width: 100% !important; 
     height: auto !important;
-    display: block !important; /* block으로 변경하여 왼쪽 정렬 강제 */
+    display: block !important; 
     text-align: left !important;
     transition: all 0.2s ease !important; 
     box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
@@ -64,9 +63,9 @@ div.stButton > button p {
     font-size: 16px !important; 
     font-weight: 800 !important; 
     color: #2C2A29 !important; 
-    white-space: pre-wrap !important; /* 줄바꿈(\\n) 허용 */
+    white-space: pre-wrap !important; 
     line-height: 1.5 !important;
-    text-align: left !important; /* 내부 텍스트 왼쪽 정렬 */
+    text-align: left !important; 
     margin: 0 !important;
     display: block !important;
 }
@@ -80,7 +79,7 @@ div.stButton > button:hover {
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 아이콘 매핑 함수 (엑셀 이미지 없을 때 기본 대체용)
+# 3. 아이콘 & 태그 함수
 def get_icon_html(name, category="product"):
     if category == "product":
         if "PCB" in name.upper() or "WIRE" in name.upper(): emoji = "🔌"
@@ -100,10 +99,8 @@ def get_customer_tags_html(customers):
     
     tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 15px;'>"
     customer_list = customers.keys() if isinstance(customers, dict) else customers
-
     for comp in customer_list:
         tags_html += f"<div style='padding: 14px 28px; background: #ffffff; border: 2px solid #C4A47C; border-radius: 40px; font-size: 18px; font-weight: 900; color: #2C2A29; box-shadow: 0 6px 12px rgba(196, 164, 124, 0.15); display: flex; align-items: center;'>🤝 {comp}</div>"
-
     tags_html += "</div>"
     return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
@@ -163,19 +160,6 @@ suppliers = [
     }
 ]
 
-# 거점 주소를 기반으로 국가 데이터 자동 생성
-all_countries_set = set()
-for s in suppliers:
-    for loc in s["locations"]:
-        if loc["type"] in ["hq", "kr"]:
-            loc["country"] = "대한민국"
-        else:
-            loc["country"] = loc["address"].split()[0] if loc["address"] else "기타"
-        all_countries_set.add(loc["country"])
-
-industry_list = ["전체"] + list(set(s["industry"] for s in suppliers if s["industry"] != "미분류"))
-country_list = ["전체"] + list(all_countries_set)
-
 # 5. 헤더 타이틀
 st.markdown("""
 <div style="background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 20px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
@@ -183,52 +167,86 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 6. 사이드바 (엑셀 이미지 연동 및 탭 기반 상세 검색)
-with st.sidebar:
-    # 6-1. 엑셀 파일 이미지 연동
-    st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>📂 데이터 연동</h3>", unsafe_allow_html=True)
-    uploaded_excel = st.file_uploader("업체정보 엑셀 첨부 (이미지 연동)", type=["xlsx", "xls"])
-    
-    excel_img_data = {}
-    if uploaded_excel:
-        try:
-            # 엑셀의 '업체정보' 시트를 읽어옵니다.
-            df_ex = pd.read_excel(uploaded_excel, sheet_name='업체정보')
-            
-            for _, row in df_ex.iterrows():
-                comp_name = str(row.iloc[0]).strip() # A열 (업체명)
-                
-                # 인덱스 에러 방지를 위해 열의 길이를 체크합니다 (L:11, M:12, N:13, O:14)
-                p1 = row.iloc[11] if len(row) > 11 else None
-                p2 = row.iloc[12] if len(row) > 12 else None
-                c1 = row.iloc[13] if len(row) > 13 else None
-                c2 = row.iloc[14] if len(row) > 14 else None
-                
-                # 비어있지 않은 실제 값들만 리스트에 저장합니다.
-                prod_imgs = [x for x in [p1, p2] if pd.notna(x) and str(x).strip() != ""]
-                cert_imgs = [x for x in [c1, c2] if pd.notna(x) and str(x).strip() != ""]
-                
-                excel_img_data[comp_name] = {"prod_imgs": prod_imgs, "cert_imgs": cert_imgs}
-                
-            st.success("✅ 엑셀 데이터 및 이미지 링크 연동 완료!")
-        except Exception as e:
-            st.error("오류 발생: 엑셀 파일에 '업체정보' 시트 및 L~O열 데이터가 존재하는지 확인해주세요.")
+# 6. 사이드바 (상세 검색 및 관리자 데이터 연동)
+excel_img_data = {}
 
-    st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
-    
-    # 6-2. 상세 검색 (탭 메뉴 적용)
+with st.sidebar:
+    # --- 상세 검색 (업종 -> 업체 -> 국가 순서) ---
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
     
-    tab_industry, tab_country, tab_company = st.tabs(["🏷️ 업종", "🌍 국가", "🏢 업체"])
+    # 국가 데이터 자동 생성
+    all_countries_set = set()
+    for s in suppliers:
+        for loc in s["locations"]:
+            if loc["type"] in ["hq", "kr"]:
+                loc["country"] = "대한민국"
+            else:
+                loc["country"] = loc["address"].split()[0] if loc["address"] else "기타"
+            all_countries_set.add(loc["country"])
+
+    industry_list = ["전체"] + list(set(s["industry"] for s in suppliers if s["industry"] != "미분류"))
+    country_list = ["전체"] + list(all_countries_set)
+
+    # 탭 순서 변경 반영
+    tab_industry, tab_company, tab_country = st.tabs(["🏷️ 업종", "🏢 업체", "🌍 국가"])
     
     with tab_industry:
         selected_industry = st.selectbox("조회할 업종을 선택하세요", industry_list, on_change=reset_map_view, label_visibility="collapsed")
-    with tab_country:
-        selected_country = st.selectbox("조회할 국가를 선택하세요", country_list, on_change=reset_map_view, label_visibility="collapsed")
     with tab_company:
         search_term = st.text_input("업체명을 입력하세요", placeholder="예: 한성전장", label_visibility="collapsed").strip()
+    with tab_country:
+        selected_country = st.selectbox("조회할 국가를 선택하세요", country_list, on_change=reset_map_view, label_visibility="collapsed")
 
-    # 교차 필터링 로직
+    # --- 엑셀 연동 로직 적용을 위해 먼저 파일 첨부 버튼 (숨김 메뉴) 구성 ---
+    st.markdown("<br><hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
+    
+    # st.popover를 사용하여 클릭 시 우측으로 열리는 숨김창 생성 (Streamlit 1.33+)
+    with st.popover("⚙️ 관리자 설정 (데이터 연동)", use_container_width=True):
+        st.markdown("#### 📂 엑셀 데이터 및 이미지 연동")
+        st.info("💡 엑셀을 첨부하면 이미지뿐만 아니라 해당 업체의 기존 텍스트(개요, 품목 등)도 자동 반영됩니다.")
+        uploaded_excel = st.file_uploader("업체정보 원본 엑셀 첨부", type=["xlsx", "xls"])
+        
+        if uploaded_excel:
+            try:
+                df_ex = pd.read_excel(uploaded_excel, sheet_name='업체정보')
+                cols = df_ex.columns
+
+                for _, row in df_ex.iterrows():
+                    comp_name = str(row.iloc[0]).strip()
+                    
+                    # 1) 기존 이미지 연동 (L~O열 고정 추출)
+                    p1 = row.iloc[11] if len(row) > 11 else None
+                    p2 = row.iloc[12] if len(row) > 12 else None
+                    c1 = row.iloc[13] if len(row) > 13 else None
+                    c2 = row.iloc[14] if len(row) > 14 else None
+                    
+                    prod_imgs = [x for x in [p1, p2] if pd.notna(x) and str(x).strip() != ""]
+                    cert_imgs = [x for x in [c1, c2] if pd.notna(x) and str(x).strip() != ""]
+                    excel_img_data[comp_name] = {"prod_imgs": prod_imgs, "cert_imgs": cert_imgs}
+                    
+                    # 2) 텍스트 데이터 자동 반영 (컬럼명이 존재할 경우 기존 데이터 덮어쓰기)
+                    target_supplier = next((s for s in suppliers if s['name'] == comp_name), None)
+                    if target_supplier:
+                        if '업종' in cols and pd.notna(row['업종']): 
+                            target_supplier['industry'] = str(row['업종'])
+                        if '기업개요' in cols and pd.notna(row['기업개요']): 
+                            target_supplier['desc'] = str(row['기업개요'])
+                        if '본사' in cols and pd.notna(row['본사']): 
+                            target_supplier['hq'] = str(row['본사'])
+                        if '지사' in cols and pd.notna(row['지사']): 
+                            target_supplier['kr'] = str(row['지사'])
+                        if '해외' in cols and pd.notna(row['해외']): 
+                            target_supplier['gl'] = str(row['해외'])
+                        if '핵심생산품목' in cols and pd.notna(row['핵심생산품목']): 
+                            target_supplier['products'] = [x.strip() for x in str(row['핵심생산품목']).split(',')]
+                        if '품질인증' in cols and pd.notna(row['품질인증']): 
+                            target_supplier['certs'] = [x.strip() for x in str(row['품질인증']).split(',')]
+
+                st.success("✅ 엑셀 데이터 및 이미지 연동 완료!")
+            except Exception as e:
+                st.error("오류 발생: 엑셀 파일 형식 또는 '업체정보' 시트 구성을 확인해주세요.")
+
+    # 교차 필터링 적용 (새롭게 연동된 데이터 반영)
     filtered = suppliers
     if selected_industry != "전체":
         filtered = [s for s in filtered if s["industry"] == selected_industry]
@@ -291,7 +309,7 @@ elif selected_name:
         st.markdown("<div class='section-title'><span class='section-num'>03.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         col_prod, col_cert = st.columns([1, 1])
 
-        # 업로드된 엑셀 기반 이미지 리스트 불러오기 (없으면 빈 리스트)
+        # 업로드된 엑셀 기반 이미지 리스트 불러오기
         company_images = excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
         with col_prod:
@@ -301,7 +319,6 @@ elif selected_name:
                 p_cols = st.columns(2)
                 for idx, prod_name in enumerate(selected['products']):
                     with p_cols[idx % 2]:
-                        # 엑셀 이미지가 존재하면 출력, 없으면 기본 이모지 출력
                         if idx < len(company_images["prod_imgs"]):
                             st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
                             try:
@@ -323,7 +340,6 @@ elif selected_name:
                 c_cols = st.columns(2)
                 for idx, cert_name in enumerate(selected['certs']):
                     with c_cols[idx % 2]:
-                        # 엑셀 이미지가 존재하면 출력, 없으면 기본 이모지 출력
                         if idx < len(company_images["cert_imgs"]):
                             st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
                             try:
@@ -345,7 +361,7 @@ elif selected_name:
         with text_col:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
             
-            # \n 을 통해 아래줄에 표시 (CSS의 white-space: pre-wrap 적용됨)
+            # 왼쪽 정렬 + 줄바꿈 완벽 호환
             st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
             if selected.get('hq') and selected['hq'] not in ["해당 없음", "-", "", "nan"]:
