@@ -125,8 +125,8 @@ if "suppliers" not in st.session_state:
     st.session_state.suppliers = [
         {
             "name": "(주)성우",
-            "industry": "PRESS(CASE)", # ✅ 분류는 사내 기준 (PRESS CASE)
-            "display_industry": "PRESS(CASE) / 2차전지 및 전장부품", # ✅ 화면 표시용 서브 타이틀 추가
+            "industry": "PRESS(CASE)", # ✅ 분류는 사내 기준 고정
+            "sub_industry": "2차전지 및 전장부품", # ✅ 서브 텍스트 분리
             "hq": "경북 구미 본사", 
             "kr": "천안 공장", 
             "gl": "중국 및 북미 법인",
@@ -146,6 +146,7 @@ if "suppliers" not in st.session_state:
         {
             "name": "(주)한성전장",
             "industry": "임가공(조립)",
+            "sub_industry": "",
             "hq": "양산 본사", "kr": "부산 공장", "gl": "-",
             "desc": "(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
             "products": ["PCB ASM", "COVER ASM", "WIRE ASM"],
@@ -250,15 +251,23 @@ elif selected_name:
     selected = next((s for s in filtered if s["name"] == selected_name), None)
     
     if selected:
-        # ✅ 메인 화면의 태그는 display_industry가 있으면 그것을, 없으면 industry를 출력
-        display_tag = selected.get("display_industry", selected["industry"])
+        # ✅ 메인 태그 렌더링 방식 수정 (PRESS CASE를 강조하고 서브 텍스트 추가)
+        badge_html = f"""
+        <div style='display:flex; align-items:center; gap: 10px; flex-wrap: wrap; margin-bottom:25px;'>
+            <h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#2C2A29 !important;'>{selected['name']}</h2>
+            <span style='background:#C4A47C; color:#ffffff !important; padding: 6px 14px; font-size: 16px; font-weight: 900; border-radius: 6px; box-shadow: 0 2px 4px rgba(196, 164, 124, 0.3);'>
+                {selected['industry']}
+            </span>
+        """
+        if selected.get('sub_industry'):
+            badge_html += f"""
+            <span style='background:#FDFCFB; border: 1px solid #E5E0D8; color:#8A817C !important; padding: 4px 12px; font-size: 14px; font-weight: 700; border-radius: 4px;'>
+                {selected['sub_industry']}
+            </span>
+            """
+        badge_html += "</div>"
         
-        st.markdown(
-            f"<div style='margin-bottom:25px; display:flex; align-items:baseline; gap: 15px; flex-wrap: wrap;'>"
-            f"<h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#2C2A29 !important;'>{selected['name']}</h2>"
-            f"<span style='background:#FDFCFB; border: 1px solid #C4A47C; color:#C4A47C !important; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 4px;'>{display_tag}</span></div>",
-            unsafe_allow_html=True
-        )
+        st.markdown(badge_html, unsafe_allow_html=True)
 
         st.markdown("<div class='section-title' style='margin-top:10px;'><span class='section-num'>01.</span> 기업 개요</div>", unsafe_allow_html=True)
         st.markdown(f"<div class='desc-box'>📖 {selected['desc']}</div>", unsafe_allow_html=True)
