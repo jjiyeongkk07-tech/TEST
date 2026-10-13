@@ -18,7 +18,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (좌우 카드 높이 완벽 동일화)
+# 2. 테마 CSS 설정 (좌우 50:50 완벽 꽉참 처리)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -33,13 +33,20 @@ footer { visibility: hidden; }
 header { background-color: transparent !important; }
 [data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
 
-/* ✅ 좌우 높이 동일화: 카드가 들어가는 상위 컬럼 강제 늘리기 */
+/* ✅ 완벽한 50:50 분할 및 높이/너비 100% 꽉참 CSS */
 [data-testid="column"] > div > div > div > div > div { padding: 0 !important; gap: 0 !important; }
-[data-testid="column"] { padding-bottom: 0 !important; display: flex; flex-direction: column; }
-div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; }
+[data-testid="column"] { padding-bottom: 0 !important; display: flex; flex-direction: column; width: 100%; }
+div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; width: 100%; }
 
-/* ✅ 완벽한 카드 레이아웃: 높이 고정으로 무조건 동일하게 */
+.custom-card-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    height: 100%;
+}
+
 .custom-card { 
+    flex: 1; /* 너비를 꽉 채우도록 설정 */
     background-color: #ffffff; 
     border: 1px solid #E5E0D8; 
     border-radius: 12px; 
@@ -47,13 +54,13 @@ div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; 
     text-align: center; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     margin-bottom: 15px;
-    height: 360px !important; /* 제품카드, 인증카드 모두 무조건 이 높이로 강제 고정 */
+    height: 380px !important; /* 높이 약간 더 확장 */
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* 위아래 간격 고르게 */
+    justify-content: space-between;
 }
 .img-container {
-    height: 250px; 
+    height: 270px; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -118,7 +125,7 @@ if "suppliers" not in st.session_state:
     st.session_state.suppliers = [
         {
             "name": "(주)성우",
-            "industry": "2차전지 및 전장부품",
+            "industry": "PRESS(CASE), 2차전지 및 전장부품", # ✅ 업종 추가
             "hq": "경북 구미 본사", 
             "kr": "천안 공장", 
             "gl": "중국 및 북미 법인",
@@ -262,23 +269,23 @@ elif selected_name:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
             
-            # ✅ 제품 카드 (높이 360px 꽉 채우기)
+            # ✅ 50:50 꽉 차게 변경된 제품 카드 HTML 로직
             if selected['products']:
-                p_cols = st.columns(2)
+                prod_html = "<div class='custom-card-container'>"
                 for idx, prod_name in enumerate(selected['products']):
-                    with p_cols[idx % 2]:
-                        if idx < len(company_images["prod_imgs"]):
-                            b64_img = get_base64_image(company_images["prod_imgs"][idx])
-                            if b64_img:
-                                card_html = "<div class='custom-card'>" + f"<div class='img-container'><img src='data:image/jpeg;base64,{b64_img}'></div>" + f"<div class='product-title'>{prod_name}</div>" + "</div>"
-                                st.markdown(card_html, unsafe_allow_html=True)
+                    if idx < len(company_images["prod_imgs"]):
+                        b64_img = get_base64_image(company_images["prod_imgs"][idx])
+                        if b64_img:
+                            prod_html += f"<div class='custom-card'><div class='img-container'><img src='data:image/jpeg;base64,{b64_img}'></div><div class='product-title'>{prod_name}</div></div>"
+                prod_html += "</div>"
+                st.markdown(prod_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
         with col_cert:
             st.markdown("<div style='padding-left: 10px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
-            # ✅ 인증서 카드 (제품과 완벽하게 동일한 구조와 높이)
+            # ✅ 인증서 카드
             if company_images.get("cert_imgs"):
                 b64_cert = get_base64_image(company_images["cert_imgs"][0])
                 if b64_cert:
@@ -288,7 +295,7 @@ elif selected_name:
                             badges_html += f"<span class='cert-badge'>{cert}</span>"
                     badges_html += "</div>"
                     
-                    cert_card = "<div class='custom-card'>" + f"<div class='img-container'><img src='data:image/jpeg;base64,{b64_cert}'></div>" + badges_html + "</div>"
+                    cert_card = f"<div class='custom-card-container'><div class='custom-card' style='height: 100%;'><div class='img-container'><img src='data:image/jpeg;base64,{b64_cert}'></div>{badges_html}</div></div>"
                     st.markdown(cert_card, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
@@ -298,7 +305,7 @@ elif selected_name:
         st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
 
-        # ✅ 글로벌 네트워크 (좌측 뷰어 / 우측 버튼)
+        # ✅ 글로벌 네트워크 
         st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 글로벌 네트워크</div>", unsafe_allow_html=True)
         
         map_col, text_col = st.columns([2.5, 1]) 
