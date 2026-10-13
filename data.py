@@ -31,8 +31,13 @@ suppliers_data = [
         "kr": "부산 공장", 
         "gl": "-",
         "desc": "(주)한성전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
-        "products": ["PCB ASM", "COVER ASM", "WIRE ASM", "MDPS 부품"],
-        "certs": ["SQ 인증", "ISO 9001", "ISO 14001"],
+        "products": [
+            "자동차용 센서 및 일반 전장품", 
+            "자동차용 컨트롤러", 
+            "전기차 배터리 부품 및 와이어 하네스", 
+            "산업용/의료기용 ESS(에너지저장장치) 부품"
+        ],
+        "certs": ["IATF16949", "ISO14001", "SQ 인증"],
         "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "현대모비스": 10, "기타": 11},
         "locations": [
             {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토로 23", "lat": 35.398579, "lon": 129.056037, "country": "대한민국"},
@@ -52,15 +57,15 @@ excel_img_data = {
             "https://www.e-sungwoo.co.kr/img/sub/cpn-wp1_2.jpg"
         ]
     },
-    # 🌟 [업데이트됨] (주)한성전장 이미지 데이터 (홈페이지 기본 경로 기반)
     "(주)한성전장": {
         "prod_imgs": [
-            "http://www.hansungeec.co.kr/img/sub/product_pcb.jpg",
-            "http://www.hansungeec.co.kr/img/sub/product_cover.jpg",
-            "http://www.hansungeec.co.kr/img/sub/product_wire.jpg"
+            # 전달해주신 4개 품목의 이미지 URL이 동일하여 대표로 1개만 적용했습니다.
+            "http://hansungeec.co.kr/data/editor/2303/68f8713e9ce1b074a95162e5d3d4e265_1679371328_4312.png"
         ],
         "cert_imgs": [
-            "http://www.hansungeec.co.kr/img/sub/cert_sq.jpg"
+            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_k4BbP3Xf_4b392b2ae34b33eca5ce6b46f911883a7c81ca00_800x600.jpg",
+            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_2nYRHtuK_ddc0920cf4043d7d29869df505f78a0cad78dd9f_800x600.jpg",
+            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_lKOVB7QU_592a0b51d658de8d226c4d807cdfa8928f2ad0e6_800x600.jpg"
         ]
     }
 }
