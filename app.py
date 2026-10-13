@@ -125,7 +125,7 @@ if "suppliers" not in st.session_state:
     st.session_state.suppliers = [
         {
             "name": "(주)성우",
-            "industry": "PRESS(CASE), 2차전지 및 전장부품", # ✅ 업종 추가
+            "industry": "PRESS(CASE)", # ✅ 사내 관리 기준 업종으로 정확하게 변경 완료!
             "hq": "경북 구미 본사", 
             "kr": "천안 공장", 
             "gl": "중국 및 북미 법인",
@@ -269,7 +269,6 @@ elif selected_name:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
             
-            # ✅ 50:50 꽉 차게 변경된 제품 카드 HTML 로직
             if selected['products']:
                 prod_html = "<div class='custom-card-container'>"
                 for idx, prod_name in enumerate(selected['products']):
@@ -285,7 +284,6 @@ elif selected_name:
             st.markdown("<div style='padding-left: 10px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
-            # ✅ 인증서 카드
             if company_images.get("cert_imgs"):
                 b64_cert = get_base64_image(company_images["cert_imgs"][0])
                 if b64_cert:
@@ -305,7 +303,7 @@ elif selected_name:
         st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
 
-        # ✅ 글로벌 네트워크 
+        # ✅ 글로벌 네트워크
         st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 글로벌 네트워크</div>", unsafe_allow_html=True)
         
         map_col, text_col = st.columns([2.5, 1]) 
