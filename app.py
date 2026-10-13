@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 import urllib.request
+import urllib.parse
 import ssl
 import base64
 
@@ -198,9 +199,12 @@ elif selected_name:
                         if img_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>", unsafe_allow_html=True)
                             
-                            # ✅ 완전히 독립된 새 브라우저 팝업창을 띄우고 그 안에 [닫기] 버튼과 이미지를 렌더링
-                            js_code = f"let w=window.open('','_blank','width=900,height=800,scrollbars=yes,resizable=yes'); w.document.write('<html style=\"background:#F9F8F6;\"><body style=\"margin:0;padding:30px;text-align:center;font-family:sans-serif;\"><div style=\"text-align:right;margin-bottom:20px;\"><button onclick=\"window.close()\" style=\"padding:10px 20px;font-size:16px;font-weight:bold;cursor:pointer;background:#ffffff;border:2px solid #2C2A29;border-radius:8px;color:#2C2A29;\">❌ 닫기</button></div><img src=\"data:image/jpeg;base64,{img_data}\" style=\"max-width:100%;max-height:75vh;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.1);\"></body></html>'); w.document.close(); return false;"
-                            st.markdown(f'''<a href="#" onclick='{js_code}' class="custom-popup-btn"><p>🔍 확대 보기</p></a>''', unsafe_allow_html=True)
+                            # ✅ 인코딩 방식을 사용하여 따옴표 충돌 원천 차단
+                            popup_html = f"""<html style="background:#F9F8F6;"><body style="margin:0;padding:30px;text-align:center;font-family:sans-serif;"><div style="text-align:right;margin-bottom:20px;"><button onclick="window.close()" style="padding:10px 20px;font-size:16px;font-weight:bold;cursor:pointer;background:#ffffff;border:2px solid #2C2A29;border-radius:8px;color:#2C2A29;">❌ 닫기</button></div><img src="data:image/jpeg;base64,{img_data}" style="max-width:100%;max-height:80vh;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.1);"></body></html>"""
+                            encoded_html = urllib.parse.quote(popup_html)
+                            js_code = f"let w=window.open('','_blank','width=900,height=800,scrollbars=yes,resizable=yes'); w.document.write(decodeURIComponent('{encoded_html}')); w.document.close(); return false;"
+                            
+                            st.markdown(f'<a href="#" onclick="{js_code}" class="custom-popup-btn"><p>🔍 확대 보기</p></a>', unsafe_allow_html=True)
             else:
                 st.info("등록된 이미지가 없습니다.")
                 
@@ -229,9 +233,12 @@ elif selected_name:
                         if cert_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>", unsafe_allow_html=True)
                             
-                            # ✅ 완전히 독립된 새 브라우저 팝업창을 띄우고 그 안에 [닫기] 버튼과 이미지를 렌더링
-                            js_code = f"let w=window.open('','_blank','width=900,height=800,scrollbars=yes,resizable=yes'); w.document.write('<html style=\"background:#F9F8F6;\"><body style=\"margin:0;padding:30px;text-align:center;font-family:sans-serif;\"><div style=\"text-align:right;margin-bottom:20px;\"><button onclick=\"window.close()\" style=\"padding:10px 20px;font-size:16px;font-weight:bold;cursor:pointer;background:#ffffff;border:2px solid #2C2A29;border-radius:8px;color:#2C2A29;\">❌ 닫기</button></div><img src=\"data:image/jpeg;base64,{cert_data}\" style=\"max-width:100%;max-height:75vh;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.1);\"></body></html>'); w.document.close(); return false;"
-                            st.markdown(f'''<a href="#" onclick='{js_code}' class="custom-popup-btn"><p>🔍 확대 보기</p></a>''', unsafe_allow_html=True)
+                            # ✅ 인코딩 방식을 사용하여 따옴표 충돌 원천 차단
+                            popup_html = f"""<html style="background:#F9F8F6;"><body style="margin:0;padding:30px;text-align:center;font-family:sans-serif;"><div style="text-align:right;margin-bottom:20px;"><button onclick="window.close()" style="padding:10px 20px;font-size:16px;font-weight:bold;cursor:pointer;background:#ffffff;border:2px solid #2C2A29;border-radius:8px;color:#2C2A29;">❌ 닫기</button></div><img src="data:image/jpeg;base64,{cert_data}" style="max-width:100%;max-height:80vh;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.1);"></body></html>"""
+                            encoded_html = urllib.parse.quote(popup_html)
+                            js_code = f"let w=window.open('','_blank','width=900,height=800,scrollbars=yes,resizable=yes'); w.document.write(decodeURIComponent('{encoded_html}')); w.document.close(); return false;"
+                            
+                            st.markdown(f'<a href="#" onclick="{js_code}" class="custom-popup-btn"><p>🔍 확대 보기</p></a>', unsafe_allow_html=True)
             else:
                 st.info("등록된 인증서 이미지가 없습니다.")
             
