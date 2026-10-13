@@ -148,7 +148,11 @@ with st.sidebar:
 
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
-    for s in filtered: options_sidebar_map[s['name']] = s['name']
+    
+    # 🌟 업체명('name')을 기준으로 오름차순 정렬(가나다 순)하여 추가
+    for s in sorted(filtered, key=lambda x: x.get('name', '')): 
+        options_sidebar_map[s['name']] = s['name']
+        
     selected_display_name = st.radio("📊 분석할 업체 선택", list(options_sidebar_map.keys()), on_change=reset_map_view)
     selected_name = options_sidebar_map[selected_display_name]
 
