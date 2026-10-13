@@ -21,7 +21,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (이미지 확대 효과 및 레이아웃 수정 반영)
+# 2. 테마 CSS 설정 (좌우 높이 맞춤 & 가로 배치 로직 완벽 적용)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -36,79 +36,73 @@ footer { visibility: hidden; }
 header { background-color: transparent !important; }
 [data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
 
-/* ✅ 완벽한 50:50 분할 및 높이/너비 100% 꽉참 CSS */
-[data-testid="column"] > div > div > div > div > div { padding: 0 !important; gap: 0 !important; }
-[data-testid="column"] { padding-bottom: 0 !important; display: flex; flex-direction: column; width: 100%; }
-div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; width: 100%; }
+/* ✅ Streamlit 컬럼(좌우) 높이 완벽 통일을 위한 Flexbox 설정 */
+[data-testid="column"] > div { height: 100%; display: flex; flex-direction: column; }
+[data-testid="column"] { display: flex; flex-direction: column; }
+.st-emotion-cache-11r0f1r { display: flex; flex-wrap: wrap; align-items: stretch; } /* Streamlit 내장 Row Flexbox 강제 지정 */
 
-/* ✅ 핵심 역량 품목 양옆 배치를 위한 CSS Flex/Grid 업데이트 */
-.grid-container { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; }
-.grid-item { flex: 1; min-width: 0; /* min-width:0 은 flexbox 내부 컨텐츠가 넘치는 것을 방지 */ }
+/* ✅ 핵심 역량 품목 양옆 배치 */
+.grid-container { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; height: 100%; align-content: flex-start; }
+.grid-item { flex: 1; min-width: 200px; display: flex; flex-direction: column; }
 
+/* ✅ 모든 카드(생산품목, 인증서) 높이 100% 매칭 */
 .unified-card {
-    background: #ffffff;
-    border: 1px solid #E5E0D8;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-    height: 100%;
+    background: #ffffff; border: 1px solid #E5E0D8; border-radius: 12px; padding: 20px;
+    display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03); height: 100%; flex: 1;
 }
 
+/* 이미지 박스 기본 설정 */
 .img-box {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    background: #FDFCFB; 
-    border-radius: 8px;
-    padding: 10px;
-    overflow: hidden; /* 확대 시 영역을 벗어나지 않도록 설정 */
+    width: 100%; display: flex; align-items: center; justify-content: center;
+    background: #FDFCFB; border-radius: 8px; padding: 10px; overflow: hidden;
 }
-.prod-img-box { height: 220px; }
-.cert-img-box { min-height: 180px; height: auto; padding: 20px; background: transparent; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+.prod-img-box { height: 240px; margin-bottom: 20px; }
 
-/* 🚀 마우스 오버 시 이미지 확대 애니메이션 설정 */
-.img-box img { 
-    max-width: 100%; max-height: 100%; object-fit: contain;
-    transition: transform 0.3s ease-in-out; /* 부드러운 전환 효과 */
+/* 🚀 인증서 박스 가로 배치(Row) 설정 */
+.cert-img-box {
+    flex: 1; /* 카드 내부에서 남는 공간을 모두 차지하게 하여 하단 뱃지를 바닥으로 밀어냄 */
+    display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px;
+    justify-content: center; align-content: center;
+    background: transparent; padding: 10px; margin-bottom: 20px;
 }
-.prod-img-box:hover img {
-    transform: scale(1.15); /* 마우스 오버 시 1.15배 확대 */
+
+/* 🚀 마우스 오버 시 이미지 확대 및 크기 설정 */
+.img-box img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease-in-out; }
+.prod-img-box:hover img { transform: scale(1.15); }
+
+/* 🚀 여러 인증서 이미지가 무조건 가로로 예쁘게 들어가도록 % 비율 및 높이 제한 */
+.cert-img-box img { 
+    max-height: 220px; /* 너무 길어지지 않게 방어 */
+    flex: 1 1 calc(33% - 15px); /* 기본적으로 3개씩 가로 배치 (공간 부족시 2개씩 자동 조절) */
+    min-width: 120px; /* 최소 너비 보장 */
+    object-fit: contain; transition: transform 0.3s ease-in-out; 
 }
-/* 여러 개의 인증서가 묶인 컨테이너 내의 개별 이미지들도 각각 확대되도록 설정 */
-.cert-img-box img { max-height: 200px; width: auto; object-fit: contain; transition: transform 0.3s ease-in-out; }
 .cert-img-box img:hover { transform: scale(1.15); z-index: 10; position: relative;}
 
+/* 태그 및 뱃지 디자인 */
 .tag-container { display: flex; flex-direction: column; gap: 8px; width: 100%; align-items: center; }
 .prod-tag {
     font-size: 14.5px; font-weight: 800; color: #4A4441; text-align: center;
     word-break: keep-all; background: #F3F4F6; padding: 8px 12px;
     border-radius: 8px; width: 100%; line-height: 1.4;
 }
-
 .cert-badge-wrap {
-    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-    width: 100%; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #E5E0D8;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: flex-end;
+    width: 100%; margin-top: auto; padding-top: 20px; border-top: 1px dashed #E5E0D8;
 }
 .cert-badge {
-    background: #ffffff; border: 1px solid #C4A47C; color: #C4A47C;
-    font-size: 14px; font-weight: 800; padding: 6px 16px;
-    border-radius: 30px; box-shadow: 0 2px 4px rgba(196, 164, 124, 0.1); white-space: nowrap;
+    background: #ffffff; border: 1px solid #C4A47C; color: #C4A47C; font-size: 14px;
+    font-weight: 800; padding: 6px 16px; border-radius: 30px; box-shadow: 0 2px 4px rgba(196, 164, 124, 0.1); white-space: nowrap;
 }
 
 h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 [data-testid="stMetricValue"] { color: #2C2A29 !important; font-weight: 900 !important; }
 [data-testid="stMetricLabel"] { color: #8A817C !important; font-weight: 700 !important; }
-
 .main-title { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; }
 .section-title { font-size: 24px; font-weight: 900; color: #2C2A29 !important; margin-top: 45px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 3px solid #E5E0D8; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
-.desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; }
+.desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; height: 100%; }
 
 div.stButton > button { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 15px 25px !important; width: 100% !important; height: auto !important; display: block !important; text-align: left !important; transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; }
 div.stButton > button p { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; white-space: pre-wrap !important; line-height: 1.5 !important; text-align: left !important; margin: 0 !important; display: block !important; }
@@ -237,16 +231,16 @@ elif selected_name:
         
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         
-        # 좌측(생산품목)과 우측(인증) 컬럼
+        # 🚀 좌우 컬럼 생성 (CSS로 stretch 강제 적용됨)
         col_prod, col_cert = st.columns([1.2, 1])
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
         with col_prod:
-            st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
+            # 컨테이너 높이를 100%로 설정하여 안쪽 요소들이 공간을 채우게 함
+            st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
             
             if selected.get('products'):
-                # 🚀 품목 리스트를 가로로 나란히(Flex wrap) 배치하기 위한 컨테이너 적용
                 prod_html = "<div class='grid-container'>"
                 for idx, prod_name in enumerate(selected['products']):
                     b64_img = ""
@@ -258,7 +252,6 @@ elif selected_name:
                     tags = [t.strip() for t in prod_name.replace(" / ", "/").split("/")]
                     tags_html = "".join([f"<div class='prod-tag'>{t}</div>" for t in tags if t])
                     
-                    # 개별 카드를 grid-item으로 감싸 가로로 정렬됨
                     prod_html += f"<div class='grid-item'><div class='unified-card'><div class='img-box prod-img-box'>{img_tag}</div><div class='tag-container'>{tags_html}</div></div></div>"
                     
                 prod_html += "</div>"
@@ -268,22 +261,22 @@ elif selected_name:
             st.markdown("</div>", unsafe_allow_html=True)
 
         with col_cert:
-            st.markdown("<div style='padding-left: 10px; height: 100%;'>", unsafe_allow_html=True)
+            # 컨테이너 높이를 100%로 설정
+            st.markdown("<div style='padding-left: 10px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
-            # 🚀 모든 인증서를 '하나의 큰 카드(unified-card)' 안에 모아서 보여줌
-            cert_html = "<div class='unified-card' style='justify-content: flex-start;'>"
+            cert_html = "<div class='unified-card'>"
             
-            # 1. 인증서 이미지들을 모아놓는 박스
+            # 1. 인증서 이미지 박스 (이미지가 여러 개일 경우 Flex wrap으로 가로 정렬됨)
             if company_images.get("cert_imgs"):
-                cert_html += "<div class='img-box cert-img-box' style='margin-bottom: 0;'>"
+                cert_html += "<div class='cert-img-box'>"
                 for cert_url in company_images["cert_imgs"]:
                     b64_cert = get_base64_image(cert_url)
                     if b64_cert:
                         cert_html += f"<img src='data:image/jpeg;base64,{b64_cert}'>"
                 cert_html += "</div>"
             
-            # 2. 인증서 하단 뱃지 
+            # 2. 인증서 하단 뱃지
             if selected.get('certs'):
                 badges = "".join([f"<span class='cert-badge'>{c}</span>" for c in selected['certs']])
                 cert_html += f"<div class='cert-badge-wrap'>{badges}</div>"
