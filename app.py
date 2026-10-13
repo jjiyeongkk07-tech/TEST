@@ -13,10 +13,6 @@ st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="
 
 if "map_view" not in st.session_state:
     st.session_state.map_view = "전체 뷰"
-if "popup_img" not in st.session_state:
-    st.session_state.popup_img = None
-if "popup_title" not in st.session_state:
-    st.session_state.popup_title = ""
 
 def set_view(view):
     st.session_state.map_view = view
@@ -72,21 +68,22 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; line-height: 1.8; font-weight: 400; }
 
-/* ✅ 지도 옆 버튼 스타일 (가운데 정렬) */
-div.stButton > button { 
+/* ✅ 지도 옆 버튼 스타일 (가운데 정렬) 및 링크 버튼 스타일 공통 적용 */
+div.stButton > button, div.stLinkButton > a { 
     background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
     border-radius: 12px !important; color: #2C2A29 !important; 
     padding: 15px 25px !important; width: 100% !important; height: auto !important; 
     display: block !important; text-align: center !important; 
     transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
+    text-decoration: none !important;
 }
-div.stButton > button p { 
+div.stButton > button p, div.stLinkButton > a p { 
     font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; 
     white-space: pre-wrap !important; line-height: 1.5 !important; 
     text-align: center !important; 
     margin: 0 !important; display: block !important; 
 }
-div.stButton > button:hover { 
+div.stButton > button:hover, div.stLinkButton > a:hover { 
     background-color: #FDFCFB !important; border-color: #C4A47C !important; 
     transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; 
 }
@@ -156,20 +153,6 @@ with st.sidebar:
     selected_name = options_sidebar_map[selected_display_name]
 
 
-# 🚀 이미지 팝업(모달) 렌더링 영역
-if st.session_state.popup_img:
-    st.markdown("<hr style='border: 2px solid #2C2A29;'>", unsafe_allow_html=True)
-    pop_col1, pop_col2 = st.columns([8, 2])
-    with pop_col1:
-        st.markdown(f"<h3 style='margin-top:0;'>🔍 {st.session_state.popup_title}</h3>", unsafe_allow_html=True)
-    with pop_col2:
-        if st.button("❌ 닫기", use_container_width=True):
-            st.session_state.popup_img = None
-            st.rerun()
-    st.markdown(f"<div style='text-align: center; background:#F9F8F6; padding: 20px; border-radius: 12px; margin-bottom: 20px;'><img src='data:image/jpeg;base64,{st.session_state.popup_img}' style='max-width: 100%; border-radius: 8px;'></div>", unsafe_allow_html=True)
-    st.markdown("<hr style='border: 2px solid #2C2A29; margin-bottom: 40px;'>", unsafe_allow_html=True)
-
-
 # 6. 메인 화면 렌더링 
 if selected_name == "🏠 종합 메인 화면":
     st.markdown("<div class='section-title' style='margin-top:0;'>📊 글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
@@ -214,10 +197,8 @@ elif selected_name:
                         img_data = get_base64_image(b64_img)
                         if img_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>", unsafe_allow_html=True)
-                            if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True):
-                                st.session_state.popup_img = img_data
-                                st.session_state.popup_title = f"{selected['name']} - 핵심 생산 품목"
-                                st.rerun()
+                            # ✅ 새 창으로 열리도록 link_button으로 변경 완료!
+                            st.link_button("🔍 확대 보기", b64_img, use_container_width=True)
             else:
                 st.info("등록된 이미지가 없습니다.")
                 
@@ -245,10 +226,8 @@ elif selected_name:
                         cert_data = get_base64_image(cert_url)
                         if cert_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>", unsafe_allow_html=True)
-                            if st.button("🔍 확대 보기", key=f"btn_cert_{idx}", use_container_width=True):
-                                st.session_state.popup_img = cert_data
-                                st.session_state.popup_title = f"{selected['name']} - 품질 및 ESG 인증"
-                                st.rerun()
+                            # ✅ 새 창으로 열리도록 link_button으로 변경 완료!
+                            st.link_button("🔍 확대 보기", cert_url, use_container_width=True)
             else:
                 st.info("등록된 인증서 이미지가 없습니다.")
             
