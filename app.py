@@ -18,7 +18,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (좌우 50:50 완벽 꽉참 처리)
+# 2. 테마 CSS 설정
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -46,7 +46,7 @@ div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; 
 }
 
 .custom-card { 
-    flex: 1; /* 너비를 꽉 채우도록 설정 */
+    flex: 1; 
     background-color: #ffffff; 
     border: 1px solid #E5E0D8; 
     border-radius: 12px; 
@@ -54,7 +54,7 @@ div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; 
     text-align: center; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     margin-bottom: 15px;
-    height: 380px !important; /* 높이 약간 더 확장 */
+    height: 380px !important; 
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -125,7 +125,8 @@ if "suppliers" not in st.session_state:
     st.session_state.suppliers = [
         {
             "name": "(주)성우",
-            "industry": "PRESS(CASE)", # ✅ 사내 관리 기준 업종으로 정확하게 변경 완료!
+            "industry": "PRESS(CASE)", # ✅ 분류는 사내 기준 (PRESS CASE)
+            "display_industry": "PRESS(CASE) / 2차전지 및 전장부품", # ✅ 화면 표시용 서브 타이틀 추가
             "hq": "경북 구미 본사", 
             "kr": "천안 공장", 
             "gl": "중국 및 북미 법인",
@@ -249,10 +250,13 @@ elif selected_name:
     selected = next((s for s in filtered if s["name"] == selected_name), None)
     
     if selected:
+        # ✅ 메인 화면의 태그는 display_industry가 있으면 그것을, 없으면 industry를 출력
+        display_tag = selected.get("display_industry", selected["industry"])
+        
         st.markdown(
-            f"<div style='margin-bottom:25px; display:flex; align-items:baseline; gap: 15px;'>"
+            f"<div style='margin-bottom:25px; display:flex; align-items:baseline; gap: 15px; flex-wrap: wrap;'>"
             f"<h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#2C2A29 !important;'>{selected['name']}</h2>"
-            f"<span style='background:#FDFCFB; border: 1px solid #C4A47C; color:#C4A47C !important; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 4px;'>{selected['industry']}</span></div>",
+            f"<span style='background:#FDFCFB; border: 1px solid #C4A47C; color:#C4A47C !important; padding: 4px 12px; font-size: 15px; font-weight: 800; border-radius: 4px;'>{display_tag}</span></div>",
             unsafe_allow_html=True
         )
 
@@ -303,7 +307,7 @@ elif selected_name:
         st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
 
-        # ✅ 글로벌 네트워크
+        # ✅ 글로벌 네트워크 
         st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 글로벌 네트워크</div>", unsafe_allow_html=True)
         
         map_col, text_col = st.columns([2.5, 1]) 
