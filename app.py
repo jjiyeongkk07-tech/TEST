@@ -61,9 +61,14 @@ div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; 
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    /* 🚀 고정 높이 400px 삭제, 유동적으로 조절되도록 수정 */
+    height: auto !important; 
+    min-height: 350px;
 }
 .img-container {
     width: 100%;
+    /* 🚀 이미지 컨테이너 기본 높이를 250px로 고정하여 튀는 것 방지 */
+    height: 250px; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -80,7 +85,7 @@ div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; 
     font-weight: 800 !important; 
     color: #2C2A29 !important; 
     word-break: keep-all; 
-    line-height: 1.6; /* 텍스트 줄 간격 여유있게 */
+    line-height: 1.6; 
     margin-top: auto; 
     padding-top: 10px;
 }
@@ -243,11 +248,11 @@ elif selected_name:
                     if idx < len(company_images["prod_imgs"]):
                         b64_img = get_base64_image(company_images["prod_imgs"][idx])
                         if b64_img:
-                            # 🚀 / 를 기준으로 줄바꿈 태그(<br>)로 변경 (양옆 띄어쓰기 유무 상관없이 모두 적용)
+                            # '/' 를 기준으로 줄바꿈 태그(<br>)로 변경
                             formatted_prod_name = prod_name.replace(" / ", "<br>").replace("/", "<br>")
                             
-                            # 🚀 이미지 에러 방지를 위해 HTML을 한 줄로 구성 + 이미지가 최대한 크게 보이도록 높이 할당(350px)
-                            prod_html += f"<div class='custom-card' style='width: 100%; max-width: 100%; flex: 1 1 100%;'><div class='img-container' style='height: 380px;'><img src='data:image/jpeg;base64,{b64_img}'></div><div class='product-title'>{formatted_prod_name}</div></div>"
+                            # 🚀 인라인 스타일에 고정 높이 제거하여 CSS 기본값(250px)을 따르게 함
+                            prod_html += f"<div class='custom-card' style='width: 100%; max-width: 100%; flex: 1 1 100%;'><div class='img-container'><img src='data:image/jpeg;base64,{b64_img}'></div><div class='product-title'>{formatted_prod_name}</div></div>"
                 prod_html += "</div>"
                 st.markdown(prod_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
@@ -266,7 +271,6 @@ elif selected_name:
                         cert_name = selected['certs'][idx] if idx < len(selected.get('certs', [])) else "인증서"
                         badges_html = f"<div class='cert-badge-container'><span class='cert-badge'>{cert_name}</span></div>"
                         
-                        # 🚀 카드가 3개 이상일 경우 너비를 3등분하고 안쪽 패딩을 줄임
                         if cert_count >= 3:
                             card_style = "width: calc(33.3% - 10px); flex: 0 0 calc(33.3% - 10px); padding: 15px;"
                         else:
@@ -355,7 +359,6 @@ elif selected_name:
             st.markdown("<div style='padding-left: 15px;'>", unsafe_allow_html=True)
             st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
-            # ✅ data.py의 정보를 읽어와서 동적으로 버튼 이름을 만듦
             has_hq = any(loc["type"] == "hq" for loc in selected["locations"])
             has_kr = any(loc["type"] == "kr" for loc in selected["locations"])
             has_gl_cn = any(loc["type"] == "gl_cn" for loc in selected["locations"])
@@ -371,10 +374,12 @@ elif selected_name:
                 st.button(f"🏭 국내(지사)\n{kr_names}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
             if has_gl_cn:
                 st.write("")
+                # 🚀 중국 거점: data.py 에서 수정한 깨끗한 이름을 그대로 가져오고, 제목에 '설립 예정'을 붙임
                 cn_names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == "gl_cn"])
-                st.button(f"🌐 해외(중국)\n{cn_names}", on_click=set_view, args=("🌐 해외(중국)",), use_container_width=True)
+                st.button(f"🌐 해외(중국)_설립 예정\n{cn_names}", on_click=set_view, args=("🌐 해외(중국)",), use_container_width=True)
             if has_gl_us:
                 st.write("")
+                # 🚀 북미 거점: data.py 에서 수정한 깨끗한 이름을 그대로 가져오고, 제목에 '설립 예정'을 붙임
                 us_names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == "gl_us"])
-                st.button(f"🌎 해외(북미)\n{us_names}", on_click=set_view, args=("🌎 해외(북미)",), use_container_width=True)
+                st.button(f"🌎 해외(북미)_설립 예정\n{us_names}", on_click=set_view, args=("🌎 해외(북미)",), use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
