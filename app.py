@@ -125,8 +125,8 @@ if "suppliers" not in st.session_state:
     st.session_state.suppliers = [
         {
             "name": "(주)성우",
-            "industry": "PRESS(CASE)", # ✅ 분류는 사내 기준 고정
-            "sub_industry": "2차전지 및 전장부품", # ✅ 서브 텍스트 분리
+            "industry": "PRESS(CASE)", 
+            "sub_industry": "2차전지 및 전장부품",
             "hq": "경북 구미 본사", 
             "kr": "천안 공장", 
             "gl": "중국 및 북미 법인",
@@ -251,20 +251,10 @@ elif selected_name:
     selected = next((s for s in filtered if s["name"] == selected_name), None)
     
     if selected:
-        # ✅ 메인 태그 렌더링 방식 수정 (PRESS CASE를 강조하고 서브 텍스트 추가)
-        badge_html = f"""
-        <div style='display:flex; align-items:center; gap: 10px; flex-wrap: wrap; margin-bottom:25px;'>
-            <h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing: -1px; color:#2C2A29 !important;'>{selected['name']}</h2>
-            <span style='background:#C4A47C; color:#ffffff !important; padding: 6px 14px; font-size: 16px; font-weight: 900; border-radius: 6px; box-shadow: 0 2px 4px rgba(196, 164, 124, 0.3);'>
-                {selected['industry']}
-            </span>
-        """
+        # ✅ 마크다운 텍스트 깨짐 완벽 방지: HTML을 무조건 한 줄(One-liner)로 결합
+        badge_html = f"<div style='margin-bottom:25px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;'><h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing:-1px; color:#2C2A29 !important;'>{selected['name']}</h2><span style='background:#C4A47C; color:#ffffff !important; padding:6px 14px; font-size:16px; font-weight:900; border-radius:6px; box-shadow:0 2px 4px rgba(196, 164, 124, 0.3);'>{selected['industry']}</span>"
         if selected.get('sub_industry'):
-            badge_html += f"""
-            <span style='background:#FDFCFB; border: 1px solid #E5E0D8; color:#8A817C !important; padding: 4px 12px; font-size: 14px; font-weight: 700; border-radius: 4px;'>
-                {selected['sub_industry']}
-            </span>
-            """
+            badge_html += f"<span style='background:#FDFCFB; border:1px solid #E5E0D8; color:#8A817C !important; padding:5px 12px; font-size:14px; font-weight:700; border-radius:4px;'>{selected['sub_industry']}</span>"
         badge_html += "</div>"
         
         st.markdown(badge_html, unsafe_allow_html=True)
