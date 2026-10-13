@@ -26,12 +26,14 @@ suppliers_data = [
     {
         "name": "(주)한성전장",
         "industry": "임가공(조립)",
-        "sub_industry": "",
-        "hq": "양산 본사", "kr": "부산 공장", "gl": "-",
-        "desc": "(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
-        "products": ["PCB ASM", "COVER ASM", "WIRE ASM"],
-        "certs": ["SQ 인증"],
-        "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "기타": 21},
+        "sub_industry": "자동차 전장 및 전자부품",
+        "hq": "경남 양산 본사", 
+        "kr": "부산 공장", 
+        "gl": "-",
+        "desc": "(주)한성전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
+        "products": ["PCB ASM", "COVER ASM", "WIRE ASM", "MDPS 부품"],
+        "certs": ["SQ 인증", "ISO 9001", "ISO 14001"],
+        "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "현대모비스": 10, "기타": 11},
         "locations": [
             {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토로 23", "lat": 35.398579, "lon": 129.056037, "country": "대한민국"},
             {"name": "부산 공장", "type": "kr", "address": "부산 금정구 팔송로 53번길 43", "lat": 35.281146, "lon": 129.085023, "country": "대한민국"}
@@ -50,9 +52,15 @@ excel_img_data = {
             "https://www.e-sungwoo.co.kr/img/sub/cpn-wp1_2.jpg"
         ]
     },
-    # 🌟 [추가됨] (주)한성전장 이미지 빈 데이터 (KeyError 에러 방지)
+    # 🌟 [업데이트됨] (주)한성전장 이미지 데이터 (홈페이지 기본 경로 기반)
     "(주)한성전장": {
-        "prod_imgs": [],
-        "cert_imgs": []
+        "prod_imgs": [
+            "http://www.hansungeec.co.kr/img/sub/product_pcb.jpg",
+            "http://www.hansungeec.co.kr/img/sub/product_cover.jpg",
+            "http://www.hansungeec.co.kr/img/sub/product_wire.jpg"
+        ],
+        "cert_imgs": [
+            "http://www.hansungeec.co.kr/img/sub/cert_sq.jpg"
+        ]
     }
 }
