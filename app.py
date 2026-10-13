@@ -83,8 +83,8 @@ st.markdown(css, unsafe_allow_html=True)
 def get_icon_html(name, category="product"):
     if category == "product":
         if "PCB" in name.upper() or "WIRE" in name.upper(): emoji = "🔌"
-        elif "CASE" in name.upper() or "COVER" in name.upper(): emoji = "🗜️"
-        elif "CORE" in name.upper(): emoji = "⚙️"
+        elif "CASE" in name.upper() or "COVER" in name.upper() or "VENT" in name.upper(): emoji = "🗜️"
+        elif "CORE" in name.upper() or "CAP" in name.upper(): emoji = "⚙️"
         elif "TERMINAL" in name.upper(): emoji = "🔩"
         else: emoji = "📦"
     elif category == "cert":
@@ -121,18 +121,22 @@ if "suppliers" not in st.session_state:
                 {"name": "부산 공장", "type": "kr", "address": "부산 금정구 팔송로 53번길 43", "lat": 35.281146, "lon": 129.085023}
             ]
         },
+        # 🌟 업데이트된 (주)성우 실제 데이터 🌟
         {
             "name": "(주)성우",
-            "industry": "PRESS(CASE)",
-            "hq": "구미 본사", "kr": "천안 2공장", "gl": "중국 남경 공장",
-            "desc": "(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.",
-            "products": ["CASE"],
-            "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
-            "customers": ["효성전기", "LG 이노텍"],
+            "industry": "2차전지 및 전장부품",
+            "hq": "경북 구미 본사", 
+            "kr": "천안 공장", 
+            "gl": "중국 남경 법인",
+            "desc": "(주)성우는 1992년 설립 이래 초정밀 프레스(PRESS) 기술을 기반으로 성장하여, 현재는 전기차 배터리용 핵심 안전부품(원통형 Top Cap 어셈블리 등) 및 자동차 전장부품 생산을 주도하는 정밀 부품 제조 전문기업입니다.",
+            "products": ["2차전지 Top Cap", "배터리 벤트(VENT)", "전장부품 CASE"],
+            "certs": ["IATF 16949", "ISO 14001", "ISO 45001", "SQ 인증"],
+            "customers": {"LG에너지솔루션": 55, "효성전기": 25, "LG이노텍": 15, "기타": 5},
             "locations": [
-                {"name": "구미 본사", "type": "hq", "address": "경상북도 구미시", "lat": 36.119485, "lon": 128.344573},
-                {"name": "천안 2공장", "type": "kr", "address": "충청남도 천안시", "lat": 36.815129, "lon": 127.113893},
-                {"name": "중국 남경 공장", "type": "gl", "address": "중국 남경", "lat": 32.060255, "lon": 118.796877}
+                {"name": "구미 본사", "type": "hq", "address": "경북 구미시 3공단2로 107", "lat": 36.1018, "lon": 128.4223},
+                {"name": "구미 신공장", "type": "kr", "address": "경북 구미시 산동읍 5공단북로 86-7", "lat": 36.1601, "lon": 128.4682},
+                {"name": "천안 공장", "type": "kr", "address": "충남 천안시 동남구 성남면 5산단2로 133", "lat": 36.7580, "lon": 127.2750},
+                {"name": "중국 남경 법인", "type": "gl", "address": "중국 장쑤성 난징시", "lat": 32.0602, "lon": 118.7968}
             ]
         },
         {
@@ -161,8 +165,17 @@ if "suppliers" not in st.session_state:
         }
     ]
 
+# 🌟 (주)성우의 실제 홈페이지 이미지 URL 연동 세팅 🌟
 if "excel_img_data" not in st.session_state:
-    st.session_state.excel_img_data = {}
+    st.session_state.excel_img_data = {
+        "(주)성우": {
+            "prod_imgs": [
+                "https://www.e-sungwoo.co.kr/theme/daon_company/img/sub/business_battary_img1.jpg", # 배터리 부품
+                "https://www.e-sungwoo.co.kr/theme/daon_company/img/sub/business_car_img1.jpg"     # 전장 부품
+            ],
+            "cert_imgs": []
+        }
+    }
 
 suppliers = st.session_state.suppliers
 
@@ -299,8 +312,7 @@ with st.sidebar:
                     with st.spinner("웹 사이트 분석 및 위경도 추출 중... (AI API 연동 필요)"):
                         time.sleep(2) # 크롤링 하는 척 대기 시간 (실제 API 연동 시 제거)
                         
-                        # --- 여기에 실제 LLM/크롤링 코드가 들어갑니다 ---
-                        # 아래는 데모용(시뮬레이션)으로 생성되는 가상의 추출 데이터입니다.
+                        # 데모용(시뮬레이션)으로 생성되는 가상의 추출 데이터
                         new_supplier = {
                             "name": input_comp,
                             "industry": "자동 추출(AI)",
@@ -315,14 +327,12 @@ with st.sidebar:
                             ]
                         }
                         
-                        # 기존에 같은 이름의 회사가 있으면 업데이트, 없으면 리스트에 추가
                         existing_idx = next((i for i, s in enumerate(st.session_state.suppliers) if s["name"] == input_comp), None)
                         if existing_idx is not None:
                             st.session_state.suppliers[existing_idx] = new_supplier
                         else:
                             st.session_state.suppliers.append(new_supplier)
                             
-                        # 이미지도 URL 형태의 데모 데이터 삽입
                         st.session_state.excel_img_data[input_comp] = {
                             "prod_imgs": ["https://via.placeholder.com/300x200.png?text=Product+1", "https://via.placeholder.com/300x200.png?text=Product+2"],
                             "cert_imgs": ["https://via.placeholder.com/300x200.png?text=Certificate"]
