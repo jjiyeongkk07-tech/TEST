@@ -18,9 +18,10 @@ suppliers_data = [
             {"name": "(주)성우 구미1사업장(본사)", "type": "hq", "address": "경북 구미시 3공단2로 107", "lat": 36.1018, "lon": 128.4223, "country": "대한민국"},
             {"name": "(주)성우 R&D Center", "type": "kr", "address": "경북 구미시 산동읍 도중리 115", "lat": 36.1601, "lon": 128.4682, "country": "대한민국"},
             {"name": "천안사업장", "type": "kr", "address": "충남 천안시 동남구 성남면 5산단2로 133", "lat": 36.7580, "lon": 127.2750, "country": "대한민국"},
-            {"name": "중국 남경사업장", "type": "gl_cn", "address": "No.9, Hengda Road, Nanjing, China", "lat": 32.0602, "lon": 118.7968, "country": "중국"},
-            {"name": "중국 추저우 사업장 (설립예정)", "type": "gl_cn", "address": "중국 안후이성 추저우시", "lat": 32.3024, "lon": 118.3186, "country": "중국"},
-            {"name": "북미 사업장 (설립예정)", "type": "gl_us", "address": "미국 오하이오 주", "lat": 39.9611, "lon": -82.9987, "country": "미국"}
+            # 👇 이름 정돈 및 (설립예정) 제거
+            {"name": "중국 남경 사업장", "type": "gl_cn", "address": "No.9, Hengda Road, Nanjing, China", "lat": 32.0602, "lon": 118.7968, "country": "중국"},
+            {"name": "중국 추저우 사업장", "type": "gl_cn", "address": "중국 안후이성 추저우시", "lat": 32.3024, "lon": 118.3186, "country": "중국"},
+            {"name": "북미 사업장", "type": "gl_us", "address": "미국 오하이오 주", "lat": 39.9611, "lon": -82.9987, "country": "미국"}
         ]
     },
     {
@@ -31,8 +32,6 @@ suppliers_data = [
         "kr": "부산 공장", 
         "gl": "-",
         "desc": "(주)한성전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
-        
-        # 👇 카드 1개만 나오도록 제품명을 하나로 합쳤습니다.
         "products": [
             "자동차용 센서 및 일반 전장품 / 자동차용 컨트롤러 / 전기차 배터리 부품 및 와이어 하네스"
         ],
@@ -57,7 +56,6 @@ excel_img_data = {
         ]
     },
     "(주)한성전장": {
-        # 👇 이미지도 1개만 남겼습니다.
         "prod_imgs": [
             "http://hansungeec.co.kr/data/editor/2303/68f8713e9ce1b074a95162e5d3d4e265_1679371328_4312.png"
         ],
