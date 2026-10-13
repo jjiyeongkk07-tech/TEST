@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
+import time
 
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
@@ -46,7 +47,6 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .product-emoji { font-size: 48px !important; margin-bottom: 15px !important; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.05)) !important; }
 .product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4;}
 
-/* 지도 거점 버튼: 왼쪽 정렬 및 2줄 표시 강제 적용 */
 div.stButton > button { 
     background-color: #ffffff !important; 
     border: 1px solid #E5E0D8 !important; 
@@ -105,60 +105,67 @@ def get_customer_tags_html(customers):
     return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
 
-# 4. 초기 데이터 셋업
-suppliers = [
-    {
-        "name": "(주)한성전장",
-        "industry": "임가공(조립)",
-        "hq": "양산 본사", "kr": "부산 공장", "gl": "-",
-        "desc": "(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
-        "products": ["PCB ASM", "COVER ASM", "WIRE ASM"],
-        "certs": ["SQ 인증"],
-        "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "기타": 21},
-        "locations": [
-            {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토로 23", "lat": 35.398579, "lon": 129.056037},
-            {"name": "부산 공장", "type": "kr", "address": "부산 금정구 팔송로 53번길 43", "lat": 35.281146, "lon": 129.085023}
-        ]
-    },
-    {
-        "name": "(주)성우",
-        "industry": "PRESS(CASE)",
-        "hq": "구미 본사", "kr": "천안 2공장", "gl": "중국 남경 공장",
-        "desc": "(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.",
-        "products": ["CASE"],
-        "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
-        "customers": ["효성전기", "LG 이노텍"],
-        "locations": [
-            {"name": "구미 본사", "type": "hq", "address": "경상북도 구미시", "lat": 36.119485, "lon": 128.344573},
-            {"name": "천안 2공장", "type": "kr", "address": "충청남도 천안시", "lat": 36.815129, "lon": 127.113893},
-            {"name": "중국 남경 공장", "type": "gl", "address": "중국 남경", "lat": 32.060255, "lon": 118.796877}
-        ]
-    },
-    {
-        "name": "(주)엠제이텍",
-        "industry": "PRESS(CORE)",
-        "hq": "경기도 본사", "kr": "-", "gl": "-",
-        "desc": "(주)엠제이텍은 자동차 및 가전용 초정밀 모터 코어와 \n전기·전자 부품을 전문적으로 생산하는 제조기업입니다.",
-        "products": ["CORE"],
-        "certs": [],
-        "customers": {"효성전기": 81, "(주)현대산업": 48, "두원공조": 40},
-        "locations": [
-            {"name": "경기도 본사", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길59 장원산업단지", "lat": 37.0862, "lon": 127.3879}
-        ]
-    },
-    {
-        "name": "(주)대광오토텍",
-        "industry": "PRESS(TERMINAL)",
-        "hq": "부산 본사", "kr": "-", "gl": "-",
-        "desc": "(주)대광오토텍은 부산 강서구 미음산업단지에 위치한 자동차 부품 제조 전문기업으로, \n자동차 모터용 정밀 부품 및 프레스 금형 설계·제작 기술을 보유하고 있습니다.",
-        "products": ["TERMINAL"],
-        "certs": [],
-        "customers": {"효성전기": 65, "진흥공업사": 15, "삼풍하이텍": 9, "기타": 11},
-        "locations": [
-            {"name": "부산 본사", "type": "hq", "address": "부산 강서구 미음산단로 76번길 29", "lat": 35.132, "lon": 128.847}
-        ]
-    }
-]
+# 4. 초기 데이터 셋업 (Session State 활용하여 동적 업데이트 지원)
+if "suppliers" not in st.session_state:
+    st.session_state.suppliers = [
+        {
+            "name": "(주)한성전장",
+            "industry": "임가공(조립)",
+            "hq": "양산 본사", "kr": "부산 공장", "gl": "-",
+            "desc": "(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
+            "products": ["PCB ASM", "COVER ASM", "WIRE ASM"],
+            "certs": ["SQ 인증"],
+            "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "기타": 21},
+            "locations": [
+                {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토로 23", "lat": 35.398579, "lon": 129.056037},
+                {"name": "부산 공장", "type": "kr", "address": "부산 금정구 팔송로 53번길 43", "lat": 35.281146, "lon": 129.085023}
+            ]
+        },
+        {
+            "name": "(주)성우",
+            "industry": "PRESS(CASE)",
+            "hq": "구미 본사", "kr": "천안 2공장", "gl": "중국 남경 공장",
+            "desc": "(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.",
+            "products": ["CASE"],
+            "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
+            "customers": ["효성전기", "LG 이노텍"],
+            "locations": [
+                {"name": "구미 본사", "type": "hq", "address": "경상북도 구미시", "lat": 36.119485, "lon": 128.344573},
+                {"name": "천안 2공장", "type": "kr", "address": "충청남도 천안시", "lat": 36.815129, "lon": 127.113893},
+                {"name": "중국 남경 공장", "type": "gl", "address": "중국 남경", "lat": 32.060255, "lon": 118.796877}
+            ]
+        },
+        {
+            "name": "(주)엠제이텍",
+            "industry": "PRESS(CORE)",
+            "hq": "경기도 본사", "kr": "-", "gl": "-",
+            "desc": "(주)엠제이텍은 자동차 및 가전용 초정밀 모터 코어와 \n전기·전자 부품을 전문적으로 생산하는 제조기업입니다.",
+            "products": ["CORE"],
+            "certs": [],
+            "customers": {"효성전기": 81, "(주)현대산업": 48, "두원공조": 40},
+            "locations": [
+                {"name": "경기도 본사", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길59 장원산업단지", "lat": 37.0862, "lon": 127.3879}
+            ]
+        },
+        {
+            "name": "(주)대광오토텍",
+            "industry": "PRESS(TERMINAL)",
+            "hq": "부산 본사", "kr": "-", "gl": "-",
+            "desc": "(주)대광오토텍은 부산 강서구 미음산업단지에 위치한 자동차 부품 제조 전문기업으로, \n자동차 모터용 정밀 부품 및 프레스 금형 설계·제작 기술을 보유하고 있습니다.",
+            "products": ["TERMINAL"],
+            "certs": [],
+            "customers": {"효성전기": 65, "진흥공업사": 15, "삼풍하이텍": 9, "기타": 11},
+            "locations": [
+                {"name": "부산 본사", "type": "hq", "address": "부산 강서구 미음산단로 76번길 29", "lat": 35.132, "lon": 128.847}
+            ]
+        }
+    ]
+
+if "excel_img_data" not in st.session_state:
+    st.session_state.excel_img_data = {}
+
+suppliers = st.session_state.suppliers
+
 
 # 5. 헤더 타이틀
 st.markdown("""
@@ -169,10 +176,8 @@ st.markdown("""
 
 
 # 6. 사이드바 구성
-excel_img_data = {}
-
 with st.sidebar:
-    # --- 6-1. 상세 검색 (최상단) ---
+    # --- 6-1. 상세 검색 ---
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
     
     all_countries_set = set()
@@ -196,7 +201,6 @@ with st.sidebar:
     with tab_country:
         selected_country = st.selectbox("조회할 국가를 선택하세요", country_list, on_change=reset_map_view, label_visibility="collapsed")
 
-    # 교차 필터링 로직
     filtered = suppliers
     if selected_industry != "전체":
         filtered = [s for s in filtered if s["industry"] == selected_industry]
@@ -205,7 +209,7 @@ with st.sidebar:
     if search_term:
         filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
 
-    # --- 6-2. 분석 업체 선택 (중단) ---
+    # --- 6-2. 분석 업체 선택 ---
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     
     options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
@@ -216,82 +220,122 @@ with st.sidebar:
     selected_name = options_sidebar_map[selected_display_name]
 
 
-    # --- 6-3. 관리자용 데이터 연동 메뉴 (가장 하단) ---
+    # --- 6-3. 관리자용 데이터 연동 메뉴 ---
     st.markdown("<br><br><br><br>", unsafe_allow_html=True)
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     
     with st.popover("⚙️ 관리자 설정 (데이터 연동)", use_container_width=True):
-        # 엑셀과 다수의 이미지를 한꺼번에 업로드할 수 있게 설정
-        uploaded_files = st.file_uploader(
-            "파일 업로드", 
-            type=["xlsx", "xls", "png", "jpg", "jpeg", "webp"], 
-            accept_multiple_files=True, 
-            label_visibility="collapsed"
-        )
+        admin_tab1, admin_tab2 = st.tabs(["📁 파일 업로드", "🌐 웹 주소 연동"])
         
-        if uploaded_files:
-            excel_file = None
-            uploaded_images = {}
+        # 탭 1: 기존 엑셀/이미지 업로드 방식
+        with admin_tab1:
+            uploaded_files = st.file_uploader(
+                "파일 및 엑셀 업로드", 
+                type=["xlsx", "xls", "png", "jpg", "jpeg", "webp"], 
+                accept_multiple_files=True, 
+                label_visibility="collapsed"
+            )
             
-            # 첨부된 파일들 중 엑셀과 이미지를 분류
-            for file in uploaded_files:
-                if file.name.endswith(('.xlsx', '.xls')):
-                    excel_file = file
+            if uploaded_files:
+                excel_file = None
+                uploaded_images = {}
+                
+                for file in uploaded_files:
+                    if file.name.endswith(('.xlsx', '.xls')):
+                        excel_file = file
+                    else:
+                        uploaded_images[file.name] = file
+
+                if excel_file:
+                    try:
+                        df_ex = pd.read_excel(excel_file, sheet_name='업체정보')
+                        cols = df_ex.columns
+
+                        for _, row in df_ex.iterrows():
+                            comp_name = str(row.iloc[0]).strip()
+                            
+                            # 웹 URL과 로컬 이미지를 모두 호환하도록 수정
+                            def get_img_source(val):
+                                if pd.isna(val) or str(val).strip() == "": return None
+                                val_str = str(val).strip()
+                                # 1. 엑셀에 http 주소가 적혀있으면 그대로 반환
+                                if val_str.startswith("http"): return val_str
+                                # 2. 첨부된 이미지가 있으면 파일 객체 반환
+                                for img_name, img_file in uploaded_images.items():
+                                    if img_name in val_str: return img_file
+                                return None
+
+                            p1 = get_img_source(row.iloc[11]) if len(row) > 11 else None
+                            p2 = get_img_source(row.iloc[12]) if len(row) > 12 else None
+                            c1 = get_img_source(row.iloc[13]) if len(row) > 13 else None
+                            c2 = get_img_source(row.iloc[14]) if len(row) > 14 else None
+                            
+                            prod_imgs = [x for x in [p1, p2] if x is not None]
+                            cert_imgs = [x for x in [c1, c2] if x is not None]
+                            st.session_state.excel_img_data[comp_name] = {"prod_imgs": prod_imgs, "cert_imgs": cert_imgs}
+                            
+                            target_supplier = next((s for s in st.session_state.suppliers if s['name'] == comp_name), None)
+                            if target_supplier:
+                                if '업종' in cols and pd.notna(row['업종']): target_supplier['industry'] = str(row['업종'])
+                                if '기업개요' in cols and pd.notna(row['기업개요']): target_supplier['desc'] = str(row['기업개요'])
+                                if '본사' in cols and pd.notna(row['본사']): target_supplier['hq'] = str(row['본사'])
+                                if '지사' in cols and pd.notna(row['지사']): target_supplier['kr'] = str(row['지사'])
+                                if '해외' in cols and pd.notna(row['해외']): target_supplier['gl'] = str(row['해외'])
+                                if '핵심생산품목' in cols and pd.notna(row['핵심생산품목']): target_supplier['products'] = [x.strip() for x in str(row['핵심생산품목']).split(',')]
+                                if '품질인증' in cols and pd.notna(row['품질인증']): target_supplier['certs'] = [x.strip() for x in str(row['품질인증']).split(',')]
+
+                        st.success("✅ 파일 데이터 연동 완료!")
+                    except Exception as e:
+                        st.error("오류: 엑셀 파일 형식 또는 '업체정보' 시트 구성을 확인해주세요.")
+
+        # 탭 2: 웹 주소 입력 (AI 크롤링 시뮬레이션 뼈대)
+        with admin_tab2:
+            st.markdown("<p style='font-size:13px; color:#8A817C;'>💡 홈페이지 주소를 입력하면 웹 데이터를 분석하여 SCM 정보를 자동 등록합니다.</p>", unsafe_allow_html=True)
+            input_comp = st.text_input("업체명", placeholder="예: (주)테스트기업")
+            input_url = st.text_input("홈페이지 URL", placeholder="https://www.example.com")
+            
+            if st.button("AI 데이터 추출 및 연동", use_container_width=True):
+                if input_comp and input_url:
+                    with st.spinner("웹 사이트 분석 및 위경도 추출 중... (AI API 연동 필요)"):
+                        time.sleep(2) # 크롤링 하는 척 대기 시간 (실제 API 연동 시 제거)
+                        
+                        # --- 여기에 실제 LLM/크롤링 코드가 들어갑니다 ---
+                        # 아래는 데모용(시뮬레이션)으로 생성되는 가상의 추출 데이터입니다.
+                        new_supplier = {
+                            "name": input_comp,
+                            "industry": "자동 추출(AI)",
+                            "hq": "서울 본사", "kr": "수원 공장", "gl": "-",
+                            "desc": f"{input_comp}는 AI 모델이 {input_url}에서 자동으로 분석하여 요약한 기업 소개글입니다. 향후 실제 데이터로 대체됩니다.",
+                            "products": ["테스트 부품 1", "테스트 부품 2"],
+                            "certs": ["ISO 9001"],
+                            "customers": ["A자동차", "B전자"],
+                            "locations": [
+                                {"name": "서울 본사", "type": "hq", "address": "서울특별시 강남구 테헤란로", "lat": 37.500, "lon": 127.036},
+                                {"name": "수원 공장", "type": "kr", "address": "경기도 수원시 영통구", "lat": 37.263, "lon": 127.028}
+                            ]
+                        }
+                        
+                        # 기존에 같은 이름의 회사가 있으면 업데이트, 없으면 리스트에 추가
+                        existing_idx = next((i for i, s in enumerate(st.session_state.suppliers) if s["name"] == input_comp), None)
+                        if existing_idx is not None:
+                            st.session_state.suppliers[existing_idx] = new_supplier
+                        else:
+                            st.session_state.suppliers.append(new_supplier)
+                            
+                        # 이미지도 URL 형태의 데모 데이터 삽입
+                        st.session_state.excel_img_data[input_comp] = {
+                            "prod_imgs": ["https://via.placeholder.com/300x200.png?text=Product+1", "https://via.placeholder.com/300x200.png?text=Product+2"],
+                            "cert_imgs": ["https://via.placeholder.com/300x200.png?text=Certificate"]
+                        }
+                        
+                        st.success(f"✅ {input_comp} 데이터 추출 및 연동 완료! 좌측 업체 목록에서 확인하세요.")
+                        time.sleep(1)
+                        st.rerun()
                 else:
-                    uploaded_images[file.name] = file
-
-            if excel_file:
-                try:
-                    df_ex = pd.read_excel(excel_file, sheet_name='업체정보')
-                    cols = df_ex.columns
-
-                    for _, row in df_ex.iterrows():
-                        comp_name = str(row.iloc[0]).strip()
-                        
-                        # 엑셀의 텍스트(ex:제품1.jpg)와 업로드된 이미지 파일을 자동 매핑하는 함수
-                        def get_img_source(val):
-                            if pd.isna(val) or str(val).strip() == "": return None
-                            val_str = str(val).strip()
-                            # 첨부된 이미지 중에 이름이 포함되어 있으면 파일 객체 반환
-                            for img_name, img_file in uploaded_images.items():
-                                if img_name in val_str:
-                                    return img_file
-                            # 매핑되는 파일이 없으면 텍스트(URL 등) 그대로 반환
-                            return val_str
-
-                        p1 = get_img_source(row.iloc[11]) if len(row) > 11 else None
-                        p2 = get_img_source(row.iloc[12]) if len(row) > 12 else None
-                        c1 = get_img_source(row.iloc[13]) if len(row) > 13 else None
-                        c2 = get_img_source(row.iloc[14]) if len(row) > 14 else None
-                        
-                        prod_imgs = [x for x in [p1, p2] if x is not None]
-                        cert_imgs = [x for x in [c1, c2] if x is not None]
-                        excel_img_data[comp_name] = {"prod_imgs": prod_imgs, "cert_imgs": cert_imgs}
-                        
-                        # 텍스트 데이터 자동 덮어쓰기
-                        target_supplier = next((s for s in suppliers if s['name'] == comp_name), None)
-                        if target_supplier:
-                            if '업종' in cols and pd.notna(row['업종']): 
-                                target_supplier['industry'] = str(row['업종'])
-                            if '기업개요' in cols and pd.notna(row['기업개요']): 
-                                target_supplier['desc'] = str(row['기업개요'])
-                            if '본사' in cols and pd.notna(row['본사']): 
-                                target_supplier['hq'] = str(row['본사'])
-                            if '지사' in cols and pd.notna(row['지사']): 
-                                target_supplier['kr'] = str(row['지사'])
-                            if '해외' in cols and pd.notna(row['해외']): 
-                                target_supplier['gl'] = str(row['해외'])
-                            if '핵심생산품목' in cols and pd.notna(row['핵심생산품목']): 
-                                target_supplier['products'] = [x.strip() for x in str(row['핵심생산품목']).split(',')]
-                            if '품질인증' in cols and pd.notna(row['품질인증']): 
-                                target_supplier['certs'] = [x.strip() for x in str(row['품질인증']).split(',')]
-
-                    st.success("✅ 데이터 및 이미지 연동 완료!")
-                except Exception as e:
-                    st.error("오류 발생: 엑셀 파일 형식 또는 '업체정보' 시트 구성을 확인해주세요.")
+                    st.warning("업체명과 URL을 모두 입력해주세요.")
 
 
-# 7. 메인 화면 출력
+# 7. 메인 화면 출력 (기존과 동일하되 session_state 데이터 활용)
 if selected_name == "🏠 종합 메인 화면":
     st.markdown("<div class='section-title' style='margin-top:0;'>📊 글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
     
@@ -335,8 +379,8 @@ elif selected_name:
         st.markdown("<div class='section-title'><span class='section-num'>03.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         col_prod, col_cert = st.columns([1, 1])
 
-        # 업로드된 엑셀 기반 이미지 리스트 불러오기
-        company_images = excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
+        # Session State 기반 이미지 불러오기
+        company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
         with col_prod:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
