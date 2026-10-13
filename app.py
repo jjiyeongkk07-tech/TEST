@@ -167,11 +167,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 6. 사이드바 (상세 검색 및 관리자 데이터 연동)
+
+# 6. 사이드바 구성
 excel_img_data = {}
 
 with st.sidebar:
-    # --- 상세 검색 (업종 -> 업체 -> 국가 순서) ---
+    # --- 6-1. 상세 검색 (최상단) ---
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
     
     # 국가 데이터 자동 생성
@@ -187,7 +188,7 @@ with st.sidebar:
     industry_list = ["전체"] + list(set(s["industry"] for s in suppliers if s["industry"] != "미분류"))
     country_list = ["전체"] + list(all_countries_set)
 
-    # 탭 순서 변경 반영
+    # 탭 순서: 업종 -> 업체 -> 국가
     tab_industry, tab_company, tab_country = st.tabs(["🏷️ 업종", "🏢 업체", "🌍 국가"])
     
     with tab_industry:
@@ -197,13 +198,35 @@ with st.sidebar:
     with tab_country:
         selected_country = st.selectbox("조회할 국가를 선택하세요", country_list, on_change=reset_map_view, label_visibility="collapsed")
 
-    # --- 엑셀 연동 로직 적용을 위해 먼저 파일 첨부 버튼 (숨김 메뉴) 구성 ---
-    st.markdown("<br><hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
+    # 교차 필터링 로직
+    filtered = suppliers
+    if selected_industry != "전체":
+        filtered = [s for s in filtered if s["industry"] == selected_industry]
+    if selected_country != "전체":
+        filtered = [s for s in filtered if any(loc.get("country") == selected_country for loc in s["locations"])]
+    if search_term:
+        filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
+
+    # --- 6-2. 분석 업체 선택 (중단) ---
+    st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     
-    # st.popover를 사용하여 클릭 시 우측으로 열리는 숨김창 생성 (Streamlit 1.33+)
+    options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
+    for s in filtered:
+        options_sidebar_map[s['name']] = s['name']
+        
+    selected_display_name = st.radio("📊 분석할 업체 선택", list(options_sidebar_map.keys()), on_change=reset_map_view)
+    selected_name = options_sidebar_map[selected_display_name]
+
+
+    # --- 6-3. 관리자용 데이터 연동 메뉴 (가장 하단) ---
+    # 빈 여백을 두어 메뉴를 시각적으로 하단으로 분리
+    st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
+    
+    # 클릭 시 오른쪽으로 열리는 숨김 팝업 창
     with st.popover("⚙️ 관리자 설정 (데이터 연동)", use_container_width=True):
         st.markdown("#### 📂 엑셀 데이터 및 이미지 연동")
-        st.info("💡 엑셀을 첨부하면 이미지뿐만 아니라 해당 업체의 기존 텍스트(개요, 품목 등)도 자동 반영됩니다.")
+        st.info("💡 엑셀을 첨부하면 이미지(L~O열)뿐만 아니라 해당 업체의 기존 텍스트(개요, 품목 등)도 자동 반영됩니다.")
         uploaded_excel = st.file_uploader("업체정보 원본 엑셀 첨부", type=["xlsx", "xls"])
         
         if uploaded_excel:
@@ -246,24 +269,6 @@ with st.sidebar:
             except Exception as e:
                 st.error("오류 발생: 엑셀 파일 형식 또는 '업체정보' 시트 구성을 확인해주세요.")
 
-    # 교차 필터링 적용 (새롭게 연동된 데이터 반영)
-    filtered = suppliers
-    if selected_industry != "전체":
-        filtered = [s for s in filtered if s["industry"] == selected_industry]
-    if selected_country != "전체":
-        filtered = [s for s in filtered if any(loc.get("country") == selected_country for loc in s["locations"])]
-    if search_term:
-        filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
-
-    st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
-    
-    # 6-3. 분석 업체 최종 선택
-    options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
-    for s in filtered:
-        options_sidebar_map[s['name']] = s['name']
-        
-    selected_display_name = st.radio("📊 분석할 업체 선택", list(options_sidebar_map.keys()), on_change=reset_map_view)
-    selected_name = options_sidebar_map[selected_display_name]
 
 # 7. 메인 화면 출력
 if selected_name == "🏠 종합 메인 화면":
