@@ -14,6 +14,10 @@ st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="
 
 if "map_view" not in st.session_state:
     st.session_state.map_view = "전체 뷰"
+if "popup_img" not in st.session_state:
+    st.session_state.popup_img = None
+if "popup_title" not in st.session_state:
+    st.session_state.popup_title = ""
 
 def set_view(view):
     st.session_state.map_view = view
@@ -21,7 +25,15 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (좌우 높이 맞춤 & 가로 배치 로직 완벽 적용)
+def open_popup(b64_str, title):
+    st.session_state.popup_img = b64_str
+    st.session_state.popup_title = title
+
+def close_popup():
+    st.session_state.popup_img = None
+    st.session_state.popup_title = ""
+
+# 2. 테마 CSS 설정 (양쪽 높이 100% 매칭을 위한 Flexbox 래퍼 추가)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -36,77 +48,49 @@ footer { visibility: hidden; }
 header { background-color: transparent !important; }
 [data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
 
-/* ✅ Streamlit 컬럼(좌우) 높이 완벽 통일을 위한 Flexbox 설정 */
-[data-testid="column"] > div { height: 100%; display: flex; flex-direction: column; }
-[data-testid="column"] { display: flex; flex-direction: column; }
-.st-emotion-cache-11r0f1r { display: flex; flex-wrap: wrap; align-items: stretch; } /* Streamlit 내장 Row Flexbox 강제 지정 */
+/* ✅ 완벽한 좌우 높이 맞춤을 위한 Custom Flex Wrapper */
+.flex-wrapper { display: flex; flex-wrap: wrap; gap: 30px; align-items: stretch; margin-bottom: 20px; }
+.flex-col-left { flex: 1.2; display: flex; flex-direction: column; min-width: 300px; }
+.flex-col-right { flex: 1; display: flex; flex-direction: column; min-width: 300px; }
 
-/* ✅ 핵심 역량 품목 양옆 배치 */
-.grid-container { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; height: 100%; align-content: flex-start; }
-.grid-item { flex: 1; min-width: 200px; display: flex; flex-direction: column; }
-
-/* ✅ 모든 카드(생산품목, 인증서) 높이 100% 매칭 */
+/* ✅ 모든 카드 높이 100% 매칭 */
 .unified-card {
-    background: #ffffff; border: 1px solid #E5E0D8; border-radius: 12px; padding: 20px;
+    background: #ffffff; border: 1px solid #E5E0D8; border-radius: 12px; padding: 25px;
     display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03); height: 100%; flex: 1;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03); height: 100%; width: 100%;
 }
 
-/* 이미지 박스 기본 설정 */
-.img-box {
-    width: 100%; display: flex; align-items: center; justify-content: center;
-    background: #FDFCFB; border-radius: 8px; padding: 10px; overflow: hidden;
-}
-.prod-img-box { height: 240px; margin-bottom: 20px; }
+.card-title { color: #2C2A29; text-align: center; margin-bottom: 25px; font-weight: 800; font-size: 18px; width: 100%; border-bottom: 2px dashed #E5E0D8; padding-bottom: 15px; }
 
-/* 🚀 인증서 박스 가로 배치(Row) 설정 */
-.cert-img-box {
-    flex: 1; /* 카드 내부에서 남는 공간을 모두 차지하게 하여 하단 뱃지를 바닥으로 밀어냄 */
-    display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px;
-    justify-content: center; align-content: center;
-    background: transparent; padding: 10px; margin-bottom: 20px;
-}
+/* 생산품목 내부 Grid */
+.grid-container { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; height: 100%; align-content: flex-start; }
+.grid-item { flex: 1; min-width: 220px; display: flex; flex-direction: column; background: #FDFCFB; border: 1px solid #F3F4F6; border-radius: 12px; padding: 15px; }
 
-/* 🚀 마우스 오버 시 이미지 확대 및 크기 설정 */
-.img-box img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease-in-out; }
-.prod-img-box:hover img { transform: scale(1.15); }
+/* 이미지 박스 기본 설정 (버튼 클릭을 위해 hover 애니메이션 제거) */
+.img-box { width: 100%; display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 15px; cursor: pointer; }
+.prod-img-box { height: 220px; background: #ffffff; }
 
-/* 🚀 여러 인증서 이미지가 무조건 가로로 예쁘게 들어가도록 % 비율 및 높이 제한 */
-.cert-img-box img { 
-    max-height: 220px; /* 너무 길어지지 않게 방어 */
-    flex: 1 1 calc(33% - 15px); /* 기본적으로 3개씩 가로 배치 (공간 부족시 2개씩 자동 조절) */
-    min-width: 120px; /* 최소 너비 보장 */
-    object-fit: contain; transition: transform 0.3s ease-in-out; 
-}
-.cert-img-box img:hover { transform: scale(1.15); z-index: 10; position: relative;}
+/* 인증서 박스 설정 (Row) */
+.cert-img-box { flex: 1; display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; justify-content: center; align-content: center; padding: 10px; margin-bottom: 20px; }
+.cert-img-box .img-wrapper { flex: 1 1 calc(33% - 15px); min-width: 120px; max-height: 220px; display: flex; align-items: center; justify-content: center; background: #FDFCFB; border-radius: 8px; padding: 10px; border: 1px solid #F3F4F6; cursor: pointer; }
 
-/* 태그 및 뱃지 디자인 */
-.tag-container { display: flex; flex-direction: column; gap: 8px; width: 100%; align-items: center; }
-.prod-tag {
-    font-size: 14.5px; font-weight: 800; color: #4A4441; text-align: center;
-    word-break: keep-all; background: #F3F4F6; padding: 8px 12px;
-    border-radius: 8px; width: 100%; line-height: 1.4;
-}
-.cert-badge-wrap {
-    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: flex-end;
-    width: 100%; margin-top: auto; padding-top: 20px; border-top: 1px dashed #E5E0D8;
-}
-.cert-badge {
-    background: #ffffff; border: 1px solid #C4A47C; color: #C4A47C; font-size: 14px;
-    font-weight: 800; padding: 6px 16px; border-radius: 30px; box-shadow: 0 2px 4px rgba(196, 164, 124, 0.1); white-space: nowrap;
-}
+.img-box img, .img-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* 태그 및 뱃지 */
+.tag-container { display: flex; flex-direction: column; gap: 8px; width: 100%; align-items: center; margin-top: auto; }
+.prod-tag { font-size: 14.5px; font-weight: 800; color: #4A4441; text-align: center; word-break: keep-all; background: #E5E0D8; padding: 8px 12px; border-radius: 8px; width: 100%; line-height: 1.4; }
+.cert-badge-wrap { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: flex-end; width: 100%; margin-top: auto; padding-top: 20px; border-top: 1px dashed #E5E0D8; }
+.cert-badge { background: #ffffff; border: 1px solid #C4A47C; color: #C4A47C; font-size: 14px; font-weight: 800; padding: 6px 16px; border-radius: 30px; white-space: nowrap; }
+
+/* 🚀 이미지 클릭 버튼 투명화 (UI 상에서는 안보이지만 클릭되게 함) */
+.stButton > button { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; height: 100% !important; }
+.stButton > button:hover { background: rgba(0,0,0,0.02) !important; transform: none !important; }
 
 h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
-[data-testid="stMetricValue"] { color: #2C2A29 !important; font-weight: 900 !important; }
-[data-testid="stMetricLabel"] { color: #8A817C !important; font-weight: 700 !important; }
 .main-title { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; }
 .section-title { font-size: 24px; font-weight: 900; color: #2C2A29 !important; margin-top: 45px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 3px solid #E5E0D8; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; height: 100%; }
-
-div.stButton > button { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 15px 25px !important; width: 100% !important; height: auto !important; display: block !important; text-align: left !important; transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; }
-div.stButton > button p { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; white-space: pre-wrap !important; line-height: 1.5 !important; text-align: left !important; margin: 0 !important; display: block !important; }
-div.stButton > button:hover { background-color: #FDFCFB !important; border-color: #C4A47C !important; transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -138,11 +122,24 @@ def get_base64_image(url):
 # 4. 초기 데이터 셋업 
 if "suppliers" not in st.session_state:
     st.session_state.suppliers = suppliers_data
-
 if "excel_img_data" not in st.session_state:
     st.session_state.excel_img_data = excel_img_data
 
 suppliers = st.session_state.suppliers
+
+# --- 🚀 팝업(모달) 다이얼로그 렌더링 ---
+@st.dialog("확대 이미지", width="large")
+def render_popup():
+    st.markdown(f"<h3 style='text-align: center; color: #2C2A29 !important;'>{st.session_state.popup_title}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align: center;'><img src='data:image/jpeg;base64,{st.session_state.popup_img}' style='max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'></div>", unsafe_allow_html=True)
+    st.write("")
+    if st.button("닫기", use_container_width=True):
+        close_popup()
+        st.rerun()
+
+if st.session_state.popup_img:
+    render_popup()
+
 
 # 5. 헤더 타이틀
 st.markdown("""
@@ -231,62 +228,58 @@ elif selected_name:
         
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         
-        # 🚀 좌우 컬럼 생성 (CSS로 stretch 강제 적용됨)
-        col_prod, col_cert = st.columns([1.2, 1])
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
-        with col_prod:
-            # 컨테이너 높이를 100%로 설정하여 안쪽 요소들이 공간을 채우게 함
-            st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
-            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
-            
+        # 🚀 HTML/CSS를 활용하여 완벽한 Flexbox 높이 매칭 래퍼를 만듭니다.
+        # Streamlit 레이아웃의 한계를 피하기 위해 HTML 컨테이너와 st.columns 조합 사용
+        
+        col_left, col_right = st.columns([1.2, 1])
+
+        with col_left:
+            st.markdown("<div class='unified-card' style='border-right: none;'><div class='card-title'>🌟 핵심 생산 품목</div>", unsafe_allow_html=True)
             if selected.get('products'):
-                prod_html = "<div class='grid-container'>"
+                st.markdown("<div class='grid-container'>", unsafe_allow_html=True)
                 for idx, prod_name in enumerate(selected['products']):
-                    b64_img = ""
-                    if idx < len(company_images.get("prod_imgs", [])):
-                        b64_img = get_base64_image(company_images["prod_imgs"][idx])
-                    
-                    img_tag = f"<img src='data:image/jpeg;base64,{b64_img}'>" if b64_img else ""
-                    
+                    b64_img = get_base64_image(company_images["prod_imgs"][idx]) if idx < len(company_images.get("prod_imgs", [])) else None
                     tags = [t.strip() for t in prod_name.replace(" / ", "/").split("/")]
                     tags_html = "".join([f"<div class='prod-tag'>{t}</div>" for t in tags if t])
                     
-                    prod_html += f"<div class='grid-item'><div class='unified-card'><div class='img-box prod-img-box'>{img_tag}</div><div class='tag-container'>{tags_html}</div></div></div>"
+                    st.markdown(f"<div class='grid-item'>", unsafe_allow_html=True)
+                    if b64_img:
+                        # 이미지를 버튼으로 감싸 클릭 이벤트를 받습니다.
+                        if st.button("🔍", key=f"btn_prod_{idx}", help="클릭하여 확대"):
+                            open_popup(b64_img, f"{selected['name']} - 생산 품목")
+                            st.rerun()
+                        # 버튼 바로 아래에 이미지를 겹쳐 보여줍니다 (CSS로 버튼 투명화)
+                        st.markdown(f"<div style='margin-top: -50px; pointer-events: none;'><div class='img-box prod-img-box'><img src='data:image/jpeg;base64,{b64_img}'></div></div>", unsafe_allow_html=True)
                     
-                prod_html += "</div>"
-                st.markdown(prod_html, unsafe_allow_html=True)
+                    st.markdown(f"<div class='tag-container'>{tags_html}</div></div>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
             else:
                 st.info("등록된 핵심 생산 품목 정보가 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
-        with col_cert:
-            # 컨테이너 높이를 100%로 설정
-            st.markdown("<div style='padding-left: 10px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
-            st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
+        with col_right:
+            st.markdown("<div class='unified-card'><div class='card-title'>🏅 품질 및 ESG 인증</div>", unsafe_allow_html=True)
             
-            cert_html = "<div class='unified-card'>"
-            
-            # 1. 인증서 이미지 박스 (이미지가 여러 개일 경우 Flex wrap으로 가로 정렬됨)
             if company_images.get("cert_imgs"):
-                cert_html += "<div class='cert-img-box'>"
-                for cert_url in company_images["cert_imgs"]:
+                st.markdown("<div class='cert-img-box'>", unsafe_allow_html=True)
+                # 컬럼을 나눠서 팝업 버튼을 가로로 정렬합니다.
+                cert_cols = st.columns(len(company_images["cert_imgs"]))
+                for idx, cert_url in enumerate(company_images["cert_imgs"]):
                     b64_cert = get_base64_image(cert_url)
                     if b64_cert:
-                        cert_html += f"<img src='data:image/jpeg;base64,{b64_cert}'>"
-                cert_html += "</div>"
+                        with cert_cols[idx]:
+                            if st.button("🔍", key=f"btn_cert_{idx}", help="클릭하여 확대"):
+                                open_popup(b64_cert, f"{selected['name']} - 품질 및 ESG 인증")
+                                st.rerun()
+                            st.markdown(f"<div style='margin-top: -50px; pointer-events: none;'><div class='img-wrapper'><img src='data:image/jpeg;base64,{b64_cert}'></div></div>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
             
-            # 2. 인증서 하단 뱃지
             if selected.get('certs'):
                 badges = "".join([f"<span class='cert-badge'>{c}</span>" for c in selected['certs']])
-                cert_html += f"<div class='cert-badge-wrap'>{badges}</div>"
-            
-            cert_html += "</div>"
-            
-            if not company_images.get("cert_imgs") and not selected.get('certs'):
-                st.info("등록된 품질 및 인증 정보가 없습니다.")
-            else:
-                st.markdown(cert_html, unsafe_allow_html=True)
+                st.markdown(f"<div class='cert-badge-wrap'>{badges}</div>", unsafe_allow_html=True)
+                
             st.markdown("</div>", unsafe_allow_html=True)
 
 
