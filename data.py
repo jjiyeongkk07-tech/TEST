@@ -54,6 +54,23 @@ suppliers_data = [
         "locations": [
             {"name": "(주)브이씨텍 본사 및 공장", "type": "hq", "address": "경기도 군포시 엘에스로45번길 107", "lat": 37.3601, "lon": 126.9535, "country": "대한민국"}
         ]
+    },
+    {
+        "name": "(주)상농전선",
+        "industry": "가공(MAGNET WIRE)",
+        "sub_industry": "에나멜선 및 절연코드",
+        "hq": "경남 양산 본사",
+        "kr": "-",
+        "gl": "-",
+        "desc": "(주)상농전선은 2003년 설립되어 에나멜 와이어, 절연코드 및 기기 내부 배선용 리드와이어 등을 전문적으로 제조하는 기업으로, KS, UL, ISO 등 다양한 품질 인증을 바탕으로 신뢰받는 제품을 공급하고 있습니다.",
+        "products": [
+            "에나멜 와이어 / 절연코드 및 코드세트 / 기기 내부 배선용 리드와이어"
+        ],
+        "certs": ["KS 인증", "UL 규격", "CSA 규격", "ISO 9001", "ISO 14001"],
+        "customers": {"국내 가전 및 전장업체": 70, "기타 대리점": 30},
+        "locations": [
+            {"name": "(주)상농전선 본사 및 공장", "type": "hq", "address": "경상남도 양산시 유산공단9길 6-1", "lat": 35.3560, "lon": 129.0250, "country": "대한민국"}
+        ]
     }
 ]
 
@@ -88,6 +105,16 @@ excel_img_data = {
         "cert_imgs": [
             "http://www.vctech.co.kr/data/file/s3_6/1935335402_pckJlNFe_d2e70ac413b6da88f760445d8c245b03d0570a88.jpg",
             "http://www.vctech.co.kr/data/file/s3_6/1935335402_WO2iTjL6_2cc23dbe35e8db9898584bc1ebe7cc649d2f5df8.jpg"
+        ]
+    },
+    "(주)상농전선": {
+        "prod_imgs": [
+            "https://www.snccable.co.kr/img/product/product_01.jpg"
+        ],
+        "cert_imgs": [
+            "https://www.snccable.co.kr/img/company/cert_ks.jpg",
+            "https://www.snccable.co.kr/img/company/cert_ul.jpg",
+            "https://www.snccable.co.kr/img/company/cert_iso.jpg"
         ]
     }
 }
