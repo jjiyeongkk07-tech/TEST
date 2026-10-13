@@ -33,7 +33,7 @@ def close_popup():
     st.session_state.popup_img = None
     st.session_state.popup_title = ""
 
-# 2. 테마 CSS 설정 (구조 단순화)
+# 2. 테마 CSS 설정 (구조 최적화)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -48,22 +48,27 @@ footer { visibility: hidden; }
 header { background-color: transparent !important; }
 [data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
 
-/* ✅ 카드 스타일 (양쪽 통일) */
+/* ✅ 카드 스타일 (빈 박스 제거 및 하나로 통합) */
 .unified-card {
     background: #ffffff; border: 1px solid #E5E0D8; border-radius: 12px; padding: 25px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 20px; height: 100%;
 }
 .card-title { color: #2C2A29; text-align: center; margin-bottom: 25px; font-weight: 800; font-size: 18px; border-bottom: 2px dashed #E5E0D8; padding-bottom: 15px; }
 
-/* ✅ 이미지 및 태그 스타일 */
+/* ✅ 이미지 박스 */
 .img-box { background: #FDFCFB; border-radius: 8px; padding: 15px; display: flex; justify-content: center; align-items: center; border: 1px solid #F3F4F6; margin-bottom: 15px; height: 200px; }
 .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
-.tag-wrap { display: flex; flex-direction: column; gap: 8px; width: 100%; align-items: center; }
-.prod-tag { font-size: 14px; font-weight: 800; color: #4A4441; text-align: center; background: #E5E0D8; padding: 8px 12px; border-radius: 8px; width: 100%; }
 
-/* ✅ 인증서 뱃지 (가로 나열) */
-.cert-badge-wrap { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; margin-top: 25px; padding-top: 20px; border-top: 1px dashed #E5E0D8; }
-.cert-badge { background: #ffffff; border: 1px solid #C4A47C; color: #C4A47C; font-size: 14px; font-weight: 800; padding: 6px 16px; border-radius: 30px; }
+/* ✅ 태그 및 뱃지 공통 스타일 (디자인 완전 통일 및 가로 정렬 추가) */
+.tag-wrap { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; justify-content: center; align-items: center; margin-top: 15px; }
+.unified-tag { 
+    font-size: 14px; font-weight: 800; color: #4A4441; text-align: center; 
+    background: #E5E0D8; padding: 10px 16px; border-radius: 8px; 
+    flex: 1 1 auto; /* 내용 길이에 맞춰 늘어나면서 가로로 배치됨 */
+    min-width: 100px; max-width: 100%;
+    word-break: keep-all; line-height: 1.4;
+}
+.cert-badge-wrap { margin-top: 25px; padding-top: 20px; border-top: 1px dashed #E5E0D8; }
 
 /* 텍스트 색상 및 폰트 */
 h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
@@ -179,46 +184,53 @@ elif selected_name:
         col_left, col_right = st.columns([1.2, 1])
 
         with col_left:
-            st.markdown("<div class='unified-card'><div class='card-title'>🌟 핵심 생산 품목</div>", unsafe_allow_html=True)
-            if selected.get('products'):
-                # 제품마다 컬럼을 나눠서 가로로 배치 (양옆 배치)
-                prod_cols = st.columns(len(selected['products']))
-                for idx, prod_name in enumerate(selected['products']):
-                    with prod_cols[idx]:
-                        b64_img = get_base64_image(company_images["prod_imgs"][idx]) if idx < len(company_images.get("prod_imgs", [])) else None
-                        if b64_img:
-                            st.markdown(f"<div class='img-box'><img src='data:image/jpeg;base64,{b64_img}'></div>", unsafe_allow_html=True)
-                            if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True):
-                                open_popup(b64_img, f"{selected['name']} - 핵심 생산 품목")
-                                st.rerun()
-                        
-                        # 제품명 태그 처리
-                        tags = [t.strip() for t in prod_name.replace(" / ", "/").split("/")]
-                        tags_html = "".join([f"<div class='prod-tag'>{t}</div>" for t in tags if t])
-                        st.markdown(f"<div class='tag-wrap' style='margin-top: 15px;'>{tags_html}</div>", unsafe_allow_html=True)
-            else:
-                st.info("등록된 핵심 생산 품목 정보가 없습니다.")
-            st.markdown("</div>", unsafe_allow_html=True)
+            # ✅ st.container 래퍼를 활용하여 빈 상자가 분리되지 않도록 하나의 흐름으로 만듦
+            with st.container():
+                st.markdown("<div class='unified-card' style='padding-bottom: 0; border-bottom: none; border-radius: 12px 12px 0 0;'><div class='card-title' style='margin-bottom:0;'>🌟 핵심 생산 품목</div></div>", unsafe_allow_html=True)
+                st.markdown("<div class='unified-card' style='border-top: none; border-radius: 0 0 12px 12px; padding-top: 15px;'>", unsafe_allow_html=True)
+                
+                if selected.get('products'):
+                    # 제품마다 컬럼을 나눠서 가로로 배치
+                    prod_cols = st.columns(len(selected['products']))
+                    for idx, prod_name in enumerate(selected['products']):
+                        with prod_cols[idx]:
+                            b64_img = get_base64_image(company_images["prod_imgs"][idx]) if idx < len(company_images.get("prod_imgs", [])) else None
+                            if b64_img:
+                                st.markdown(f"<div class='img-box'><img src='data:image/jpeg;base64,{b64_img}'></div>", unsafe_allow_html=True)
+                                if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True):
+                                    open_popup(b64_img, f"{selected['name']} - 핵심 생산 품목")
+                                    st.rerun()
+                            
+                            # ✅ 제품명 태그 처리 (가로 유연 배치)
+                            tags = [t.strip() for t in prod_name.replace(" / ", "/").split("/")]
+                            tags_html = "".join([f"<div class='unified-tag'>{t}</div>" for t in tags if t])
+                            st.markdown(f"<div class='tag-wrap'>{tags_html}</div>", unsafe_allow_html=True)
+                else:
+                    st.info("등록된 핵심 생산 품목 정보가 없습니다.")
+                st.markdown("</div>", unsafe_allow_html=True)
 
         with col_right:
-            st.markdown("<div class='unified-card'><div class='card-title'>🏅 품질 및 ESG 인증</div>", unsafe_allow_html=True)
-            
-            if company_images.get("cert_imgs"):
-                # 인증서 이미지들을 가로(그리드)로 배치
-                cert_cols = st.columns(len(company_images["cert_imgs"]))
-                for idx, cert_url in enumerate(company_images["cert_imgs"]):
-                    b64_cert = get_base64_image(cert_url)
-                    if b64_cert:
-                        with cert_cols[idx]:
-                            st.markdown(f"<div class='img-box'><img src='data:image/jpeg;base64,{b64_cert}'></div>", unsafe_allow_html=True)
-                            if st.button("🔍 확대", key=f"btn_cert_{idx}", use_container_width=True):
-                                open_popup(b64_cert, f"{selected['name']} - 품질 인증서")
-                                st.rerun()
+            with st.container():
+                st.markdown("<div class='unified-card' style='padding-bottom: 0; border-bottom: none; border-radius: 12px 12px 0 0;'><div class='card-title' style='margin-bottom:0;'>🏅 품질 및 ESG 인증</div></div>", unsafe_allow_html=True)
+                st.markdown("<div class='unified-card' style='border-top: none; border-radius: 0 0 12px 12px; padding-top: 15px;'>", unsafe_allow_html=True)
+                
+                if company_images.get("cert_imgs"):
+                    # 인증서 이미지들을 가로(그리드)로 배치
+                    cert_cols = st.columns(len(company_images["cert_imgs"]))
+                    for idx, cert_url in enumerate(company_images["cert_imgs"]):
+                        b64_cert = get_base64_image(cert_url)
+                        if b64_cert:
+                            with cert_cols[idx]:
+                                st.markdown(f"<div class='img-box'><img src='data:image/jpeg;base64,{b64_cert}'></div>", unsafe_allow_html=True)
+                                if st.button("🔍 확대", key=f"btn_cert_{idx}", use_container_width=True):
+                                    open_popup(b64_cert, f"{selected['name']} - 품질 인증서")
+                                    st.rerun()
 
-            if selected.get('certs'):
-                badges = "".join([f"<span class='cert-badge'>{c}</span>" for c in selected['certs']])
-                st.markdown(f"<div class='cert-badge-wrap'>{badges}</div>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+                if selected.get('certs'):
+                    # ✅ 인증서 뱃지 디자인을 생산품목 태그와 동일하게(unified-tag) 맞춤
+                    badges = "".join([f"<div class='unified-tag'>{c}</div>" for c in selected['certs']])
+                    st.markdown(f"<div class='tag-wrap cert-badge-wrap'>{badges}</div>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
 
 
         st.markdown("<div class='section-title' style='margin-top: 40px;'><span class='section-num'>03.</span> 주요 고객사</div>", unsafe_allow_html=True)
