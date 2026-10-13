@@ -83,7 +83,7 @@ suppliers_data = [
             "Hybrid stepping motors"
         ],
         "certs": [], 
-        "customers": {}, 
+        "customers": {"LG-MAGNA","현대모비스","SNT Motiv"}, 
         "locations": [
             {"name": "본사", "type": "hq", "address": "부산광역시 사상구 새벽로 167번길 85-6(감전동, 제1,2,3,4층 제에이동호)", "lat": 35.1538, "lon": 128.9830, "country": "대한민국"},
             {"name": "모덕Office", "type": "kr", "address": "부산광역시 사상구 모덕로 57 3층", "lat": 35.1743, "lon": 128.9822, "country": "대한민국"},
