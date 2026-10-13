@@ -83,17 +83,19 @@ excel_img_data = {
     },
     "(주)브이씨텍": {
         "prod_imgs": [
-            "http://www.vctech.co.kr/img/main/visual_01.jpg", 
-            "http://www.vctech.co.kr/img/main/visual_02.jpg"
+            "http://www.vctech.co.kr/data/file/s2_1/thumb-1935335402_tQVnDyF3_385c1a0d238922837141fa6ad27fc6dc7970737a_1320x658.jpg",
+            "http://www.vctech.co.kr/data/file/s2_2/thumb-1935335402_V29TJaYb_44f0acae6d689f722c1459c9b63470dd91ebd019_1320x656.jpg",
+            "http://www.vctech.co.kr/data/file/s2_3/thumb-1935335402_7v6DUh92_5097fe52bb7984fa8ef695134836f25e92075f8c_1320x656.jpg"
         ],
         "cert_imgs": [
-            "http://www.vctech.co.kr/img/s1/s1_5_img.jpg"
+            "http://www.vctech.co.kr/data/file/s3_6/1935335402_pckJlNFe_d2e70ac413b6da88f760445d8c245b03d0570a88.jpg",
+            "http://www.vctech.co.kr/data/file/s3_6/1935335402_WO2iTjL6_2cc23dbe35e8db9898584bc1ebe7cc649d2f5df8.jpg"
         ]
     }
 }
 
 # 3. 글로벌 네트워크 (지도 시각화) 관련 설정값 모음
-# 버튼 레이블(View명)과 내부 코드(type)를 매핑합니다.
+# 버튼 레이블(View명)과 내부 코드(type) 매핑합니다.
 map_view_mapping = {
     "전체 뷰": "all",
     "🏢 국내(본사)": "hq",
