@@ -41,15 +41,19 @@ header { background-color: transparent !important; }
 [data-testid="column"] { padding-bottom: 0 !important; display: flex; flex-direction: column; width: 100%; }
 div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; width: 100%; }
 
+/* ✅ 카드(네모 칸) 안의 내용 정렬 및 이미지 크기 강제 통일 */
 .custom-card-container {
     display: flex;
+    flex-wrap: wrap; /* 여러 개일 경우 줄바꿈 허용 */
     gap: 20px;
     width: 100%;
     height: 100%;
+    justify-content: center;
 }
 
 .custom-card { 
-    flex: 1; 
+    flex: 1 1 200px; /* 최소 200px 너비 유지, 공간 남으면 늘어남 */
+    max-width: 300px; /* 카드 최대 크기 제한 */
     background-color: #ffffff; 
     border: 1px solid #E5E0D8; 
     border-radius: 12px; 
@@ -63,7 +67,7 @@ div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; 
     justify-content: space-between;
 }
 .img-container {
-    height: 270px; 
+    height: 250px; /* ✅ 이미지 영역 높이 고정 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -72,7 +76,7 @@ div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; 
 .img-container img {
     max-height: 100%;
     max-width: 100%;
-    object-fit: contain; 
+    object-fit: contain;  /* ✅ 이미지 찌그러짐 방지 및 크기 통일 */
     border-radius: 8px;
 }
 .product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4; margin-top: auto; padding-top: 10px;}
@@ -83,7 +87,7 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 [data-testid="stMetricValue"] { color: #2C2A29 !important; font-weight: 900 !important; }
 [data-testid="stMetricLabel"] { color: #8A817C !important; font-weight: 700 !important; }
 
-/* 🌟 [수정됨] 헤더 폰트 색상을 흰색으로 고정 */
+/* 헤더 폰트 색상을 흰색으로 고정 */
 .main-title { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; }
 
 .section-title { 
@@ -125,7 +129,7 @@ def get_base64_image(url):
     except Exception:
         return None
 
-# 🌟 [수정됨] 4. 초기 데이터 셋업 (data.py에서 로드)
+# 4. 초기 데이터 셋업 (data.py에서 로드)
 if "suppliers" not in st.session_state:
     st.session_state.suppliers = suppliers_data
 
@@ -133,7 +137,6 @@ if "excel_img_data" not in st.session_state:
     st.session_state.excel_img_data = excel_img_data
 
 suppliers = st.session_state.suppliers
-
 
 # 5. 헤더 타이틀
 st.markdown("""
@@ -222,6 +225,7 @@ elif selected_name:
         
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         
+        # ✅ 좌측(생산품목)과 우측(인증서) 비율을 1:1로 설정
         col_prod, col_cert = st.columns([1, 1])
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
@@ -244,17 +248,18 @@ elif selected_name:
             st.markdown("<div style='padding-left: 10px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
+            # ✅ [수정됨] 인증서 이미지가 여러 개일 때 모두 보여주도록 반복문으로 변경!
             if company_images.get("cert_imgs"):
-                b64_cert = get_base64_image(company_images["cert_imgs"][0])
-                if b64_cert:
-                    badges_html = "<div class='cert-badge-container'>"
-                    if selected.get('certs'):
-                        for cert in selected['certs']:
-                            badges_html += f"<span class='cert-badge'>{cert}</span>"
-                    badges_html += "</div>"
-                    
-                    cert_card = f"<div class='custom-card-container'><div class='custom-card' style='height: 100%;'><div class='img-container'><img src='data:image/jpeg;base64,{b64_cert}'></div>{badges_html}</div></div>"
-                    st.markdown(cert_card, unsafe_allow_html=True)
+                cert_html = "<div class='custom-card-container'>"
+                for idx, cert_url in enumerate(company_images["cert_imgs"]):
+                    b64_cert = get_base64_image(cert_url)
+                    if b64_cert:
+                        # 인증서 이름 매칭 (데이터에 순서대로 있다고 가정)
+                        cert_name = selected['certs'][idx] if idx < len(selected.get('certs', [])) else "인증서"
+                        badges_html = f"<div class='cert-badge-container'><span class='cert-badge'>{cert_name}</span></div>"
+                        cert_html += f"<div class='custom-card'><div class='img-container'><img src='data:image/jpeg;base64,{b64_cert}'></div>{badges_html}</div>"
+                cert_html += "</div>"
+                st.markdown(cert_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
 
@@ -334,6 +339,7 @@ elif selected_name:
             st.markdown("<div style='padding-left: 15px;'>", unsafe_allow_html=True)
             st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
+            # ✅ [수정됨] 하드코딩(구미/천안) 글씨 제거하고 실제 data.py에 있는 거점 이름을 가져와서 버튼 제목으로 만들게 변경!
             has_hq = any(loc["type"] == "hq" for loc in selected["locations"])
             has_kr = any(loc["type"] == "kr" for loc in selected["locations"])
             has_gl_cn = any(loc["type"] == "gl_cn" for loc in selected["locations"])
@@ -341,14 +347,18 @@ elif selected_name:
             
             if has_hq:
                 st.write("")
-                st.button(f"🏢 국내(본사)\n구미 1사업장", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
+                hq_names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == "hq"])
+                st.button(f"🏢 국내(본사)\n{hq_names}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
             if has_kr:
                 st.write("")
-                st.button(f"🏭 국내(지사)\nR&D센터, 천안사업장", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
+                kr_names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == "kr"])
+                st.button(f"🏭 국내(지사)\n{kr_names}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
             if has_gl_cn:
                 st.write("")
-                st.button(f"🌐 해외(중국)\n남경, 추저우(예정)", on_click=set_view, args=("🌐 해외(중국)",), use_container_width=True)
+                cn_names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == "gl_cn"])
+                st.button(f"🌐 해외(중국)\n{cn_names}", on_click=set_view, args=("🌐 해외(중국)",), use_container_width=True)
             if has_gl_us:
                 st.write("")
-                st.button(f"🌎 해외(북미)\n미국 법인(예정)", on_click=set_view, args=("🌎 해외(북미)",), use_container_width=True)
+                us_names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == "gl_us"])
+                st.button(f"🌎 해외(북미)\n{us_names}", on_click=set_view, args=("🌎 해외(북미)",), use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
