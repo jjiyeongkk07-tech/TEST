@@ -14,7 +14,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정
+# 2. 테마 CSS 설정 (버튼 왼쪽 정렬 규칙 완벽 적용)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -33,28 +33,54 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 [data-testid="stMetricLabel"] { color: #8A817C !important; font-weight: 700 !important; }
 .main-title { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; }
 
-/* 🌟 섹션 타이틀에 순번(Numbering) 스타일 적용 */
+/* 섹션 타이틀에 순번(Numbering) 스타일 적용 */
 .section-title { 
     font-size: 24px; font-weight: 900; color: #2C2A29 !important; 
     margin-top: 45px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;
     padding-bottom: 12px; border-bottom: 3px solid #E5E0D8; 
 }
-.section-num {
-    color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px;
-}
+.section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; }
 .product-card { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 30px 20px !important; text-align: center !important; height: 100% !important; transition: all 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .product-card:hover { transform: translateY(-4px) !important; border-color: #C4A47C !important; box-shadow: 0 10px 15px rgba(0,0,0,0.06) !important; }
 .product-emoji { font-size: 48px !important; margin-bottom: 15px !important; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.05)) !important; }
 .product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4;}
-.stButton > button { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 20px 25px !important; width: 100% !important; text-align: left !important; display: flex !important; justify-content: flex-start !important; font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; white-space: pre-wrap !important; line-height: 1.6 !important; transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; }
-.stButton > button:hover { background-color: #FDFCFB !important; border-color: #C4A47C !important; transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; }
+
+/* 지도 거점 버튼: 왼쪽 정렬 및 2줄 표시 강제 적용 */
+div.stButton > button { 
+    background-color: #ffffff !important; 
+    border: 1px solid #E5E0D8 !important; 
+    border-radius: 12px !important; 
+    padding: 15px 25px !important; 
+    width: 100% !important; 
+    height: auto !important;
+    display: block !important; /* block으로 변경하여 왼쪽 정렬 강제 */
+    text-align: left !important;
+    transition: all 0.2s ease !important; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
+}
+div.stButton > button p {
+    font-size: 16px !important; 
+    font-weight: 800 !important; 
+    color: #2C2A29 !important; 
+    white-space: pre-wrap !important; /* 줄바꿈(\\n) 허용 */
+    line-height: 1.5 !important;
+    text-align: left !important; /* 내부 텍스트 왼쪽 정렬 */
+    margin: 0 !important;
+    display: block !important;
+}
+div.stButton > button:hover { 
+    background-color: #FDFCFB !important; 
+    border-color: #C4A47C !important; 
+    transform: translateY(-2px) !important; 
+    box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; 
+}
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 아이콘 매핑 함수
+# 3. 아이콘 매핑 함수 (엑셀 이미지 없을 때 기본 대체용)
 def get_icon_html(name, category="product"):
     if category == "product":
         if "PCB" in name.upper() or "WIRE" in name.upper(): emoji = "🔌"
@@ -68,33 +94,26 @@ def get_icon_html(name, category="product"):
         else: emoji = "📜"
     return f"<div class='product-emoji'>{emoji}</div>"
 
-# 4. 주요 고객사 강조형 뱃지 HTML 생성 함수 (비중 제거, 글씨 크기 확대)
 def get_customer_tags_html(customers):
     if not customers:
         return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
     
     tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 15px;'>"
-    
-    # 딕셔너리로 들어오더라도 key(업체명)만 추출하여 동일하게 처리
     customer_list = customers.keys() if isinstance(customers, dict) else customers
 
     for comp in customer_list:
-        # 폰트 사이즈 키우고 패딩 넓힘, 보더 색상 진하게 하여 강조
         tags_html += f"<div style='padding: 14px 28px; background: #ffffff; border: 2px solid #C4A47C; border-radius: 40px; font-size: 18px; font-weight: 900; color: #2C2A29; box-shadow: 0 6px 12px rgba(196, 164, 124, 0.15); display: flex; align-items: center;'>🤝 {comp}</div>"
 
     tags_html += "</div>"
-    
     return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
 
-# 5. 데이터 매핑
+# 4. 초기 데이터 셋업
 suppliers = [
     {
         "name": "(주)한성전장",
         "industry": "임가공(조립)",
-        "hq": "양산 본사",
-        "kr": "부산 공장",
-        "gl": "-",
+        "hq": "양산 본사", "kr": "부산 공장", "gl": "-",
         "desc": "(주)한선전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
         "products": ["PCB ASM", "COVER ASM", "WIRE ASM"],
         "certs": ["SQ 인증"],
@@ -107,9 +126,7 @@ suppliers = [
     {
         "name": "(주)성우",
         "industry": "PRESS(CASE)",
-        "hq": "구미 본사",
-        "kr": "천안 2공장",
-        "gl": "중국 남경 공장",
+        "hq": "구미 본사", "kr": "천안 2공장", "gl": "중국 남경 공장",
         "desc": "(주)성우는 1992년 CRT TV 전자총 PRESS 제품을 시작으로, PRESS 제품과 Sub Assembly 사업을 운용하고 있는 기업입니다.",
         "products": ["CASE"],
         "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
@@ -123,9 +140,7 @@ suppliers = [
     {
         "name": "(주)엠제이텍",
         "industry": "PRESS(CORE)",
-        "hq": "경기도 본사",
-        "kr": "-",
-        "gl": "-",
+        "hq": "경기도 본사", "kr": "-", "gl": "-",
         "desc": "(주)엠제이텍은 자동차 및 가전용 초정밀 모터 코어와 \n전기·전자 부품을 전문적으로 생산하는 제조기업입니다.",
         "products": ["CORE"],
         "certs": [],
@@ -137,10 +152,8 @@ suppliers = [
     {
         "name": "(주)대광오토텍",
         "industry": "PRESS(TERMINAL)",
-        "hq": "부산 본사",
-        "kr": "-",
-        "gl": "-",
-        "desc": "(주)대광오토텍은 부산 강서구 미음산업단지에 위치한 자동차 부품 제조 전문기업으로, \n자동차 모터용 정밀 부품 및 프레스 금형 설계·제작 기술을 보유하고 있습니다. \n현대·기아자동차 등 글로벌 완성차 공급망에 참여하고 있으며, 전기차 구동 모터 부품 생산 역량 강화와 고정밀 금형 기술 내재화를 통해 지속 성장하고 있습니다.",
+        "hq": "부산 본사", "kr": "-", "gl": "-",
+        "desc": "(주)대광오토텍은 부산 강서구 미음산업단지에 위치한 자동차 부품 제조 전문기업으로, \n자동차 모터용 정밀 부품 및 프레스 금형 설계·제작 기술을 보유하고 있습니다.",
         "products": ["TERMINAL"],
         "certs": [],
         "customers": {"효성전기": 65, "진흥공업사": 15, "삼풍하이텍": 9, "기타": 11},
@@ -150,30 +163,83 @@ suppliers = [
     }
 ]
 
-# 6. 헤더 타이틀
+# 거점 주소를 기반으로 국가 데이터 자동 생성
+all_countries_set = set()
+for s in suppliers:
+    for loc in s["locations"]:
+        if loc["type"] in ["hq", "kr"]:
+            loc["country"] = "대한민국"
+        else:
+            loc["country"] = loc["address"].split()[0] if loc["address"] else "기타"
+        all_countries_set.add(loc["country"])
+
+industry_list = ["전체"] + list(set(s["industry"] for s in suppliers if s["industry"] != "미분류"))
+country_list = ["전체"] + list(all_countries_set)
+
+# 5. 헤더 타이틀
 st.markdown("""
 <div style="background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 20px; border-bottom: 4px solid #C4A47C; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
     <div class="main-title">🌍 글로벌 SCM 및 파트너사 인프라 분석</div>
 </div>
 """, unsafe_allow_html=True)
 
-# 7. 사이드바 구성
+# 6. 사이드바 (엑셀 이미지 연동 및 탭 기반 상세 검색)
 with st.sidebar:
-    st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🏢 필터 및 검색</h3>", unsafe_allow_html=True)
+    # 6-1. 엑셀 파일 이미지 연동
+    st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>📂 데이터 연동</h3>", unsafe_allow_html=True)
+    uploaded_excel = st.file_uploader("업체정보 엑셀 첨부 (이미지 연동)", type=["xlsx", "xls"])
     
-    industry_list = ["전체"] + list(set(s["industry"] for s in suppliers if s["industry"] != "미분류"))
-    selected_industry = st.selectbox("🏷️ 업종 필터", industry_list, on_change=reset_map_view)
+    excel_img_data = {}
+    if uploaded_excel:
+        try:
+            # 엑셀의 '업체정보' 시트를 읽어옵니다.
+            df_ex = pd.read_excel(uploaded_excel, sheet_name='업체정보')
+            
+            for _, row in df_ex.iterrows():
+                comp_name = str(row.iloc[0]).strip() # A열 (업체명)
+                
+                # 인덱스 에러 방지를 위해 열의 길이를 체크합니다 (L:11, M:12, N:13, O:14)
+                p1 = row.iloc[11] if len(row) > 11 else None
+                p2 = row.iloc[12] if len(row) > 12 else None
+                c1 = row.iloc[13] if len(row) > 13 else None
+                c2 = row.iloc[14] if len(row) > 14 else None
+                
+                # 비어있지 않은 실제 값들만 리스트에 저장합니다.
+                prod_imgs = [x for x in [p1, p2] if pd.notna(x) and str(x).strip() != ""]
+                cert_imgs = [x for x in [c1, c2] if pd.notna(x) and str(x).strip() != ""]
+                
+                excel_img_data[comp_name] = {"prod_imgs": prod_imgs, "cert_imgs": cert_imgs}
+                
+            st.success("✅ 엑셀 데이터 및 이미지 링크 연동 완료!")
+        except Exception as e:
+            st.error("오류 발생: 엑셀 파일에 '업체정보' 시트 및 L~O열 데이터가 존재하는지 확인해주세요.")
+
+    st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     
+    # 6-2. 상세 검색 (탭 메뉴 적용)
+    st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
+    
+    tab_industry, tab_country, tab_company = st.tabs(["🏷️ 업종", "🌍 국가", "🏢 업체"])
+    
+    with tab_industry:
+        selected_industry = st.selectbox("조회할 업종을 선택하세요", industry_list, on_change=reset_map_view, label_visibility="collapsed")
+    with tab_country:
+        selected_country = st.selectbox("조회할 국가를 선택하세요", country_list, on_change=reset_map_view, label_visibility="collapsed")
+    with tab_company:
+        search_term = st.text_input("업체명을 입력하세요", placeholder="예: 한성전장", label_visibility="collapsed").strip()
+
+    # 교차 필터링 로직
     filtered = suppliers
     if selected_industry != "전체":
         filtered = [s for s in filtered if s["industry"] == selected_industry]
-        
-    search_term = st.text_input("🔍 업체명 검색", placeholder="예: 한성전장").strip()
+    if selected_country != "전체":
+        filtered = [s for s in filtered if any(loc.get("country") == selected_country for loc in s["locations"])]
     if search_term:
         filtered = [s for s in filtered if search_term.lower() in s["name"].lower()]
 
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     
+    # 6-3. 분석 업체 최종 선택
     options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
     for s in filtered:
         options_sidebar_map[s['name']] = s['name']
@@ -181,7 +247,7 @@ with st.sidebar:
     selected_display_name = st.radio("📊 분석할 업체 선택", list(options_sidebar_map.keys()), on_change=reset_map_view)
     selected_name = options_sidebar_map[selected_display_name]
 
-# 8. 메인 화면 출력
+# 7. 메인 화면 출력
 if selected_name == "🏠 종합 메인 화면":
     st.markdown("<div class='section-title' style='margin-top:0;'>📊 글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
     
@@ -216,17 +282,17 @@ elif selected_name:
             unsafe_allow_html=True
         )
 
-        # [변경] 순번 적용: 01. 기업 개요
         st.markdown("<div class='section-title' style='margin-top:10px;'><span class='section-num'>01.</span> 기업 개요</div>", unsafe_allow_html=True)
         st.markdown(f"<div class='desc-box'>📖 {selected['desc']}</div>", unsafe_allow_html=True)
         
-        # [변경] 순번 적용: 02. 주요 고객사 (내부 UI 강조됨)
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 주요 고객사</div>", unsafe_allow_html=True)
         st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
-        # [변경] 순번 적용: 03. 핵심 역량 및 품질 인증
         st.markdown("<div class='section-title'><span class='section-num'>03.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         col_prod, col_cert = st.columns([1, 1])
+
+        # 업로드된 엑셀 기반 이미지 리스트 불러오기 (없으면 빈 리스트)
+        company_images = excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
         with col_prod:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
@@ -234,11 +300,18 @@ elif selected_name:
             if selected['products']:
                 p_cols = st.columns(2)
                 for idx, prod_name in enumerate(selected['products']):
-                    icon_html = get_icon_html(prod_name, "product")
-                    p_cols[idx % 2].markdown(
-                        f"<div class='product-card' style='margin-bottom:15px;'>{icon_html}<div class='product-title'>{prod_name}</div></div>",
-                        unsafe_allow_html=True
-                    )
+                    with p_cols[idx % 2]:
+                        # 엑셀 이미지가 존재하면 출력, 없으면 기본 이모지 출력
+                        if idx < len(company_images["prod_imgs"]):
+                            st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
+                            try:
+                                st.image(company_images["prod_imgs"][idx], use_container_width=True)
+                            except Exception:
+                                st.warning("이미지 로드 실패")
+                            st.markdown(f"<div class='product-title' style='margin-top:10px;'>{prod_name}</div></div>", unsafe_allow_html=True)
+                        else:
+                            icon_html = get_icon_html(prod_name, "product")
+                            st.markdown(f"<div class='product-card' style='margin-bottom:15px;'>{icon_html}<div class='product-title'>{prod_name}</div></div>", unsafe_allow_html=True)
             else:
                 st.info("등록된 핵심 생산 품목이 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
@@ -249,33 +322,43 @@ elif selected_name:
             if selected['certs']:
                 c_cols = st.columns(2)
                 for idx, cert_name in enumerate(selected['certs']):
-                    icon_html = get_icon_html(cert_name, "cert")
-                    c_cols[idx % 2].markdown(
-                        f"<div class='product-card' style='margin-bottom:15px;'>{icon_html}<div class='product-title'>{cert_name}</div></div>",
-                        unsafe_allow_html=True
-                    )
+                    with c_cols[idx % 2]:
+                        # 엑셀 이미지가 존재하면 출력, 없으면 기본 이모지 출력
+                        if idx < len(company_images["cert_imgs"]):
+                            st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
+                            try:
+                                st.image(company_images["cert_imgs"][idx], use_container_width=True)
+                            except Exception:
+                                st.warning("이미지 로드 실패")
+                            st.markdown(f"<div class='product-title' style='margin-top:10px;'>{cert_name}</div></div>", unsafe_allow_html=True)
+                        else:
+                            icon_html = get_icon_html(cert_name, "cert")
+                            st.markdown(f"<div class='product-card' style='margin-bottom:15px;'>{icon_html}<div class='product-title'>{cert_name}</div></div>", unsafe_allow_html=True)
             else:
                 st.info("등록된 품질 및 인증 내역이 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # [변경] 순번 적용: 04. 주요 거점 네트워크
         st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 주요 거점 네트워크</div>", unsafe_allow_html=True)
         map_col, text_col = st.columns([1.8, 1])
         df_loc = pd.DataFrame(selected["locations"])
 
         with text_col:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
-            st.button("🌍 전체 뷰", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
-            if selected['hq'] and selected['hq'] not in ["해당 없음", "-", "", "nan"]:
+            # \n 을 통해 아래줄에 표시 (CSS의 white-space: pre-wrap 적용됨)
+            st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
+            
+            if selected.get('hq') and selected['hq'] not in ["해당 없음", "-", "", "nan"]:
                 st.write("")
-                st.button(f"🏢 본사\n\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
-            if selected['kr'] and selected['kr'] not in ["해당 없음", "-", "", "nan"]:
+                st.button(f"🏢 본사\n{selected['hq']}", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
+                
+            if selected.get('kr') and selected['kr'] not in ["해당 없음", "-", "", "nan"]:
                 st.write("")
-                st.button(f"🏭 지사\n\n{selected['kr']}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
-            if selected['gl'] and selected['gl'] not in ["해당 없음", "-", "", "nan"]:
+                st.button(f"🏭 지사\n{selected['kr']}", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
+                
+            if selected.get('gl') and selected['gl'] not in ["해당 없음", "-", "", "nan"]:
                 st.write("")
-                st.button(f"🌐 해외 지점\n\n{selected['gl']}", on_click=set_view, args=("🌐 해외",), use_container_width=True)
+                st.button(f"🌐 해외\n{selected['gl']}", on_click=set_view, args=("🌐 해외",), use_container_width=True)
 
         with map_col:
             current_view = st.session_state.map_view
