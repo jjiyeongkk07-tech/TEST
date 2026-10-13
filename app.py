@@ -18,7 +18,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정
+# 2. 테마 CSS 설정 (카드 컨테이너 빈 공백 제거 로직 추가)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -32,6 +32,11 @@ html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 footer { visibility: hidden; }
 header { background-color: transparent !important; }
 [data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
+
+/* 핵심: Streamlit 기본 컨테이너 여백/빈상자 강제 제거 */
+[data-testid="column"] > div > div > div > div > div { padding: 0 !important; gap: 0 !important; }
+[data-testid="column"] { padding-bottom: 0 !important; }
+
 h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 [data-testid="stMetricValue"] { color: #2C2A29 !important; font-weight: 900 !important; }
 [data-testid="stMetricLabel"] { color: #8A817C !important; font-weight: 700 !important; }
@@ -45,10 +50,11 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; }
-.product-card { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 20px !important; text-align: center !important; height: 100% !important; transition: all 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.product-card { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 25px 20px 20px 20px !important; text-align: center !important; height: 100% !important; transition: all 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .product-card:hover { transform: translateY(-4px) !important; border-color: #C4A47C !important; box-shadow: 0 10px 15px rgba(0,0,0,0.06) !important; }
-.product-emoji { font-size: 48px !important; margin-bottom: 15px !important; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.05)) !important; }
 .product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4;}
+.cert-badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; }
+.cert-badge { background: #F3F4F6; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px; }
 
 div.stButton > button { 
     background-color: #ffffff !important; 
@@ -82,7 +88,7 @@ div.stButton > button:hover {
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 데이터 및 이미지 Base64 변환 함수 (빈 상자 문제 완벽 해결)
+# 3. 데이터 및 이미지 Base64 변환 함수
 def get_customer_tags_html(customers):
     if not customers:
         return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
@@ -100,7 +106,7 @@ def get_base64_image(url):
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
-        headers = {'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.google.com/'}
+        headers = {'User-Agent': 'Mozilla/5.0'}
         req = urllib.request.Request(url, headers=headers)
         res = urllib.request.urlopen(req, context=ctx, timeout=5)
         return base64.b64encode(res.read()).decode('utf-8')
@@ -118,7 +124,7 @@ if "suppliers" not in st.session_state:
             "gl": "중국 및 북미 법인",
             "desc": "(주)성우는 1992년 설립 이래 초정밀 프레스(PRESS) 기술을 기반으로 성장하여, 현재는 전기차 배터리용 핵심 안전부품(원통형 Top Cap 어셈블리 등) 및 자동차 전장부품 생산을 주도하는 정밀 부품 제조 전문기업입니다.",
             "products": ["2차전지 제품", "전장부품 및 기타제품"],
-            "certs": ["IATF 16949", "ISO 14001", "ISO 45001", "SQ 인증"],
+            "certs": ["IATF16949", "ISO14001", "SQ 인증", "ESG 경영"],
             "customers": {"LG에너지솔루션": 55, "효성전기": 25, "LG이노텍": 15, "기타": 5},
             "locations": [
                 {"name": "(주)성우 구미1사업장(본사)", "type": "hq", "address": "경북 구미시 3공단2로 107", "lat": 36.1018, "lon": 128.4223, "country": "대한민국"},
@@ -246,54 +252,70 @@ elif selected_name:
         st.markdown("<div class='section-title' style='margin-top:10px;'><span class='section-num'>01.</span> 기업 개요</div>", unsafe_allow_html=True)
         st.markdown(f"<div class='desc-box'>📖 {selected['desc']}</div>", unsafe_allow_html=True)
         
-        st.markdown("<div class='section-title'><span class='section-num'>02.</span> 주요 고객사</div>", unsafe_allow_html=True)
-        st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
-
-        st.markdown("<div class='section-title'><span class='section-num'>03.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
+        # ✅ 순서 변경 1: 핵심 역량 및 품질 인증이 02번으로 이동
+        st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         
         col_prod, col_cert = st.columns([1, 1])
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
-        # ✅ 1,2번: 공란 완전 삭제 & 이미지 크기 동일화 (HTML <img> 태그 직접 삽입)
         with col_prod:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
+            
+            # HTML 코드를 리스트 하나에 담아 st.markdown을 한 번만 호출하여 공란 발생 원천 차단
+            prod_html = "<div style='display: flex; gap: 15px;'>"
             if selected['products']:
-                p_cols = st.columns(2)
                 for idx, prod_name in enumerate(selected['products']):
-                    with p_cols[idx % 2]:
-                        if idx < len(company_images["prod_imgs"]):
-                            b64_img = get_base64_image(company_images["prod_imgs"][idx])
-                            if b64_img:
-                                # 빈 상자 없이 이미지+텍스트가 하나의 카드로 통합됨 (높이 180px 동일화)
-                                st.markdown(f"""
-                                <div class='product-card' style='margin-bottom:15px; padding: 15px !important;'>
-                                    <img src="data:image/jpeg;base64,{b64_img}" style="width:100%; height:180px; object-fit:contain; margin-bottom:15px; border-radius:8px;">
-                                    <div class='product-title'>{prod_name}</div>
-                                </div>
-                                """, unsafe_allow_html=True)
-                            else:
-                                st.warning("이미지 로드 실패")
+                    if idx < len(company_images["prod_imgs"]):
+                        b64_img = get_base64_image(company_images["prod_imgs"][idx])
+                        img_tag = f'<img src="data:image/jpeg;base64,{b64_img}" style="width:100%; height:220px; object-fit:contain; margin-bottom:15px; border-radius:8px;">' if b64_img else "<p>이미지 없음</p>"
+                    else:
+                        img_tag = "<p>이미지 없음</p>"
+                    
+                    prod_html += f"""
+                    <div style='flex: 1; background: #ffffff; border: 1px solid #E5E0D8; border-radius: 12px; padding: 20px; text-align: center;'>
+                        {img_tag}
+                        <div class='product-title'>{prod_name}</div>
+                    </div>
+                    """
+            prod_html += "</div>"
+            st.markdown(prod_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # ✅ 3번: 기존 내용 싹 지우고 단일 이미지 하나만 출력
         with col_cert:
             st.markdown("<div style='padding-left: 10px; height: 100%;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
             if company_images.get("cert_imgs"):
                 b64_cert = get_base64_image(company_images["cert_imgs"][0])
+                
+                # 인증서 텍스트 뱃지 생성 로직
+                badges_html = ""
+                if selected.get('certs'):
+                    badges_html = "<div class='cert-badge-container'>"
+                    for cert in selected['certs']:
+                        badges_html += f"<span class='cert-badge'>{cert}</span>"
+                    badges_html += "</div>"
+
                 if b64_cert:
-                    st.markdown(f"""
-                    <div class='product-card' style='padding: 15px !important; display: flex; align-items: center; justify-content: center; height: calc(100% - 60px);'>
-                        <img src="data:image/jpeg;base64,{b64_cert}" style="width:100%; max-height:240px; object-fit:contain; border-radius:8px;">
+                    # 높이 220px로 고정 + 뱃지 추가
+                    cert_html = f"""
+                    <div style='background: #ffffff; border: 1px solid #E5E0D8; border-radius: 12px; padding: 20px; text-align: center; height: 100%;'>
+                        <img src="data:image/jpeg;base64,{b64_cert}" style="width:100%; height:220px; object-fit:contain; border-radius:8px;">
+                        {badges_html}
                     </div>
-                    """, unsafe_allow_html=True)
+                    """
+                    st.markdown(cert_html, unsafe_allow_html=True)
             else:
                 st.info("인증서 이미지가 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # ✅ 4,5,6번: 글로벌 네트워크로 명칭 변경 / 좌측 지도, 우측 버튼 롤백 / 지도 크기 확대(height=600)
+        # ✅ 순서 변경 2: 주요 고객사가 03번으로 이동
+        st.markdown("<div class='section-title' style='margin-top: 40px;'><span class='section-num'>03.</span> 주요 고객사</div>", unsafe_allow_html=True)
+        st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
+
+
+        # ✅ 지도 왼쪽 / 버튼 오른쪽 원복
         st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 글로벌 네트워크</div>", unsafe_allow_html=True)
         
         map_col, text_col = st.columns([2.5, 1]) 
@@ -376,7 +398,6 @@ elif selected_name:
                 )
                 
                 with st.container():
-                    # ✅ 지도 높이를 600px로 확 키워서 화면에 꽉 차게 변경
                     st.pydeck_chart(pdk.Deck(
                         map_style="light",
                         initial_view_state=view_state,
