@@ -54,43 +54,6 @@ suppliers_data = [
         ]
     },
     {
-        "name": "(주)상농전선",
-        "industry": "가공(MAGNET WIRE)",
-        "sub_industry": "에나멜선 및 절연코드",
-        "hq": "경남 양산 본사",
-        "kr": "-",
-        "gl": "-",
-        "desc": "(주)상농전선은 2003년 설립되어 에나멜 와이어, 절연코드 및 기기 내부 배선용 리드와이어 등을 전문적으로 제조하는 기업으로, KS, UL, ISO 등 다양한 품질 인증을 바탕으로 신뢰받는 제품을 공급하고 있습니다.",
-        "products": [
-            "에나멜 와이어"
-        ],
-        "certs": ["IATF 16949", "ISO 14001"],
-        "customers": {"국내 가전 및 전장업체": 70, "기타 대리점": 30},
-        "locations": [
-            {"name": "(주)상농전선 본사 및 공장", "type": "hq", "address": "경상남도 양산시 유산공단9길 6-1", "lat": 35.3560, "lon": 129.0250, "country": "대한민국"}
-        ]
-    },
-    {
-        "name": "(주)김천베아링",
-        "industry": "Bearing",
-        "sub_industry": "Rotary Components/Actuator",
-        "hq": "부산 본사",
-        "kr": "경기 지사",
-        "gl": "-",
-        "desc": "(주)김천베아링은 한국NMB(MinebeaMitsumi)의 공식 지정 대리점으로서 미니어처 볼베어링, 스테핑 모터, 팬 모터 및 레졸버 등 첨단 정밀 부품을 자동차 부품 및 가전 산업 분야에 적기 공급하는 유통 전문기업입니다.",
-        "products": [
-            "미니어처 볼베어링 / 스테핑 모터 / 팬 모터 / 레졸버 및 정밀기계부품"
-        ],
-        "certs": ["MAIN-BIZ", "공식 대리점 인증"],
-        "customers": {"현대모비스": 40, "LG마그나": 30, "SNT모티브": 20, "기타": 10},
-        "locations": [
-            {"name": "부산 본사", "type": "hq", "address": "부산광역시 사상구 새벽로167번길 85-6(감전동)", "lat": 35.1538, "lon": 128.9830, "country": "대한민국"},
-            {"name": "경기 지사", "type": "kr", "address": "경기도 성남시 분당구", "lat": 37.3827, "lon": 127.1189, "country": "대한민국"},
-            {"name": "부산 물류창고", "type": "kr", "address": "부산광역시 강서구 대저동", "lat": 35.2155, "lon": 128.9813, "country": "대한민국"}
-        ]
-    },
-    # 💡 새롭게 추가된 업체 정보
-    {
         "name": "한국NMB(주)",
         "industry": "Bearing",
         "sub_industry": "Rotary Components/Actuator",
