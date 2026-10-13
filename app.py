@@ -98,7 +98,7 @@ st.markdown(css, unsafe_allow_html=True)
 
 # 3. 데이터 및 변환 함수
 def get_customer_tags_html(customers):
-    if not customers: return <p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"""
+    if not customers: return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
     tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 15px;'>"
     customer_list = customers.keys() if isinstance(customers, dict) else customers
     for comp in customer_list:
@@ -186,7 +186,7 @@ st.markdown("""
 
 # 6. 사이드바 구성
 with st.sidebar:
-    st.markdown(<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>"", unsafe_allow_html=True)"
+    st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
     
     all_countries_set = set()
     for s in suppliers:
