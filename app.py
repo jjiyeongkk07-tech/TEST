@@ -18,7 +18,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (레이아웃 완벽 고정)
+# 2. 테마 CSS 설정 (좌우 카드 높이 완벽 동일화)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -33,7 +33,12 @@ footer { visibility: hidden; }
 header { background-color: transparent !important; }
 [data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
 
-/* ✅ 완벽한 카드 레이아웃을 위한 커스텀 CSS */
+/* ✅ 좌우 높이 동일화: 카드가 들어가는 상위 컬럼 강제 늘리기 */
+[data-testid="column"] > div > div > div > div > div { padding: 0 !important; gap: 0 !important; }
+[data-testid="column"] { padding-bottom: 0 !important; display: flex; flex-direction: column; }
+div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; }
+
+/* ✅ 완벽한 카드 레이아웃: 높이 고정으로 무조건 동일하게 */
 .custom-card { 
     background-color: #ffffff; 
     border: 1px solid #E5E0D8; 
@@ -42,24 +47,26 @@ header { background-color: transparent !important; }
     text-align: center; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     margin-bottom: 15px;
-    height: 100%;
+    height: 360px !important; /* 제품카드, 인증카드 모두 무조건 이 높이로 강제 고정 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 위아래 간격 고르게 */
 }
 .img-container {
-    height: 280px; /* 제품과 인증서 이미지 높이를 무조건 280px로 강제 동일화 */
+    height: 250px; 
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 15px;
     width: 100%;
 }
 .img-container img {
     max-height: 100%;
     max-width: 100%;
-    object-fit: contain; /* 비율 유지하며 꽉 차게 */
+    object-fit: contain; 
     border-radius: 8px;
 }
-.product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4; margin-top: 10px;}
-.cert-badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; }
+.product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4; margin-top: auto; padding-top: 10px;}
+.cert-badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: auto; padding-top: 10px; }
 .cert-badge { background: #F3F4F6; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px; }
 
 h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
@@ -82,7 +89,7 @@ div.stButton > button:hover { background-color: #FDFCFB !important; border-color
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 데이터 및 우회 이미지 다운로드 함수 (공란/깨짐 완벽 방지)
+# 3. 데이터 및 변환 함수
 def get_customer_tags_html(customers):
     if not customers: return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
     tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 15px;'>"
@@ -245,17 +252,17 @@ elif selected_name:
         st.markdown("<div class='section-title' style='margin-top:10px;'><span class='section-num'>01.</span> 기업 개요</div>", unsafe_allow_html=True)
         st.markdown(f"<div class='desc-box'>📖 {selected['desc']}</div>", unsafe_allow_html=True)
         
-        # ✅ 순서 변경: 핵심 역량 및 품질 인증
+        # ✅ 핵심 역량 및 품질 인증
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         
         col_prod, col_cert = st.columns([1, 1])
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
-        # ✅ 마크다운 텍스트 깨짐 방지: 한 줄로 결합하여 렌더링
         with col_prod:
-            st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
+            st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
             
+            # ✅ 제품 카드 (높이 360px 꽉 채우기)
             if selected['products']:
                 p_cols = st.columns(2)
                 for idx, prod_name in enumerate(selected['products']):
@@ -263,15 +270,15 @@ elif selected_name:
                         if idx < len(company_images["prod_imgs"]):
                             b64_img = get_base64_image(company_images["prod_imgs"][idx])
                             if b64_img:
-                                # 네모 공란 삭제 및 높이 280px 동일화 적용
                                 card_html = "<div class='custom-card'>" + f"<div class='img-container'><img src='data:image/jpeg;base64,{b64_img}'></div>" + f"<div class='product-title'>{prod_name}</div>" + "</div>"
                                 st.markdown(card_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
         with col_cert:
-            st.markdown("<div style='padding-left: 10px; height: 100%;'>", unsafe_allow_html=True)
+            st.markdown("<div style='padding-left: 10px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
+            # ✅ 인증서 카드 (제품과 완벽하게 동일한 구조와 높이)
             if company_images.get("cert_imgs"):
                 b64_cert = get_base64_image(company_images["cert_imgs"][0])
                 if b64_cert:
@@ -281,18 +288,17 @@ elif selected_name:
                             badges_html += f"<span class='cert-badge'>{cert}</span>"
                     badges_html += "</div>"
                     
-                    # 네모 공란 삭제 및 높이 280px 동일화 적용
                     cert_card = "<div class='custom-card'>" + f"<div class='img-container'><img src='data:image/jpeg;base64,{b64_cert}'></div>" + badges_html + "</div>"
                     st.markdown(cert_card, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
 
-        # ✅ 순서 변경: 주요 고객사
+        # ✅ 주요 고객사
         st.markdown("<div class='section-title' style='margin-top: 40px;'><span class='section-num'>03.</span> 주요 고객사</div>", unsafe_allow_html=True)
         st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
 
-        # ✅ 지도 왼쪽 / 버튼 오른쪽 및 높이 600px 유지
+        # ✅ 글로벌 네트워크 (좌측 뷰어 / 우측 버튼)
         st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 글로벌 네트워크</div>", unsafe_allow_html=True)
         
         map_col, text_col = st.columns([2.5, 1]) 
