@@ -57,7 +57,7 @@ suppliers_data = [
     },
     {
         "name": "(주)상농전선",
-        "industry": "전선/케이블",
+        "industry": "가공(MAGNET WIRE)",
         "sub_industry": "에나멜선 및 절연코드",
         "hq": "경남 양산 본사",
         "kr": "-",
