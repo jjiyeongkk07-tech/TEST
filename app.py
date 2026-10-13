@@ -97,7 +97,7 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
     padding-bottom: 12px; border-bottom: 3px solid #E5E0D8; 
 }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
-.desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px 기solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; }
+.desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; }
 
 div.stButton > button { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 15px 25px !important; width: 100% !important; height: auto !important; display: block !important; text-align: left !important; transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; }
 div.stButton > button p { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; white-space: pre-wrap !important; line-height: 1.5 !important; text-align: left !important; margin: 0 !important; display: block !important; }
@@ -240,8 +240,7 @@ elif selected_name:
                     if idx < len(company_images["prod_imgs"]):
                         b64_img = get_base64_image(company_images["prod_imgs"][idx])
                         if b64_img:
-                            # 제품 카드는 너비를 100% 다 쓰게 설정
-                            prod_html += f"<div class='custom-card' style='width: 100%; max-width: 100%; flex: 1 1 100%;'><div class='img-container'><img src='data:image/jpeg;base64,{b64_img}'></div><div class='product-title'>{prod_name}</div></div>"
+                            prod_html += f"<div class='custom-card'><div class='img-container'><img src='data:image/jpeg;base64,{b64_img}'></div><div class='product-title'>{prod_name}</div></div>"
                 prod_html += "</div>"
                 st.markdown(prod_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
@@ -250,26 +249,15 @@ elif selected_name:
             st.markdown("<div style='padding-left: 10px; height: 100%; display: flex; flex-direction: column;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
+            # ✅ 인증서 이미지가 여러 개일 때 모두 보여주도록 렌더링
             if company_images.get("cert_imgs"):
-                # 인증서 컨테이너 설정 (가로로 강제 정렬)
-                cert_html = "<div class='custom-card-container' style='justify-content: space-between;'>"
-                
-                # 인증서 개수 확인
-                cert_count = len(company_images["cert_imgs"])
-                
+                cert_html = "<div class='custom-card-container'>"
                 for idx, cert_url in enumerate(company_images["cert_imgs"]):
                     b64_cert = get_base64_image(cert_url)
                     if b64_cert:
                         cert_name = selected['certs'][idx] if idx < len(selected.get('certs', [])) else "인증서"
                         badges_html = f"<div class='cert-badge-container'><span class='cert-badge'>{cert_name}</span></div>"
-                        
-                        # 핵심!! 카드가 3개 이상일 경우 너비를 3등분하여 한 줄에 다 들어가게 함
-                        if cert_count >= 3:
-                            card_style = "width: calc(33.3% - 14px); min-width: 100px; flex: 0 0 calc(33.3% - 14px); max-width: none; padding: 10px;"
-                        else:
-                            card_style = "flex: 1; max-width: 300px; padding: 20px;"
-                            
-                        cert_html += f"<div class='custom-card' style='{card_style}'><div class='img-container'><img src='data:image/jpeg;base64,{b64_cert}'></div>{badges_html}</div>"
+                        cert_html += f"<div class='custom-card'><div class='img-container'><img src='data:image/jpeg;base64,{b64_cert}'></div>{badges_html}</div>"
                 cert_html += "</div>"
                 st.markdown(cert_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
