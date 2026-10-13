@@ -175,7 +175,6 @@ with st.sidebar:
     # --- 6-1. 상세 검색 (최상단) ---
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
     
-    # 국가 데이터 자동 생성
     all_countries_set = set()
     for s in suppliers:
         for loc in s["locations"]:
@@ -188,7 +187,6 @@ with st.sidebar:
     industry_list = ["전체"] + list(set(s["industry"] for s in suppliers if s["industry"] != "미분류"))
     country_list = ["전체"] + list(all_countries_set)
 
-    # 탭 순서: 업종 -> 업체 -> 국가
     tab_industry, tab_company, tab_country = st.tabs(["🏷️ 업종", "🏢 업체", "🌍 국가"])
     
     with tab_industry:
@@ -219,55 +217,78 @@ with st.sidebar:
 
 
     # --- 6-3. 관리자용 데이터 연동 메뉴 (가장 하단) ---
-    # 빈 여백을 두어 메뉴를 시각적으로 하단으로 분리
     st.markdown("<br><br><br><br>", unsafe_allow_html=True)
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     
-    # 클릭 시 오른쪽으로 열리는 숨김 팝업 창
     with st.popover("⚙️ 관리자 설정 (데이터 연동)", use_container_width=True):
-        st.markdown("#### 📂 엑셀 데이터 및 이미지 연동")
-        st.info("💡 엑셀을 첨부하면 이미지(L~O열)뿐만 아니라 해당 업체의 기존 텍스트(개요, 품목 등)도 자동 반영됩니다.")
-        uploaded_excel = st.file_uploader("업체정보 원본 엑셀 첨부", type=["xlsx", "xls"])
+        # 엑셀과 다수의 이미지를 한꺼번에 업로드할 수 있게 설정
+        uploaded_files = st.file_uploader(
+            "파일 업로드", 
+            type=["xlsx", "xls", "png", "jpg", "jpeg", "webp"], 
+            accept_multiple_files=True, 
+            label_visibility="collapsed"
+        )
         
-        if uploaded_excel:
-            try:
-                df_ex = pd.read_excel(uploaded_excel, sheet_name='업체정보')
-                cols = df_ex.columns
+        if uploaded_files:
+            excel_file = None
+            uploaded_images = {}
+            
+            # 첨부된 파일들 중 엑셀과 이미지를 분류
+            for file in uploaded_files:
+                if file.name.endswith(('.xlsx', '.xls')):
+                    excel_file = file
+                else:
+                    uploaded_images[file.name] = file
 
-                for _, row in df_ex.iterrows():
-                    comp_name = str(row.iloc[0]).strip()
-                    
-                    # 1) 기존 이미지 연동 (L~O열 고정 추출)
-                    p1 = row.iloc[11] if len(row) > 11 else None
-                    p2 = row.iloc[12] if len(row) > 12 else None
-                    c1 = row.iloc[13] if len(row) > 13 else None
-                    c2 = row.iloc[14] if len(row) > 14 else None
-                    
-                    prod_imgs = [x for x in [p1, p2] if pd.notna(x) and str(x).strip() != ""]
-                    cert_imgs = [x for x in [c1, c2] if pd.notna(x) and str(x).strip() != ""]
-                    excel_img_data[comp_name] = {"prod_imgs": prod_imgs, "cert_imgs": cert_imgs}
-                    
-                    # 2) 텍스트 데이터 자동 반영 (컬럼명이 존재할 경우 기존 데이터 덮어쓰기)
-                    target_supplier = next((s for s in suppliers if s['name'] == comp_name), None)
-                    if target_supplier:
-                        if '업종' in cols and pd.notna(row['업종']): 
-                            target_supplier['industry'] = str(row['업종'])
-                        if '기업개요' in cols and pd.notna(row['기업개요']): 
-                            target_supplier['desc'] = str(row['기업개요'])
-                        if '본사' in cols and pd.notna(row['본사']): 
-                            target_supplier['hq'] = str(row['본사'])
-                        if '지사' in cols and pd.notna(row['지사']): 
-                            target_supplier['kr'] = str(row['지사'])
-                        if '해외' in cols and pd.notna(row['해외']): 
-                            target_supplier['gl'] = str(row['해외'])
-                        if '핵심생산품목' in cols and pd.notna(row['핵심생산품목']): 
-                            target_supplier['products'] = [x.strip() for x in str(row['핵심생산품목']).split(',')]
-                        if '품질인증' in cols and pd.notna(row['품질인증']): 
-                            target_supplier['certs'] = [x.strip() for x in str(row['품질인증']).split(',')]
+            if excel_file:
+                try:
+                    df_ex = pd.read_excel(excel_file, sheet_name='업체정보')
+                    cols = df_ex.columns
 
-                st.success("✅ 엑셀 데이터 및 이미지 연동 완료!")
-            except Exception as e:
-                st.error("오류 발생: 엑셀 파일 형식 또는 '업체정보' 시트 구성을 확인해주세요.")
+                    for _, row in df_ex.iterrows():
+                        comp_name = str(row.iloc[0]).strip()
+                        
+                        # 엑셀의 텍스트(ex:제품1.jpg)와 업로드된 이미지 파일을 자동 매핑하는 함수
+                        def get_img_source(val):
+                            if pd.isna(val) or str(val).strip() == "": return None
+                            val_str = str(val).strip()
+                            # 첨부된 이미지 중에 이름이 포함되어 있으면 파일 객체 반환
+                            for img_name, img_file in uploaded_images.items():
+                                if img_name in val_str:
+                                    return img_file
+                            # 매핑되는 파일이 없으면 텍스트(URL 등) 그대로 반환
+                            return val_str
+
+                        p1 = get_img_source(row.iloc[11]) if len(row) > 11 else None
+                        p2 = get_img_source(row.iloc[12]) if len(row) > 12 else None
+                        c1 = get_img_source(row.iloc[13]) if len(row) > 13 else None
+                        c2 = get_img_source(row.iloc[14]) if len(row) > 14 else None
+                        
+                        prod_imgs = [x for x in [p1, p2] if x is not None]
+                        cert_imgs = [x for x in [c1, c2] if x is not None]
+                        excel_img_data[comp_name] = {"prod_imgs": prod_imgs, "cert_imgs": cert_imgs}
+                        
+                        # 텍스트 데이터 자동 덮어쓰기
+                        target_supplier = next((s for s in suppliers if s['name'] == comp_name), None)
+                        if target_supplier:
+                            if '업종' in cols and pd.notna(row['업종']): 
+                                target_supplier['industry'] = str(row['업종'])
+                            if '기업개요' in cols and pd.notna(row['기업개요']): 
+                                target_supplier['desc'] = str(row['기업개요'])
+                            if '본사' in cols and pd.notna(row['본사']): 
+                                target_supplier['hq'] = str(row['본사'])
+                            if '지사' in cols and pd.notna(row['지사']): 
+                                target_supplier['kr'] = str(row['지사'])
+                            if '해외' in cols and pd.notna(row['해외']): 
+                                target_supplier['gl'] = str(row['해외'])
+                            if '핵심생산품목' in cols and pd.notna(row['핵심생산품목']): 
+                                target_supplier['products'] = [x.strip() for x in str(row['핵심생산품목']).split(',')]
+                            if '품질인증' in cols and pd.notna(row['품질인증']): 
+                                target_supplier['certs'] = [x.strip() for x in str(row['품질인증']).split(',')]
+
+                    st.success("✅ 데이터 및 이미지 연동 완료!")
+                except Exception as e:
+                    st.error("오류 발생: 엑셀 파일 형식 또는 '업체정보' 시트 구성을 확인해주세요.")
 
 
 # 7. 메인 화면 출력
@@ -366,7 +387,6 @@ elif selected_name:
         with text_col:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
             
-            # 왼쪽 정렬 + 줄바꿈 완벽 호환
             st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
             if selected.get('hq') and selected['hq'] not in ["해당 없음", "-", "", "nan"]:
