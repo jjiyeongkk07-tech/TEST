@@ -40,8 +40,8 @@ suppliers_data = [
         "certs": ["IATF16949", "ISO14001", "SQ 인증"],
         "customers": {"S&T MOTIV": 46, "효성전기": 20, "스타리온": 13, "현대모비스": 10, "기타": 11},
         "locations": [
-            {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토로 23", "lat": 35.398579, "lon": 129.056037, "country": "대한민국"},
-            {"name": "부산 공장", "type": "kr", "address": "부산 금정구 팔송로 53번길 43", "lat": 35.281146, "lon": 129.085023, "country": "대한민국"}
+            {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토리 650번지", "lat": 35.398579, "lon": 129.056037, "country": "대한민국"},
+            {"name": "부산 공장", "type": "kr", "address": "부산광역시 금정구 남산동 974-34번지", "lat": 35.267605, "lon": 129.091172, "country": "대한민국"}
         ]
     }
 ]
@@ -59,13 +59,16 @@ excel_img_data = {
     },
     "(주)한성전장": {
         "prod_imgs": [
-            # 전달해주신 4개 품목의 이미지 URL이 동일하여 대표로 1개만 적용했습니다.
-            "http://hansungeec.co.kr/data/editor/2303/68f8713e9ce1b074a95162e5d3d4e265_1679371328_4312.png"
+            # 요청하신 4개의 품목에 맞춰 이미지가 각각 출력되도록 4개의 URL을 모두 배치했습니다.
+            "http://hansungeec.co.kr/data/editor/2303/68f8713e9ce1b074a95162e5d3d4e265_1679371328_4312.png", # 자동차용 센서 및 일반 전장품
+            "http://hansungeec.co.kr/data/editor/2303/68f8713e9ce1b074a95162e5d3d4e265_1679371328_4312.png", # 자동차용 컨트롤러
+            "http://hansungeec.co.kr/data/editor/2303/68f8713e9ce1b074a95162e5d3d4e265_1679371328_4312.png", # 전기차 배터리 부품 및 와이어 하네스
+            "http://hansungeec.co.kr/data/editor/2303/68f8713e9ce1b074a95162e5d3d4e265_1679371328_4312.png"  # 산업용/의료기용 ESS 부품
         ],
         "cert_imgs": [
-            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_k4BbP3Xf_4b392b2ae34b33eca5ce6b46f911883a7c81ca00_800x600.jpg",
-            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_2nYRHtuK_ddc0920cf4043d7d29869df505f78a0cad78dd9f_800x600.jpg",
-            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_lKOVB7QU_592a0b51d658de8d226c4d807cdfa8928f2ad0e6_800x600.jpg"
+            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_k4BbP3Xf_4b392b2ae34b33eca5ce6b46f911883a7c81ca00_800x600.jpg", # IATF16949
+            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_2nYRHtuK_ddc0920cf4043d7d29869df505f78a0cad78dd9f_800x600.jpg", # ISO14001
+            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_lKOVB7QU_592a0b51d658de8d226c4d807cdfa8928f2ad0e6_800x600.jpg"  # SQ인증서
         ]
     }
 }
