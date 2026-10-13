@@ -54,6 +54,23 @@ suppliers_data = [
         ]
     },
     {
+        "name": "(주)상농전선",
+        "industry": "가공(MAGNET WIRE)",
+        "sub_industry": "에나멜선 및 절연코드",
+        "hq": "경남 양산 본사",
+        "kr": "-",
+        "gl": "-",
+        "desc": "(주)상농전선은 2003년 설립되어 에나멜 와이어, 절연코드 및 기기 내부 배선용 리드와이어 등을 전문적으로 제조하는 기업으로, KS, UL, ISO 등 다양한 품질 인증을 바탕으로 신뢰받는 제품을 공급하고 있습니다.",
+        "products": [
+            "에나멜 와이어"
+        ],
+        "certs": ["IATF 16949", "ISO 14001"],
+        "customers": {"국내 가전 및 전장업체": 70, "기타 대리점": 30},
+        "locations": [
+            {"name": "(주)상농전선 본사 및 공장", "type": "hq", "address": "경상남도 양산시 유산공단9길 6-1", "lat": 35.3560, "lon": 129.0250, "country": "대한민국"}
+        ]
+    },
+    {
         "name": "한국NMB(주)",
         "industry": "Bearing",
         "sub_industry": "Rotary Components/Actuator",
