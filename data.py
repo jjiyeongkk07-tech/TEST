@@ -41,8 +41,26 @@ suppliers_data = [
             {"name": "양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토리 650번지", "lat": 35.398579, "lon": 129.056037, "country": "대한민국"},
             {"name": "부산 공장", "type": "kr", "address": "부산광역시 금정구 남산동 974-34번지", "lat": 35.267605, "lon": 129.091172, "country": "대한민국"}
         ]
+    },
+    {
+        "name": "(주)브이씨텍",
+        "industry": "제어장치 및 전장품",
+        "sub_industry": "철도차량 및 전기차 부품",
+        "hq": "경기 군포 본사",
+        "kr": "-",
+        "gl": "-",
+        "desc": "(주)브이씨텍은 철도차량용 추진제어장치 및 보조전원장치(APU), 전기차 및 골프카용 구동 인버터 등을 개발·제조하는 전력변환 및 제어장치 전문기업입니다.",
+        "products": [
+            "철도차량용 추진 인버터 및 제어장치",
+            "보조전원장치(APU)",
+            "전기차 및 골프카용 구동 인버터 / AC 모터"
+        ],
+        "certs": ["IATF16949", "IRIS 인증", "이노비즈(INNO-BIZ)", "벤처기업"],
+        "customers": {"현대로템": 50, "CT&T": 30, "Fulu Motor": 10, "기타": 10},
+        "locations": [
+            {"name": "(주)브이씨텍 본사 및 공장", "type": "hq", "address": "경기도 군포시 엘에스로45번길 107", "lat": 37.3601, "lon": 126.9535, "country": "대한민국"}
+        ]
     }
-    # ➕ 여기에 새로운 업체 딕셔너리를 계속 추가하시면 됩니다.
 ]
 
 # 2. 업체별 이미지 URL 딕셔너리
@@ -65,6 +83,15 @@ excel_img_data = {
             "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_k4BbP3Xf_4b392b2ae34b33eca5ce6b46f911883a7c81ca00_800x600.jpg",
             "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_2nYRHtuK_ddc0920cf4043d7d29869df505f78a0cad78dd9f_800x600.jpg",
             "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_lKOVB7QU_592a0b51d658de8d226c4d807cdfa8928f2ad0e6_800x600.jpg"
+        ]
+    },
+    "(주)브이씨텍": {
+        "prod_imgs": [
+            "http://www.vctech.co.kr/img/main/visual_01.jpg", 
+            "http://www.vctech.co.kr/img/main/visual_02.jpg"
+        ],
+        "cert_imgs": [
+            "http://www.vctech.co.kr/img/s1/s1_5_img.jpg"
         ]
     }
 }
@@ -95,22 +122,3 @@ map_radius_settings = {
     "highlighted": 300000,
     "dimmed": 40000
 }
-    {
-        "name": "(주)브이씨텍",
-        "industry": "제어장치 및 전장품",
-        "sub_industry": "철도차량 및 전기차 부품",
-        "hq": "경기 군포 본사",
-        "kr": "-",
-        "gl": "-",
-        "desc": "(주)브이씨텍은 철도차량용 추진제어장치 및 보조전원장치(APU), 전기차 및 골프카용 구동 인버터 등을 개발·제조하는 전력변환 및 제어장치 전문기업입니다.",
-        "products": [
-            "철도차량용 추진 인버터 및 제어장치",
-            "보조전원장치(APU)",
-            "전기차 및 골프카용 구동 인버터 / AC 모터"
-        ],
-        "certs": ["IATF16949", "IRIS 인증", "이노비즈(INNO-BIZ)", "벤처기업"],
-        "customers": {"현대로템": 50, "CT&T": 30, "Fulu Motor": 10, "기타": 10},
-        "locations": [
-            {"name": "(주)브이씨텍 본사 및 공장", "type": "hq", "address": "경기도 군포시 엘에스로45번길 107", "lat": 37.3601, "lon": 126.9535, "country": "대한민국"}
-        ]
-    }
