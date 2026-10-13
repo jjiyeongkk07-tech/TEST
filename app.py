@@ -42,59 +42,48 @@ header { background-color: transparent !important; }
 [data-testid="column"] { padding-bottom: 0 !important; display: flex; flex-direction: column; width: 100%; }
 div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; width: 100%; }
 
-/* ✅ 카드(네모 칸) 안의 내용 정렬 및 이미지 크기 강제 통일 */
+/* ✅ 카드 및 이미지 컨테이너 CSS 수정 */
 .custom-card-container {
     display: flex;
     flex-wrap: wrap; 
-    gap: 15px; /* 간격 살짝 줄임 */
+    gap: 15px; 
     width: 100%;
     height: 100%;
-    justify-content: space-between;
 }
-
 .custom-card { 
     background-color: #ffffff; 
     border: 1px solid #E5E0D8; 
     border-radius: 12px; 
-    padding: 15px; /* 패딩을 약간 줄여 이미지가 더 커보이게 함 */
+    padding: 20px;
     text-align: center; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     margin-bottom: 15px;
-    height: 400px !important;  /* 카드 높이 고정 */
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* 위에서부터 채움 */
-    overflow: hidden; /* 영역 밖으로 삐져나가는 것 방지 */
+    justify-content: space-between;
 }
 .img-container {
-    height: 250px; /* 이미지 영역 높이 고정 (여기서 조절) */
     width: 100%;
-    margin-bottom: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #fff; /* 배경색 흰색 보장 */
+    margin-bottom: 15px;
 }
-
-/* 🚀 핵심 수정 1: 이미지를 네모 칸 안에 꽉 채우기 */
 .img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* 이미지를 잘리더라도 영역에 꽉 차게 덮음 */
-    object-position: center; /* 중앙 정렬 */
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* 이미지가 잘리지 않게 보호 */
     border-radius: 8px;
 }
-
 .product-title { 
-    font-size: 15px !important; 
+    font-size: 16px !important; 
     font-weight: 800 !important; 
     color: #2C2A29 !important; 
     word-break: keep-all; 
-    line-height: 1.6; /* 줄간격을 넓혀서 보기 편하게 */
+    line-height: 1.6; /* 텍스트 줄 간격 여유있게 */
     margin-top: auto; 
     padding-top: 10px;
 }
-
 .cert-badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: auto; padding-top: 10px; }
 .cert-badge { background: #F3F4F6; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px; white-space: nowrap; }
 
@@ -254,17 +243,11 @@ elif selected_name:
                     if idx < len(company_images["prod_imgs"]):
                         b64_img = get_base64_image(company_images["prod_imgs"][idx])
                         if b64_img:
-                            # 🚀 핵심 수정 2: '/' 를 기준으로 줄바꿈(<br>) 처리
-                            formatted_prod_name = prod_name.replace("/", "<br>")
+                            # 🚀 / 를 기준으로 줄바꿈 태그(<br>)로 변경 (양옆 띄어쓰기 유무 상관없이 모두 적용)
+                            formatted_prod_name = prod_name.replace(" / ", "<br>").replace("/", "<br>")
                             
-                            prod_html += f"""
-                            <div class='custom-card' style='width: 100%; max-width: 100%; flex: 1 1 100%;'>
-                                <div class='img-container'>
-                                    <img src='data:image/jpeg;base64,{b64_img}'>
-                                </div>
-                                <div class='product-title'>{formatted_prod_name}</div>
-                            </div>
-                            """
+                            # 🚀 이미지 에러 방지를 위해 HTML을 한 줄로 구성 + 이미지가 최대한 크게 보이도록 높이 할당(350px)
+                            prod_html += f"<div class='custom-card' style='width: 100%; max-width: 100%; flex: 1 1 100%;'><div class='img-container' style='height: 380px;'><img src='data:image/jpeg;base64,{b64_img}'></div><div class='product-title'>{formatted_prod_name}</div></div>"
                 prod_html += "</div>"
                 st.markdown(prod_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
@@ -274,7 +257,7 @@ elif selected_name:
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
             if company_images.get("cert_imgs"):
-                cert_html = "<div class='custom-card-container'>"
+                cert_html = "<div class='custom-card-container' style='justify-content: space-between;'>"
                 cert_count = len(company_images["cert_imgs"])
                 
                 for idx, cert_url in enumerate(company_images["cert_imgs"]):
@@ -283,13 +266,14 @@ elif selected_name:
                         cert_name = selected['certs'][idx] if idx < len(selected.get('certs', [])) else "인증서"
                         badges_html = f"<div class='cert-badge-container'><span class='cert-badge'>{cert_name}</span></div>"
                         
-                        # 카드가 3개 이상일 경우 너비를 3등분
+                        # 🚀 카드가 3개 이상일 경우 너비를 3등분하고 안쪽 패딩을 줄임
                         if cert_count >= 3:
-                            card_style = "width: calc(33.3% - 10px); flex: 0 0 calc(33.3% - 10px);"
+                            card_style = "width: calc(33.3% - 10px); flex: 0 0 calc(33.3% - 10px); padding: 15px;"
                         else:
-                            card_style = "flex: 1; max-width: 300px;"
+                            card_style = "flex: 1; max-width: 300px; padding: 15px;"
                             
-                        cert_html += f"<div class='custom-card' style='{card_style}'><div class='img-container'><img src='data:image/jpeg;base64,{b64_cert}'></div>{badges_html}</div>"
+                        # 인증서 이미지 컨테이너 높이 설정 (180px)
+                        cert_html += f"<div class='custom-card' style='{card_style}'><div class='img-container' style='height: 180px;'><img src='data:image/jpeg;base64,{b64_cert}'></div>{badges_html}</div>"
                 cert_html += "</div>"
                 st.markdown(cert_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
