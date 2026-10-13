@@ -4,6 +4,7 @@ import pydeck as pdk
 import time
 import urllib.request
 import ssl
+import base64
 
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
@@ -44,7 +45,7 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; }
-.product-card { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 30px 20px !important; text-align: center !important; height: 100% !important; transition: all 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.product-card { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 20px !important; text-align: center !important; height: 100% !important; transition: all 0.2s !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .product-card:hover { transform: translateY(-4px) !important; border-color: #C4A47C !important; box-shadow: 0 10px 15px rgba(0,0,0,0.06) !important; }
 .product-emoji { font-size: 48px !important; margin-bottom: 15px !important; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.05)) !important; }
 .product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4;}
@@ -81,24 +82,10 @@ div.stButton > button:hover {
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 아이콘 & 태그 및 이미지 로드 우회 함수
-def get_icon_html(name, category="product"):
-    if category == "product":
-        if "PCB" in name.upper() or "WIRE" in name.upper(): emoji = "🔌"
-        elif "CASE" in name.upper() or "COVER" in name.upper() or "VENT" in name.upper(): emoji = "🗜️"
-        elif "CORE" in name.upper() or "CAP" in name.upper(): emoji = "⚙️"
-        elif "TERMINAL" in name.upper(): emoji = "🔩"
-        else: emoji = "📦"
-    elif category == "cert":
-        if "IATF" in name.upper() or "ISO" in name.upper(): emoji = "🏅"
-        elif "SQ" in name.upper(): emoji = "🛡️"
-        else: emoji = "📜"
-    return f"<div class='product-emoji'>{emoji}</div>"
-
+# 3. 데이터 및 이미지 Base64 변환 함수 (빈 상자 문제 완벽 해결)
 def get_customer_tags_html(customers):
     if not customers:
         return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
-    
     tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 15px;'>"
     customer_list = customers.keys() if isinstance(customers, dict) else customers
     for comp in customer_list:
@@ -106,31 +93,21 @@ def get_customer_tags_html(customers):
     tags_html += "</div>"
     return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
-def safe_image_render(image_source):
-    if isinstance(image_source, str) and image_source.startswith("http"):
-        try:
-            ctx = ssl.create_default_context()
-            ctx.check_hostname = False
-            ctx.verify_mode = ssl.CERT_NONE
+@st.cache_data(show_spinner=False)
+def get_base64_image(url):
+    if not url or not str(url).startswith("http"): return None
+    try:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        headers = {'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.google.com/'}
+        req = urllib.request.Request(url, headers=headers)
+        res = urllib.request.urlopen(req, context=ctx, timeout=5)
+        return base64.b64encode(res.read()).decode('utf-8')
+    except Exception:
+        return None
 
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-                'Referer': 'https://www.google.com/'
-            }
-            req = urllib.request.Request(image_source, headers=headers)
-            
-            response = urllib.request.urlopen(req, context=ctx, timeout=5)
-            img_bytes = response.read()
-            st.image(img_bytes, use_container_width=True)
-            
-        except Exception as e:
-            st.warning(f"이미지 차단됨: {str(e)[:50]}...")
-    else:
-        st.image(image_source, use_container_width=True)
-
-
-# 4. 초기 데이터 셋업 
+# 4. 초기 데이터 셋업
 if "suppliers" not in st.session_state:
     st.session_state.suppliers = [
         {
@@ -167,6 +144,7 @@ if "suppliers" not in st.session_state:
         }
     ]
 
+# 🌟 이미지 URL 적용 🌟
 if "excel_img_data" not in st.session_state:
     st.session_state.excel_img_data = {
         "(주)성우": {
@@ -174,7 +152,9 @@ if "excel_img_data" not in st.session_state:
                 "https://www.e-sungwoo.co.kr/img/sub/prd_111.jpg", 
                 "https://www.e-sungwoo.co.kr/img/sub/prd_112.jpg"
             ],
-            "cert_imgs": []
+            "cert_imgs": [
+                "https://www.e-sungwoo.co.kr/img/sub/cpn-wp1_2.jpg"
+            ]
         }
     }
 
@@ -270,11 +250,11 @@ elif selected_name:
         st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
         st.markdown("<div class='section-title'><span class='section-num'>03.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
+        
         col_prod, col_cert = st.columns([1, 1])
-
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
-        # ✅ 1. 공란 문제 해결: 빈 카드 렌더링 방지 로직 고도화
+        # ✅ 1,2번: 공란 완전 삭제 & 이미지 크기 동일화 (HTML <img> 태그 직접 삽입)
         with col_prod:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
@@ -282,46 +262,53 @@ elif selected_name:
                 p_cols = st.columns(2)
                 for idx, prod_name in enumerate(selected['products']):
                     with p_cols[idx % 2]:
-                        st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
                         if idx < len(company_images["prod_imgs"]):
-                            safe_image_render(company_images["prod_imgs"][idx])
-                        else:
-                            st.markdown(get_icon_html(prod_name, "product"), unsafe_allow_html=True)
-                        st.markdown(f"<div class='product-title' style='margin-top:10px;'>{prod_name}</div></div>", unsafe_allow_html=True)
-            else:
-                st.info("등록된 핵심 생산 품목이 없습니다.")
+                            b64_img = get_base64_image(company_images["prod_imgs"][idx])
+                            if b64_img:
+                                # 빈 상자 없이 이미지+텍스트가 하나의 카드로 통합됨 (높이 180px 동일화)
+                                st.markdown(f"""
+                                <div class='product-card' style='margin-bottom:15px; padding: 15px !important;'>
+                                    <img src="data:image/jpeg;base64,{b64_img}" style="width:100%; height:180px; object-fit:contain; margin-bottom:15px; border-radius:8px;">
+                                    <div class='product-title'>{prod_name}</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            else:
+                                st.warning("이미지 로드 실패")
             st.markdown("</div>", unsafe_allow_html=True)
 
+        # ✅ 3번: 기존 내용 싹 지우고 단일 이미지 하나만 출력
         with col_cert:
             st.markdown("<div style='padding-left: 10px; height: 100%;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
-            if selected['certs']:
-                c_cols = st.columns(2)
-                for idx, cert_name in enumerate(selected['certs']):
-                    with c_cols[idx % 2]:
-                        st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
-                        if idx < len(company_images["cert_imgs"]):
-                            safe_image_render(company_images["cert_imgs"][idx])
-                        else:
-                            st.markdown(get_icon_html(cert_name, "cert"), unsafe_allow_html=True)
-                        st.markdown(f"<div class='product-title' style='margin-top:10px;'>{cert_name}</div></div>", unsafe_allow_html=True)
+            
+            if company_images.get("cert_imgs"):
+                b64_cert = get_base64_image(company_images["cert_imgs"][0])
+                if b64_cert:
+                    st.markdown(f"""
+                    <div class='product-card' style='padding: 15px !important; display: flex; align-items: center; justify-content: center; height: calc(100% - 60px);'>
+                        <img src="data:image/jpeg;base64,{b64_cert}" style="width:100%; max-height:240px; object-fit:contain; border-radius:8px;">
+                    </div>
+                    """, unsafe_allow_html=True)
             else:
-                st.info("등록된 품질 및 인증 내역이 없습니다.")
+                st.info("인증서 이미지가 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
-        st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 주요 거점 네트워크</div>", unsafe_allow_html=True)
+        # ✅ 4,5,6번: 글로벌 네트워크로 명칭 변경 / 좌측 지도, 우측 버튼 롤백 / 지도 크기 확대(height=600)
+        st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 글로벌 네트워크</div>", unsafe_allow_html=True)
         
-        # ✅ 2. 지도와 버튼의 위치 반전 (좌측 버튼 / 우측 넓은 지도)
-        text_col, map_col = st.columns([1, 2.5]) 
+        map_col, text_col = st.columns([2.5, 1]) 
         df_loc = pd.DataFrame(selected["locations"])
 
         with text_col:
-            st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px; padding-left:15px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
             
+            st.markdown("<div style='padding-left: 15px;'>", unsafe_allow_html=True)
             st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
             has_hq = any(loc["type"] == "hq" for loc in selected["locations"])
             has_kr = any(loc["type"] == "kr" for loc in selected["locations"])
+            has_gl_cn = any(loc["type"] == "gl_cn" for loc in selected["locations"])
+            has_gl_us = any(loc["type"] == "gl_us" for loc in selected["locations"])
             
             if has_hq:
                 st.write("")
@@ -329,16 +316,13 @@ elif selected_name:
             if has_kr:
                 st.write("")
                 st.button(f"🏭 국내(지사)\nR&D센터, 천안사업장", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
-
-            has_gl_cn = any(loc["type"] == "gl_cn" for loc in selected["locations"])
-            has_gl_us = any(loc["type"] == "gl_us" for loc in selected["locations"])
-
             if has_gl_cn:
                 st.write("")
                 st.button(f"🌐 해외(중국)\n남경, 추저우(예정)", on_click=set_view, args=("🌐 해외(중국)",), use_container_width=True)
             if has_gl_us:
                 st.write("")
                 st.button(f"🌎 해외(북미)\n미국 법인(예정)", on_click=set_view, args=("🌎 해외(북미)",), use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
         with map_col:
             current_view = st.session_state.map_view
@@ -392,11 +376,12 @@ elif selected_name:
                 )
                 
                 with st.container():
+                    # ✅ 지도 높이를 600px로 확 키워서 화면에 꽉 차게 변경
                     st.pydeck_chart(pdk.Deck(
                         map_style="light",
                         initial_view_state=view_state,
                         layers=[layer],
                         tooltip={"text": "{name}\n{address}"} 
-                    ))
+                    ), height=600)
             else:
                 st.info("해당 업체의 등록된 거점 정보가 없습니다.")
