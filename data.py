@@ -37,9 +37,7 @@ suppliers_data = [
             {"name": "부산 공장", "type": "kr", "address": "부산 금정구 팔송로 53번길 43", "lat": 35.281146, "lon": 129.085023, "country": "대한민국"}
         ]
     }
-    # ⬇️ 3번째, 4번째 등 10개 업체를 계속 이어서 추가하시면 됩니다!
 ]
-
 
 # 2. 업체별 이미지 URL 딕셔너리
 excel_img_data = {
@@ -52,11 +50,9 @@ excel_img_data = {
             "https://www.e-sungwoo.co.kr/img/sub/cpn-wp1_2.jpg"
         ]
     },
-    # 🌟 [수정된 부분] KeyError 방지를 위해 (주)한성전장의 빈 데이터를 추가했습니다.
+    # 🌟 [추가됨] (주)한성전장 이미지 빈 데이터 (KeyError 에러 방지)
     "(주)한성전장": {
         "prod_imgs": [],
         "cert_imgs": []
     }
-    # ⬇️ 다른 업체의 데이터도 추가 시 이곳에 [업체명: {prod_imgs:[], cert_imgs:[]}] 형식으로 꼭 맞춰주세요!
 }
-
