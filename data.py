@@ -56,7 +56,7 @@ suppliers_data = [
     {
         "name": "한국NMB(주)",
         "industry": "Bearing",
-        "sub_industry": "Rotary Components/Actuator",
+        "sub_industry": "Rotary Components",
         "hq": "부산 본사",
         "kr": "모덕 및 경기 사무소",
         "gl": "중국 법인",
