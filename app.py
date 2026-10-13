@@ -21,7 +21,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (업데이트 됨)
+# 2. 테마 CSS 설정
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -65,7 +65,7 @@ div[data-testid="stVerticalBlock"] > div { display: flex; align-items: stretch; 
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
-    background: #FDFCFB; /* 연한 배경으로 빈 공간을 채워 통일감 부여 */
+    background: #FDFCFB; 
     border-radius: 8px;
     padding: 10px;
 }
@@ -136,7 +136,7 @@ def get_base64_image(url):
     except Exception:
         return None
 
-# 4. 초기 데이터 셋업 (data.py에서 로드)
+# 4. 초기 데이터 셋업 
 if "suppliers" not in st.session_state:
     st.session_state.suppliers = suppliers_data
 
@@ -232,7 +232,6 @@ elif selected_name:
         
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         
-        # 좌측(생산품목)에 1.2비율을 주어 공간 안정화
         col_prod, col_cert = st.columns([1.2, 1])
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
@@ -249,16 +248,12 @@ elif selected_name:
                     
                     img_tag = f"<img src='data:image/jpeg;base64,{b64_img}'>" if b64_img else ""
                     
-                    # 💡 문자열 속 '/' 를 기준으로 자동 태그 쪼개기
                     tags = [t.strip() for t in prod_name.replace(" / ", "/").split("/")]
                     tags_html = "".join([f"<div class='prod-tag'>{t}</div>" for t in tags if t])
                     
-                    prod_html += f"""
-                    <div class='unified-card'>
-                        <div class='img-box prod-img-box'>{img_tag}</div>
-                        <div class='tag-container'>{tags_html}</div>
-                    </div>
-                    """
+                    # 🚀 마크다운 파싱 에러 방지를 위해 들여쓰기를 제거한 한 줄짜리 HTML로 수정
+                    prod_html += f"<div class='unified-card'><div class='img-box prod-img-box'>{img_tag}</div><div class='tag-container'>{tags_html}</div></div>"
+                    
                 prod_html += "</div>"
                 st.markdown(prod_html, unsafe_allow_html=True)
             else:
@@ -270,20 +265,15 @@ elif selected_name:
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
             cert_html = ""
-            # 💡 이미지는 이미지대로 그리드로 배열
             if company_images.get("cert_imgs"):
                 cert_html += "<div class='grid-container grid-cert'>"
                 for cert_url in company_images["cert_imgs"]:
                     b64_cert = get_base64_image(cert_url)
                     if b64_cert:
-                        cert_html += f"""
-                        <div class='unified-card' style='padding: 10px; justify-content: center;'>
-                            <div class='img-box cert-img-box' style='margin-bottom: 0;'><img src='data:image/jpeg;base64,{b64_cert}'></div>
-                        </div>
-                        """
+                        # 🚀 마크다운 파싱 에러 방지를 위해 들여쓰기를 제거한 한 줄짜리 HTML로 수정
+                        cert_html += f"<div class='unified-card' style='padding: 10px; justify-content: center;'><div class='img-box cert-img-box' style='margin-bottom: 0;'><img src='data:image/jpeg;base64,{b64_cert}'></div></div>"
                 cert_html += "</div>"
             
-            # 💡 인증서 라벨(뱃지)은 하단에 통합하여 나열
             if selected.get('certs'):
                 badges = "".join([f"<span class='cert-badge'>{c}</span>" for c in selected['certs']])
                 cert_html += f"<div class='cert-badge-wrap'>{badges}</div>"
