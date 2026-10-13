@@ -25,7 +25,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (깨짐 유발하던 박스 래퍼 모두 제거하고 깔끔하게 정돈)
+# 2. 테마 CSS 설정
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -53,7 +53,7 @@ header { background-color: transparent !important; }
 }
 .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-/* ✅ 하단 태그 가로 정렬 (양쪽 모두 동일한 디자인 적용) */
+/* ✅ 하단 태그 가로 정렬 */
 .tag-wrap-box { 
     display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; 
     align-items: flex-start; padding-top: 20px; margin-top: 20px;
@@ -73,9 +73,23 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; line-height: 1.8; font-weight: 400; }
 
-/* ✅ 깔끔한 버튼 스타일 */
-div.stButton > button { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 8px !important; color: #4A4441 !important; font-weight: 700 !important; transition: all 0.2s ease !important; }
-div.stButton > button:hover { border-color: #C4A47C !important; color: #C4A47C !important; }
+/* ✅ 지도 옆 버튼 스타일 (멀티라인 텍스트 및 버튼 크기 복구) */
+div.stButton > button { 
+    background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
+    border-radius: 12px !important; color: #2C2A29 !important; 
+    padding: 15px 25px !important; width: 100% !important; height: auto !important; 
+    display: block !important; text-align: left !important; 
+    transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
+}
+div.stButton > button p { 
+    font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; 
+    white-space: pre-wrap !important; line-height: 1.5 !important; 
+    text-align: left !important; margin: 0 !important; display: block !important; 
+}
+div.stButton > button:hover { 
+    background-color: #FDFCFB !important; border-color: #C4A47C !important; 
+    transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; 
+}
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -286,7 +300,9 @@ elif selected_name:
 
         with text_col:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
-            st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
+            st.button("🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
+            
+            # ✅ 버튼 줄바꿈(\n)을 활용해 위아래 두 줄로 표시
             for typ, btn_label in [("hq", "🏢 국내(본사)"), ("kr", "🏭 국내(지사)"), ("gl_cn", "🌐 해외(중국)"), ("gl_us", "🌎 해외(북미)")]:
                 if any(loc.get("type") == typ for loc in selected.get("locations", [])):
                     names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == typ])
