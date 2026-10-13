@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import pydeck as pdk
 import urllib.request
-import urllib.parse
 import ssl
 import base64
 
@@ -70,23 +69,29 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; line-height: 1.8; font-weight: 400; }
 
 /* ✅ 지도 옆 버튼 스타일 (가운데 정렬) 및 커스텀 팝업 버튼 스타일 공통 적용 */
-div.stButton > button, div.stLinkButton > a, a.custom-popup-btn { 
+div.stButton > button, a.custom-popup-btn { 
     background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
     border-radius: 12px !important; color: #2C2A29 !important; 
     padding: 15px 25px !important; width: 100% !important; height: auto !important; 
     display: block !important; text-align: center !important; 
     transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
     text-decoration: none !important; box-sizing: border-box;
+    margin-bottom: 0px !important;
 }
-div.stButton > button p, div.stLinkButton > a p, a.custom-popup-btn p { 
+div.stButton > button p, a.custom-popup-btn p { 
     font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; 
     white-space: pre-wrap !important; line-height: 1.5 !important; 
     text-align: center !important; 
     margin: 0 !important; display: block !important; 
 }
-div.stButton > button:hover, div.stLinkButton > a:hover, a.custom-popup-btn:hover { 
+div.stButton > button:hover, a.custom-popup-btn:hover { 
     background-color: #FDFCFB !important; border-color: #C4A47C !important; 
     transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; 
+}
+
+/* ✅ 불필요한 공백 제거를 위한 강제 설정 */
+div[data-testid="stMarkdownContainer"] {
+    margin-bottom: 0px !important;
 }
 </style>
 """
@@ -193,18 +198,18 @@ elif selected_name:
             prod_list = company_images.get("prod_imgs", [])
             if prod_list:
                 img_cols = st.columns(len(prod_list))
-                for idx, b64_img in enumerate(prod_list):
+                for idx, img_url in enumerate(prod_list):
                     with img_cols[idx]:
-                        img_data = get_base64_image(b64_img)
+                        img_data = get_base64_image(img_url)
                         if img_data:
-                            st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>", unsafe_allow_html=True)
-                            
-                            # ✅ 인코딩 방식을 사용하여 따옴표 충돌 원천 차단
-                            popup_html = f"""<html style="background:#F9F8F6;"><body style="margin:0;padding:30px;text-align:center;font-family:sans-serif;"><div style="text-align:right;margin-bottom:20px;"><button onclick="window.close()" style="padding:10px 20px;font-size:16px;font-weight:bold;cursor:pointer;background:#ffffff;border:2px solid #2C2A29;border-radius:8px;color:#2C2A29;">❌ 닫기</button></div><img src="data:image/jpeg;base64,{img_data}" style="max-width:100%;max-height:80vh;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.1);"></body></html>"""
-                            encoded_html = urllib.parse.quote(popup_html)
-                            js_code = f"let w=window.open('','_blank','width=900,height=800,scrollbars=yes,resizable=yes'); w.document.write(decodeURIComponent('{encoded_html}')); w.document.close(); return false;"
-                            
-                            st.markdown(f'<a href="#" onclick="{js_code}" class="custom-popup-btn"><p>🔍 확대 보기</p></a>', unsafe_allow_html=True)
+                            # 🚨 빈 공간 현상을 제거하기 위해 이미지와 버튼을 하나의 HTML div 블록 안으로 통합했습니다.
+                            combined_html = f"""
+                            <div style="margin-bottom: 10px;">
+                                <div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>
+                                <a href="{img_url}" target="_blank" class="custom-popup-btn"><p>🔍 확대 보기</p></a>
+                            </div>
+                            """
+                            st.markdown(combined_html, unsafe_allow_html=True)
             else:
                 st.info("등록된 이미지가 없습니다.")
                 
@@ -231,14 +236,14 @@ elif selected_name:
                     with cert_cols[idx]:
                         cert_data = get_base64_image(cert_url)
                         if cert_data:
-                            st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>", unsafe_allow_html=True)
-                            
-                            # ✅ 인코딩 방식을 사용하여 따옴표 충돌 원천 차단
-                            popup_html = f"""<html style="background:#F9F8F6;"><body style="margin:0;padding:30px;text-align:center;font-family:sans-serif;"><div style="text-align:right;margin-bottom:20px;"><button onclick="window.close()" style="padding:10px 20px;font-size:16px;font-weight:bold;cursor:pointer;background:#ffffff;border:2px solid #2C2A29;border-radius:8px;color:#2C2A29;">❌ 닫기</button></div><img src="data:image/jpeg;base64,{cert_data}" style="max-width:100%;max-height:80vh;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.1);"></body></html>"""
-                            encoded_html = urllib.parse.quote(popup_html)
-                            js_code = f"let w=window.open('','_blank','width=900,height=800,scrollbars=yes,resizable=yes'); w.document.write(decodeURIComponent('{encoded_html}')); w.document.close(); return false;"
-                            
-                            st.markdown(f'<a href="#" onclick="{js_code}" class="custom-popup-btn"><p>🔍 확대 보기</p></a>', unsafe_allow_html=True)
+                            # 🚨 빈 공간 현상을 제거하기 위해 이미지와 버튼을 하나의 HTML div 블록 안으로 통합했습니다.
+                            combined_html = f"""
+                            <div style="margin-bottom: 10px;">
+                                <div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>
+                                <a href="{cert_url}" target="_blank" class="custom-popup-btn"><p>🔍 확대 보기</p></a>
+                            </div>
+                            """
+                            st.markdown(combined_html, unsafe_allow_html=True)
             else:
                 st.info("등록된 인증서 이미지가 없습니다.")
             
