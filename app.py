@@ -106,7 +106,6 @@ def get_customer_tags_html(customers):
     tags_html += "</div>"
     return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
-# ✅ 강력한 우회 다운로더
 def safe_image_render(image_source):
     if isinstance(image_source, str) and image_source.startswith("http"):
         try:
@@ -131,7 +130,7 @@ def safe_image_render(image_source):
         st.image(image_source, use_container_width=True)
 
 
-# 4. 초기 데이터 셋업 (성우 6개 거점 완벽 반영 및 제품명 정리)
+# 4. 초기 데이터 셋업 
 if "suppliers" not in st.session_state:
     st.session_state.suppliers = [
         {
@@ -141,17 +140,16 @@ if "suppliers" not in st.session_state:
             "kr": "천안 공장", 
             "gl": "중국 및 북미 법인",
             "desc": "(주)성우는 1992년 설립 이래 초정밀 프레스(PRESS) 기술을 기반으로 성장하여, 현재는 전기차 배터리용 핵심 안전부품(원통형 Top Cap 어셈블리 등) 및 자동차 전장부품 생산을 주도하는 정밀 부품 제조 전문기업입니다.",
-            "products": ["2차전지 제품", "전장부품 및 기타제품"],  # ✅ 수정됨: 2개로 정확히 맞춤
+            "products": ["2차전지 제품", "전장부품 및 기타제품"],
             "certs": ["IATF 16949", "ISO 14001", "ISO 45001", "SQ 인증"],
             "customers": {"LG에너지솔루션": 55, "효성전기": 25, "LG이노텍": 15, "기타": 5},
             "locations": [
-                # ✅ 수정됨: 글로벌 6개 거점 완벽 반영
                 {"name": "(주)성우 구미1사업장(본사)", "type": "hq", "address": "경북 구미시 3공단2로 107", "lat": 36.1018, "lon": 128.4223, "country": "대한민국"},
                 {"name": "(주)성우 R&D Center", "type": "kr", "address": "경북 구미시 산동읍 도중리 115", "lat": 36.1601, "lon": 128.4682, "country": "대한민국"},
                 {"name": "천안사업장", "type": "kr", "address": "충남 천안시 동남구 성남면 5산단2로 133", "lat": 36.7580, "lon": 127.2750, "country": "대한민국"},
                 {"name": "중국 남경사업장", "type": "gl_cn", "address": "No.9, Hengda Road, Nanjing, China", "lat": 32.0602, "lon": 118.7968, "country": "중국"},
                 {"name": "중국 추저우 사업장 (설립예정)", "type": "gl_cn", "address": "중국 안후이성 추저우시", "lat": 32.3024, "lon": 118.3186, "country": "중국"},
-                {"name": "북미 사업장 (설립예정)", "type": "gl_us", "address": "미국 테네시주 또는 오하이오주 일대", "lat": 39.9611, "lon": -82.9987, "country": "미국"}
+                {"name": "북미 사업장 (설립예정)", "type": "gl_us", "address": "미국 오하이오 주", "lat": 39.9611, "lon": -82.9987, "country": "미국"}
             ]
         },
         {
@@ -230,112 +228,6 @@ with st.sidebar:
     selected_name = options_sidebar_map[selected_display_name]
 
 
-    # --- 6-3. 관리자용 데이터 연동 메뉴 ---
-    st.markdown("<br><br><br><br>", unsafe_allow_html=True)
-    st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
-    
-    with st.popover("⚙️ 관리자 설정 (데이터 연동)", use_container_width=True):
-        admin_tab1, admin_tab2 = st.tabs(["📁 파일 업로드", "🌐 웹 주소 연동"])
-        
-        with admin_tab1:
-            uploaded_files = st.file_uploader(
-                "파일 및 엑셀 업로드", 
-                type=["xlsx", "xls", "png", "jpg", "jpeg", "webp"], 
-                accept_multiple_files=True, 
-                label_visibility="collapsed"
-            )
-            
-            if uploaded_files:
-                excel_file = None
-                uploaded_images = {}
-                
-                for file in uploaded_files:
-                    if file.name.endswith(('.xlsx', '.xls')):
-                        excel_file = file
-                    else:
-                        uploaded_images[file.name] = file
-
-                if excel_file:
-                    try:
-                        df_ex = pd.read_excel(excel_file, sheet_name='업체정보')
-                        cols = df_ex.columns
-
-                        for _, row in df_ex.iterrows():
-                            comp_name = str(row.iloc[0]).strip()
-                            
-                            def get_img_source(val):
-                                if pd.isna(val) or str(val).strip() == "": return None
-                                val_str = str(val).strip()
-                                if val_str.startswith("http"): return val_str
-                                for img_name, img_file in uploaded_images.items():
-                                    if img_name in val_str: return img_file
-                                return None
-
-                            p1 = get_img_source(row.iloc[11]) if len(row) > 11 else None
-                            p2 = get_img_source(row.iloc[12]) if len(row) > 12 else None
-                            c1 = get_img_source(row.iloc[13]) if len(row) > 13 else None
-                            c2 = get_img_source(row.iloc[14]) if len(row) > 14 else None
-                            
-                            prod_imgs = [x for x in [p1, p2] if x is not None]
-                            cert_imgs = [x for x in [c1, c2] if x is not None]
-                            st.session_state.excel_img_data[comp_name] = {"prod_imgs": prod_imgs, "cert_imgs": cert_imgs}
-                            
-                            target_supplier = next((s for s in st.session_state.suppliers if s['name'] == comp_name), None)
-                            if target_supplier:
-                                if '업종' in cols and pd.notna(row['업종']): target_supplier['industry'] = str(row['업종'])
-                                if '기업개요' in cols and pd.notna(row['기업개요']): target_supplier['desc'] = str(row['기업개요'])
-                                if '본사' in cols and pd.notna(row['본사']): target_supplier['hq'] = str(row['본사'])
-                                if '지사' in cols and pd.notna(row['지사']): target_supplier['kr'] = str(row['지사'])
-                                if '해외' in cols and pd.notna(row['해외']): target_supplier['gl'] = str(row['해외'])
-                                if '핵심생산품목' in cols and pd.notna(row['핵심생산품목']): target_supplier['products'] = [x.strip() for x in str(row['핵심생산품목']).split(',')]
-                                if '품질인증' in cols and pd.notna(row['품질인증']): target_supplier['certs'] = [x.strip() for x in str(row['품질인증']).split(',')]
-
-                        st.success("✅ 파일 데이터 연동 완료!")
-                    except Exception as e:
-                        st.error("오류: 엑셀 파일 형식 또는 '업체정보' 시트 구성을 확인해주세요.")
-
-        with admin_tab2:
-            st.markdown("<p style='font-size:13px; color:#8A817C;'>💡 홈페이지 주소를 입력하면 웹 데이터를 분석하여 SCM 정보를 자동 등록합니다.</p>", unsafe_allow_html=True)
-            input_comp = st.text_input("업체명", placeholder="예: (주)테스트기업")
-            input_url = st.text_input("홈페이지 URL", placeholder="https://www.example.com")
-            
-            if st.button("AI 데이터 추출 및 연동", use_container_width=True):
-                if input_comp and input_url:
-                    with st.spinner("웹 사이트 분석 및 위경도 추출 중... (AI API 연동 필요)"):
-                        time.sleep(2)
-                        
-                        new_supplier = {
-                            "name": input_comp,
-                            "industry": "자동 추출(AI)",
-                            "hq": "서울 본사", "kr": "수원 공장", "gl": "-",
-                            "desc": f"{input_comp}는 AI 모델이 {input_url}에서 자동으로 분석하여 요약한 기업 소개글입니다. 향후 실제 데이터로 대체됩니다.",
-                            "products": ["테스트 부품 1", "테스트 부품 2"],
-                            "certs": ["ISO 9001"],
-                            "customers": ["A자동차", "B전자"],
-                            "locations": [
-                                {"name": "서울 본사", "type": "hq", "address": "서울특별시 강남구 테헤란로", "lat": 37.500, "lon": 127.036, "country": "대한민국"},
-                                {"name": "수원 공장", "type": "kr", "address": "경기도 수원시 영통구", "lat": 37.263, "lon": 127.028, "country": "대한민국"}
-                            ]
-                        }
-                        
-                        existing_idx = next((i for i, s in enumerate(st.session_state.suppliers) if s["name"] == input_comp), None)
-                        if existing_idx is not None:
-                            st.session_state.suppliers[existing_idx] = new_supplier
-                        else:
-                            st.session_state.suppliers.append(new_supplier)
-                            
-                        st.session_state.excel_img_data[input_comp] = {
-                            "prod_imgs": ["https://images.unsplash.com/photo-1617774136473-03e5c98d6263?w=500&q=80", "https://images.unsplash.com/photo-1518985289947-0bfa7d2bcebd?w=500&q=80"],
-                            "cert_imgs": []
-                        }
-                        
-                        st.success(f"✅ {input_comp} 데이터 추출 및 연동 완료! 좌측 업체 목록에서 확인하세요.")
-                        time.sleep(1)
-                        st.rerun()
-                else:
-                    st.warning("업체명과 URL을 모두 입력해주세요.")
-
-
 # 7. 메인 화면 출력 
 if selected_name == "🏠 종합 메인 화면":
     st.markdown("<div class='section-title' style='margin-top:0;'>📊 글로벌 SCM 통합 현황</div>", unsafe_allow_html=True)
@@ -382,6 +274,7 @@ elif selected_name:
 
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
+        # ✅ 1. 공란 문제 해결: 빈 카드 렌더링 방지 로직 고도화
         with col_prod:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
@@ -389,13 +282,12 @@ elif selected_name:
                 p_cols = st.columns(2)
                 for idx, prod_name in enumerate(selected['products']):
                     with p_cols[idx % 2]:
+                        st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
                         if idx < len(company_images["prod_imgs"]):
-                            st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
                             safe_image_render(company_images["prod_imgs"][idx])
-                            st.markdown(f"<div class='product-title' style='margin-top:10px;'>{prod_name}</div></div>", unsafe_allow_html=True)
                         else:
-                            icon_html = get_icon_html(prod_name, "product")
-                            st.markdown(f"<div class='product-card' style='margin-bottom:15px;'>{icon_html}<div class='product-title'>{prod_name}</div></div>", unsafe_allow_html=True)
+                            st.markdown(get_icon_html(prod_name, "product"), unsafe_allow_html=True)
+                        st.markdown(f"<div class='product-title' style='margin-top:10px;'>{prod_name}</div></div>", unsafe_allow_html=True)
             else:
                 st.info("등록된 핵심 생산 품목이 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
@@ -407,20 +299,20 @@ elif selected_name:
                 c_cols = st.columns(2)
                 for idx, cert_name in enumerate(selected['certs']):
                     with c_cols[idx % 2]:
+                        st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
                         if idx < len(company_images["cert_imgs"]):
-                            st.markdown(f"<div class='product-card' style='margin-bottom:15px; padding: 10px !important;'>", unsafe_allow_html=True)
                             safe_image_render(company_images["cert_imgs"][idx])
-                            st.markdown(f"<div class='product-title' style='margin-top:10px;'>{cert_name}</div></div>", unsafe_allow_html=True)
                         else:
-                            icon_html = get_icon_html(cert_name, "cert")
-                            st.markdown(f"<div class='product-card' style='margin-bottom:15px;'>{icon_html}<div class='product-title'>{cert_name}</div></div>", unsafe_allow_html=True)
+                            st.markdown(get_icon_html(cert_name, "cert"), unsafe_allow_html=True)
+                        st.markdown(f"<div class='product-title' style='margin-top:10px;'>{cert_name}</div></div>", unsafe_allow_html=True)
             else:
                 st.info("등록된 품질 및 인증 내역이 없습니다.")
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # ✅ 거점 6개에 맞춰 지도 뷰 전환 버튼 고도화
         st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 주요 거점 네트워크</div>", unsafe_allow_html=True)
-        map_col, text_col = st.columns([1.8, 1])
+        
+        # ✅ 2. 지도와 버튼의 위치 반전 (좌측 버튼 / 우측 넓은 지도)
+        text_col, map_col = st.columns([1, 2.5]) 
         df_loc = pd.DataFrame(selected["locations"])
 
         with text_col:
@@ -428,7 +320,6 @@ elif selected_name:
             
             st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
             
-            # 국내 본사/지사
             has_hq = any(loc["type"] == "hq" for loc in selected["locations"])
             has_kr = any(loc["type"] == "kr" for loc in selected["locations"])
             
@@ -439,7 +330,6 @@ elif selected_name:
                 st.write("")
                 st.button(f"🏭 국내(지사)\nR&D센터, 천안사업장", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
 
-            # 해외 법인(중국, 북미 분리)
             has_gl_cn = any(loc["type"] == "gl_cn" for loc in selected["locations"])
             has_gl_us = any(loc["type"] == "gl_us" for loc in selected["locations"])
 
@@ -449,7 +339,6 @@ elif selected_name:
             if has_gl_us:
                 st.write("")
                 st.button(f"🌎 해외(북미)\n미국 법인(예정)", on_click=set_view, args=("🌎 해외(북미)",), use_container_width=True)
-
 
         with map_col:
             current_view = st.session_state.map_view
@@ -476,9 +365,8 @@ elif selected_name:
                 df_loc['color'] = df_loc.apply(get_color, axis=1)
                 df_loc['radius'] = df_loc.apply(get_radius, axis=1)
                 
-                # 시점(Camera) 이동 세팅
                 if current_view == "전체 뷰":
-                    center_lat, center_lon = 35.0, 150.0 # 태평양 중심 (한국-미국 모두 보이게)
+                    center_lat, center_lon = 35.0, 150.0 
                     zoom_lvl = 1.0 
                 else:
                     target_type = 'hq' if "본사" in current_view else ('kr' if "지사" in current_view else ('gl_cn' if "중국" in current_view else 'gl_us'))
