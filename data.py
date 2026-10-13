@@ -44,8 +44,8 @@ suppliers_data = [
     },
     {
         "name": "(주)브이씨텍",
-        "industry": "제어장치 및 전장품",
-        "sub_industry": "철도차량 및 전기차 부품",
+        "industry": "PCB",
+        "sub_industry": "제어장치 및 전장품",
         "hq": "경기 군포 본사",
         "kr": "-",
         "gl": "-",
