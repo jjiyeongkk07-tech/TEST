@@ -57,16 +57,16 @@ suppliers_data = [
     },
     {
         "name": "(주)상농전선",
-        "industry": "가공(MAGNET WIRE)",
+        "industry": "전선/케이블",
         "sub_industry": "에나멜선 및 절연코드",
         "hq": "경남 양산 본사",
         "kr": "-",
         "gl": "-",
         "desc": "(주)상농전선은 2003년 설립되어 에나멜 와이어, 절연코드 및 기기 내부 배선용 리드와이어 등을 전문적으로 제조하는 기업으로, KS, UL, ISO 등 다양한 품질 인증을 바탕으로 신뢰받는 제품을 공급하고 있습니다.",
         "products": [
-            "에나멜 와이어 / 절연코드 및 코드세트 / 기기 내부 배선용 리드와이어"
+            "에나멜 와이어"
         ],
-        "certs": ["KS 인증", "UL 규격", "CSA 규격", "ISO 9001", "ISO 14001"],
+        "certs": ["IATF 16949", "ISO 14001", "KS 인증", "UL 규격", "CSA 규격"],
         "customers": {"국내 가전 및 전장업체": 70, "기타 대리점": 30},
         "locations": [
             {"name": "(주)상농전선 본사 및 공장", "type": "hq", "address": "경상남도 양산시 유산공단9길 6-1", "lat": 35.3560, "lon": 129.0250, "country": "대한민국"}
@@ -109,12 +109,11 @@ excel_img_data = {
     },
     "(주)상농전선": {
         "prod_imgs": [
-            "https://www.snccable.co.kr/img/product/product_01.jpg"
+            "https://www.snccable.co.kr/_product/photo/12_1.jpg"
         ],
         "cert_imgs": [
-            "https://www.snccable.co.kr/img/company/cert_ks.jpg",
-            "https://www.snccable.co.kr/img/company/cert_ul.jpg",
-            "https://www.snccable.co.kr/img/company/cert_iso.jpg"
+            "https://www.snccable.co.kr/_company/image/certiA16949.gif",
+            "https://www.snccable.co.kr/_company/image/certiA14001.gif"
         ]
     }
 }
