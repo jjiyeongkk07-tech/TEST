@@ -4,6 +4,7 @@ import pydeck as pdk
 import time
 import urllib.request
 import ssl
+import base64
 
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
@@ -17,7 +18,7 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정 (공란 방지를 위한 CSS 최적화)
+# 2. 테마 CSS 설정 (레이아웃 완벽 고정)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -32,22 +33,19 @@ footer { visibility: hidden; }
 header { background-color: transparent !important; }
 [data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
 
-/* 공란(빈 상자) 방지용 CSS */
+/* ✅ 완벽한 카드 레이아웃을 위한 커스텀 CSS */
 .custom-card { 
     background-color: #ffffff; 
     border: 1px solid #E5E0D8; 
     border-radius: 12px; 
     padding: 20px; 
     text-align: center; 
-    height: 100%; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center;
     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    margin-bottom: 15px;
+    height: 100%;
 }
 .img-container {
-    height: 240px; /* 제품 & 인증서 모두 이 높이로 동일하게 적용 */
+    height: 280px; /* 제품과 인증서 이미지 높이를 무조건 280px로 강제 동일화 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -57,12 +55,10 @@ header { background-color: transparent !important; }
 .img-container img {
     max-height: 100%;
     max-width: 100%;
-    object-fit: contain;
+    object-fit: contain; /* 비율 유지하며 꽉 차게 */
     border-radius: 8px;
 }
-.product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4;}
-
-/* 뱃지 컨테이너 */
+.product-title { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; word-break: keep-all; line-height: 1.4; margin-top: 10px;}
 .cert-badge-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 15px; }
 .cert-badge { background: #F3F4F6; border: 1px solid #E5E7EB; color: #374151; font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px; }
 
@@ -79,42 +75,16 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; color: #4A4441 !important; line-height: 1.8; font-weight: 400; }
 
-div.stButton > button { 
-    background-color: #ffffff !important; 
-    border: 1px solid #E5E0D8 !important; 
-    border-radius: 12px !important; 
-    padding: 15px 25px !important; 
-    width: 100% !important; 
-    height: auto !important;
-    display: block !important; 
-    text-align: left !important;
-    transition: all 0.2s ease !important; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
-}
-div.stButton > button p {
-    font-size: 16px !important; 
-    font-weight: 800 !important; 
-    color: #2C2A29 !important; 
-    white-space: pre-wrap !important; 
-    line-height: 1.5 !important;
-    text-align: left !important; 
-    margin: 0 !important;
-    display: block !important;
-}
-div.stButton > button:hover { 
-    background-color: #FDFCFB !important; 
-    border-color: #C4A47C !important; 
-    transform: translateY(-2px) !important; 
-    box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; 
-}
+div.stButton > button { background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; border-radius: 12px !important; padding: 15px 25px !important; width: 100% !important; height: auto !important; display: block !important; text-align: left !important; transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; }
+div.stButton > button p { font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; white-space: pre-wrap !important; line-height: 1.5 !important; text-align: left !important; margin: 0 !important; display: block !important; }
+div.stButton > button:hover { background-color: #FDFCFB !important; border-color: #C4A47C !important; transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
 
-# 3. 데이터 및 우회 이미지 다운로드 함수 (st.image 용)
+# 3. 데이터 및 우회 이미지 다운로드 함수 (공란/깨짐 완벽 방지)
 def get_customer_tags_html(customers):
-    if not customers:
-        return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
+    if not customers: return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
     tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 15px;'>"
     customer_list = customers.keys() if isinstance(customers, dict) else customers
     for comp in customer_list:
@@ -123,7 +93,7 @@ def get_customer_tags_html(customers):
     return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
 @st.cache_data(show_spinner=False)
-def fetch_image_bytes(url):
+def get_base64_image(url):
     if not url or not str(url).startswith("http"): return None
     try:
         ctx = ssl.create_default_context()
@@ -132,7 +102,7 @@ def fetch_image_bytes(url):
         headers = {'User-Agent': 'Mozilla/5.0'}
         req = urllib.request.Request(url, headers=headers)
         res = urllib.request.urlopen(req, context=ctx, timeout=5)
-        return res.read()
+        return base64.b64encode(res.read()).decode('utf-8')
     except Exception:
         return None
 
@@ -275,91 +245,58 @@ elif selected_name:
         st.markdown("<div class='section-title' style='margin-top:10px;'><span class='section-num'>01.</span> 기업 개요</div>", unsafe_allow_html=True)
         st.markdown(f"<div class='desc-box'>📖 {selected['desc']}</div>", unsafe_allow_html=True)
         
-        # ✅ 순서 변경 1: 핵심 역량 및 품질 인증이 02번으로 이동
+        # ✅ 순서 변경: 핵심 역량 및 품질 인증
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         
         col_prod, col_cert = st.columns([1, 1])
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
+        # ✅ 마크다운 텍스트 깨짐 방지: 한 줄로 결합하여 렌더링
         with col_prod:
             st.markdown("<div style='border-right: 2px dashed #E5E0D8; padding-right: 30px; height: 100%;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🌟 핵심 생산 품목</h4>", unsafe_allow_html=True)
             
-            # HTML 대신 순수 Streamlit 요소로 그려서 공백 차단
             if selected['products']:
                 p_cols = st.columns(2)
                 for idx, prod_name in enumerate(selected['products']):
                     with p_cols[idx % 2]:
-                        st.markdown("<div class='custom-card'>", unsafe_allow_html=True)
-                        st.markdown("<div class='img-container'>", unsafe_allow_html=True)
                         if idx < len(company_images["prod_imgs"]):
-                            img_bytes = fetch_image_bytes(company_images["prod_imgs"][idx])
-                            if img_bytes:
-                                st.image(img_bytes)
-                        st.markdown("</div>", unsafe_allow_html=True)
-                        st.markdown(f"<div class='product-title'>{prod_name}</div>", unsafe_allow_html=True)
-                        st.markdown("</div>", unsafe_allow_html=True)
+                            b64_img = get_base64_image(company_images["prod_imgs"][idx])
+                            if b64_img:
+                                # 네모 공란 삭제 및 높이 280px 동일화 적용
+                                card_html = "<div class='custom-card'>" + f"<div class='img-container'><img src='data:image/jpeg;base64,{b64_img}'></div>" + f"<div class='product-title'>{prod_name}</div>" + "</div>"
+                                st.markdown(card_html, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
         with col_cert:
             st.markdown("<div style='padding-left: 10px; height: 100%;'>", unsafe_allow_html=True)
             st.markdown("<h4 style='color: #2C2A29 !important; text-align: center; margin-bottom: 25px; font-weight: 800;'>🏅 품질 및 ESG 인증</h4>", unsafe_allow_html=True)
             
-            st.markdown("<div class='custom-card'>", unsafe_allow_html=True)
-            st.markdown("<div class='img-container'>", unsafe_allow_html=True)
             if company_images.get("cert_imgs"):
-                cert_bytes = fetch_image_bytes(company_images["cert_imgs"][0])
-                if cert_bytes:
-                    st.image(cert_bytes)
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-            # 인증서 하단 텍스트 뱃지
-            badges_html = "<div class='cert-badge-container'>"
-            if selected.get('certs'):
-                for cert in selected['certs']:
-                    badges_html += f"<span class='cert-badge'>{cert}</span>"
-            badges_html += "</div>"
-            st.markdown(badges_html, unsafe_allow_html=True)
-            
-            st.markdown("</div>", unsafe_allow_html=True)
+                b64_cert = get_base64_image(company_images["cert_imgs"][0])
+                if b64_cert:
+                    badges_html = "<div class='cert-badge-container'>"
+                    if selected.get('certs'):
+                        for cert in selected['certs']:
+                            badges_html += f"<span class='cert-badge'>{cert}</span>"
+                    badges_html += "</div>"
+                    
+                    # 네모 공란 삭제 및 높이 280px 동일화 적용
+                    cert_card = "<div class='custom-card'>" + f"<div class='img-container'><img src='data:image/jpeg;base64,{b64_cert}'></div>" + badges_html + "</div>"
+                    st.markdown(cert_card, unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
 
-        # ✅ 순서 변경 2: 주요 고객사가 03번으로 이동
+        # ✅ 순서 변경: 주요 고객사
         st.markdown("<div class='section-title' style='margin-top: 40px;'><span class='section-num'>03.</span> 주요 고객사</div>", unsafe_allow_html=True)
         st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
 
-        # ✅ 지도 왼쪽 / 버튼 오른쪽 원복 및 지도 크기 확대(height=600)
+        # ✅ 지도 왼쪽 / 버튼 오른쪽 및 높이 600px 유지
         st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 글로벌 네트워크</div>", unsafe_allow_html=True)
         
         map_col, text_col = st.columns([2.5, 1]) 
         df_loc = pd.DataFrame(selected["locations"])
-
-        with text_col:
-            st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px; padding-left:15px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
-            
-            st.markdown("<div style='padding-left: 15px;'>", unsafe_allow_html=True)
-            st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
-            
-            has_hq = any(loc["type"] == "hq" for loc in selected["locations"])
-            has_kr = any(loc["type"] == "kr" for loc in selected["locations"])
-            has_gl_cn = any(loc["type"] == "gl_cn" for loc in selected["locations"])
-            has_gl_us = any(loc["type"] == "gl_us" for loc in selected["locations"])
-            
-            if has_hq:
-                st.write("")
-                st.button(f"🏢 국내(본사)\n구미 1사업장", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
-            if has_kr:
-                st.write("")
-                st.button(f"🏭 국내(지사)\nR&D센터, 천안사업장", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
-            if has_gl_cn:
-                st.write("")
-                st.button(f"🌐 해외(중국)\n남경, 추저우(예정)", on_click=set_view, args=("🌐 해외(중국)",), use_container_width=True)
-            if has_gl_us:
-                st.write("")
-                st.button(f"🌎 해외(북미)\n미국 법인(예정)", on_click=set_view, args=("🌎 해외(북미)",), use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
 
         with map_col:
             current_view = st.session_state.map_view
@@ -421,3 +358,28 @@ elif selected_name:
                     ), height=600)
             else:
                 st.info("해당 업체의 등록된 거점 정보가 없습니다.")
+
+        with text_col:
+            st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px; padding-left:15px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
+            
+            st.markdown("<div style='padding-left: 15px;'>", unsafe_allow_html=True)
+            st.button(f"🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
+            
+            has_hq = any(loc["type"] == "hq" for loc in selected["locations"])
+            has_kr = any(loc["type"] == "kr" for loc in selected["locations"])
+            has_gl_cn = any(loc["type"] == "gl_cn" for loc in selected["locations"])
+            has_gl_us = any(loc["type"] == "gl_us" for loc in selected["locations"])
+            
+            if has_hq:
+                st.write("")
+                st.button(f"🏢 국내(본사)\n구미 1사업장", on_click=set_view, args=("🏢 국내(본사)",), use_container_width=True)
+            if has_kr:
+                st.write("")
+                st.button(f"🏭 국내(지사)\nR&D센터, 천안사업장", on_click=set_view, args=("🏭 국내(지사)",), use_container_width=True)
+            if has_gl_cn:
+                st.write("")
+                st.button(f"🌐 해외(중국)\n남경, 추저우(예정)", on_click=set_view, args=("🌐 해외(중국)",), use_container_width=True)
+            if has_gl_us:
+                st.write("")
+                st.button(f"🌎 해외(북미)\n미국 법인(예정)", on_click=set_view, args=("🌎 해외(북미)",), use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
