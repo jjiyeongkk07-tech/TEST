@@ -106,7 +106,7 @@ def get_customer_tags_html(customers):
     tags_html += "</div>"
     return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
-# ✅ 핵심 기능: 강력한 우회 다운로더 (SSL 무시 + 브라우저 위장)
+# ✅ 강력한 우회 다운로더
 def safe_image_render(image_source):
     if isinstance(image_source, str) and image_source.startswith("http"):
         try:
@@ -166,14 +166,13 @@ if "suppliers" not in st.session_state:
         }
     ]
 
-# 🌟 작동 확인을 위한 샘플 이미지 적용 🌟
-# 나중에 여기에 홈페이지에서 '이미지 주소 복사'한 값을 넣어주시면 됩니다.
+# 🌟 유저가 직접 찾아준 정확한 (주)성우 이미지 URL 적용 완료! 🌟
 if "excel_img_data" not in st.session_state:
     st.session_state.excel_img_data = {
         "(주)성우": {
             "prod_imgs": [
-                "https://images.unsplash.com/photo-1617774136473-03e5c98d6263?w=500&q=80", # 1. 배터리 부품 샘플
-                "https://images.unsplash.com/photo-1518985289947-0bfa7d2bcebd?w=500&q=80"  # 2. 전장부품 공정 샘플
+                "https://www.e-sungwoo.co.kr/img/sub/prd_111.jpg", # 2차전지 제품 
+                "https://www.e-sungwoo.co.kr/img/sub/prd_112.jpg"  # 전장부품 및 기타제품
             ],
             "cert_imgs": []
         }
