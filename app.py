@@ -110,26 +110,22 @@ def get_customer_tags_html(customers):
 def safe_image_render(image_source):
     if isinstance(image_source, str) and image_source.startswith("http"):
         try:
-            # 1. SSL 인증서 검증 강제 무시 (사내망 통신 에러 우회)
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
 
-            # 2. 완벽한 크롬 브라우저인 것처럼 헤더 위조
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-                'Referer': 'https://www.google.com/' # 구글에서 타고 들어온 것처럼 위장
+                'Referer': 'https://www.google.com/'
             }
             req = urllib.request.Request(image_source, headers=headers)
             
-            # 3. 타임아웃 5초 설정 후 이미지 가져오기
             response = urllib.request.urlopen(req, context=ctx, timeout=5)
             img_bytes = response.read()
             st.image(img_bytes, use_container_width=True)
             
         except Exception as e:
-            # 실패 사유 명시적 출력 (방화벽 원인 파악용)
             st.warning(f"이미지 차단됨: {str(e)[:50]}...")
     else:
         st.image(image_source, use_container_width=True)
@@ -170,12 +166,14 @@ if "suppliers" not in st.session_state:
         }
     ]
 
+# 🌟 작동 확인을 위한 샘플 이미지 적용 🌟
+# 나중에 여기에 홈페이지에서 '이미지 주소 복사'한 값을 넣어주시면 됩니다.
 if "excel_img_data" not in st.session_state:
     st.session_state.excel_img_data = {
         "(주)성우": {
             "prod_imgs": [
-                "https://www.e-sungwoo.co.kr/theme/daon_company/img/sub/business_battary_img1.jpg", 
-                "https://www.e-sungwoo.co.kr/theme/daon_company/img/sub/business_car_img1.jpg"
+                "https://images.unsplash.com/photo-1617774136473-03e5c98d6263?w=500&q=80", # 1. 배터리 부품 샘플
+                "https://images.unsplash.com/photo-1518985289947-0bfa7d2bcebd?w=500&q=80"  # 2. 전장부품 공정 샘플
             ],
             "cert_imgs": []
         }
@@ -330,8 +328,8 @@ with st.sidebar:
                             st.session_state.suppliers.append(new_supplier)
                             
                         st.session_state.excel_img_data[input_comp] = {
-                            "prod_imgs": ["https://via.placeholder.com/300x200.png?text=Product+1", "https://via.placeholder.com/300x200.png?text=Product+2"],
-                            "cert_imgs": ["https://via.placeholder.com/300x200.png?text=Certificate"]
+                            "prod_imgs": ["https://images.unsplash.com/photo-1617774136473-03e5c98d6263?w=500&q=80", "https://images.unsplash.com/photo-1518985289947-0bfa7d2bcebd?w=500&q=80"],
+                            "cert_imgs": []
                         }
                         
                         st.success(f"✅ {input_comp} 데이터 추출 및 연동 완료! 좌측 업체 목록에서 확인하세요.")
