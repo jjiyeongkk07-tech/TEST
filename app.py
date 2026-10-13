@@ -13,6 +13,8 @@ st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="
 
 if "map_view" not in st.session_state:
     st.session_state.map_view = "전체 뷰"
+if "popup_img" not in st.session_state:
+    st.session_state.popup_img = None
 
 def set_view(view):
     st.session_state.map_view = view
@@ -20,7 +22,26 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
-# 2. 테마 CSS 설정
+# 🚀 팝업 모달 함수 정의 (Streamlit 공식 다이얼로그 기능 활용)
+if hasattr(st, "dialog"):
+    @st.dialog("🔍 이미지 확대 보기", width="large")
+    def show_popup_modal(img_data):
+        st.markdown(f"<div style='text-align:center; background:#F9F8F6; padding:20px; border-radius:12px; margin-bottom: 20px;'><img src='data:image/jpeg;base64,{img_data}' style='max-width:100%; max-height:75vh; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1);'></div>", unsafe_allow_html=True)
+        if st.button("❌ 닫기", use_container_width=True):
+            st.rerun()
+elif hasattr(st, "experimental_dialog"):
+    @st.experimental_dialog("🔍 이미지 확대 보기", width="large")
+    def show_popup_modal(img_data):
+        st.markdown(f"<div style='text-align:center; background:#F9F8F6; padding:20px; border-radius:12px; margin-bottom: 20px;'><img src='data:image/jpeg;base64,{img_data}' style='max-width:100%; max-height:75vh; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1);'></div>", unsafe_allow_html=True)
+        if st.button("❌ 닫기", use_container_width=True):
+            st.rerun()
+else:
+    # 구버전 Streamlit 호환성 유지용 폴백
+    def show_popup_modal(img_data):
+        st.session_state.popup_img = img_data
+        st.rerun()
+
+# 2. 테마 CSS 설정 (기존과 100% 동일, 빈 공간 유발하던 a태그 CSS 제거)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -68,30 +89,23 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; line-height: 1.8; font-weight: 400; }
 
-/* ✅ 지도 옆 버튼 스타일 (가운데 정렬) 및 커스텀 팝업 버튼 스타일 공통 적용 */
-div.stButton > button, a.custom-popup-btn { 
+/* ✅ 버튼 스타일 (가운데 정렬 및 그림자 유지) */
+div.stButton > button { 
     background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
     border-radius: 12px !important; color: #2C2A29 !important; 
     padding: 15px 25px !important; width: 100% !important; height: auto !important; 
     display: block !important; text-align: center !important; 
     transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
-    text-decoration: none !important; box-sizing: border-box;
-    margin-bottom: 0px !important;
 }
-div.stButton > button p, a.custom-popup-btn p { 
+div.stButton > button p { 
     font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; 
     white-space: pre-wrap !important; line-height: 1.5 !important; 
     text-align: center !important; 
     margin: 0 !important; display: block !important; 
 }
-div.stButton > button:hover, a.custom-popup-btn:hover { 
+div.stButton > button:hover { 
     background-color: #FDFCFB !important; border-color: #C4A47C !important; 
     transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; 
-}
-
-/* ✅ 불필요한 공백 제거를 위한 강제 설정 */
-div[data-testid="stMarkdownContainer"] {
-    margin-bottom: 0px !important;
 }
 </style>
 """
@@ -121,6 +135,19 @@ def get_base64_image(url):
     except Exception:
         return None
 
+# 구버전 Streamlit 팝업 렌더링 폴백
+if not hasattr(st, "dialog") and not hasattr(st, "experimental_dialog"):
+    if st.session_state.popup_img:
+        st.markdown("<hr style='border: 2px solid #2C2A29;'>", unsafe_allow_html=True)
+        pop_col1, pop_col2 = st.columns([8, 2])
+        with pop_col1:
+            st.markdown("<h3 style='margin-top:0;'>🔍 이미지 확대 보기</h3>", unsafe_allow_html=True)
+        with pop_col2:
+            if st.button("❌ 닫기", use_container_width=True, key="fallback_close"):
+                st.session_state.popup_img = None
+                st.rerun()
+        st.markdown(f"<div style='text-align: center; background:#F9F8F6; padding: 20px; border-radius: 12px; margin-bottom: 20px;'><img src='data:image/jpeg;base64,{st.session_state.popup_img}' style='max-width: 100%; border-radius: 8px;'></div>", unsafe_allow_html=True)
+        st.markdown("<hr style='border: 2px solid #2C2A29; margin-bottom: 40px;'>", unsafe_allow_html=True)
 
 # 4. 초기 데이터 로드 
 if "suppliers" not in st.session_state: st.session_state.suppliers = suppliers_data
@@ -202,14 +229,11 @@ elif selected_name:
                     with img_cols[idx]:
                         img_data = get_base64_image(img_url)
                         if img_data:
-                            # 🚨 빈 공간 현상을 제거하기 위해 이미지와 버튼을 하나의 HTML div 블록 안으로 통합했습니다.
-                            combined_html = f"""
-                            <div style="margin-bottom: 10px;">
-                                <div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>
-                                <a href="{img_url}" target="_blank" class="custom-popup-btn"><p>🔍 확대 보기</p></a>
-                            </div>
-                            """
-                            st.markdown(combined_html, unsafe_allow_html=True)
+                            st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>", unsafe_allow_html=True)
+                            
+                            # 🚀 버튼을 클릭하면 위에서 정의한 팝업 모달창이 실행됩니다!
+                            if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True):
+                                show_popup_modal(img_data)
             else:
                 st.info("등록된 이미지가 없습니다.")
                 
@@ -236,14 +260,11 @@ elif selected_name:
                     with cert_cols[idx]:
                         cert_data = get_base64_image(cert_url)
                         if cert_data:
-                            # 🚨 빈 공간 현상을 제거하기 위해 이미지와 버튼을 하나의 HTML div 블록 안으로 통합했습니다.
-                            combined_html = f"""
-                            <div style="margin-bottom: 10px;">
-                                <div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>
-                                <a href="{cert_url}" target="_blank" class="custom-popup-btn"><p>🔍 확대 보기</p></a>
-                            </div>
-                            """
-                            st.markdown(combined_html, unsafe_allow_html=True)
+                            st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>", unsafe_allow_html=True)
+                            
+                            # 🚀 버튼을 클릭하면 위에서 정의한 팝업 모달창이 실행됩니다!
+                            if st.button("🔍 확대 보기", key=f"btn_cert_{idx}", use_container_width=True):
+                                show_popup_modal(cert_data)
             else:
                 st.info("등록된 인증서 이미지가 없습니다.")
             
@@ -263,7 +284,6 @@ elif selected_name:
         df_loc = pd.DataFrame(selected.get("locations", []))
 
         with map_col:
-            # 🚀 data.py 에서 설정한 변수들을 활용하여 맵 렌더링
             current_view = st.session_state.map_view
             target_type_key = map_view_mapping.get(current_view, "all")
 
