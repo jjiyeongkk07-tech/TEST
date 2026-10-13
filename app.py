@@ -1,17 +1,3 @@
-제가 작성해드린 레이아웃 구조가 Streamlit 고유의 마크다운 렌더링 방식과 충돌하여 디자인이 심하게 깨지고 팝업이 동작하지 않는 문제가 발생했습니다. (버튼과 HTML을 혼용하면서 컨테이너가 분리된 것이 원인입니다.)
-
-이를 해결하기 위해 HTML 구조를 완전히 단순화하고, ** Streamlit 기본 컬럼 기능만으로 깔끔하게 정렬되도록** 전면 수정했습니다. 
-
-### 💡 주요 개선 사항
-1. **레이아웃 깨짐 완전 해결 (CSS 단순화)**: Streamlit 내장 기능(`st.container`, `st.columns`)을 최대한 활용하고, 복잡한 Flexbox CSS는 걷어내어 이미지가 박스를 이탈하는 현상을 잡았습니다. 
-2. **높이 일치화 해결**: 양쪽 영역에 공통된 CSS 클래스를 부여하여 높이가 일정하게 유지되도록 조정했습니다. 
-3. **팝업 (이미지 확대) 기능 정상화**: Streamlit 버튼 기능을 안전한 위치로 빼고 상태 관리(`st.session_state`)와 다이얼로그(`@st.dialog`)를 확실하게 연동하여 정상 동작하도록 수정했습니다. 
-
----
-
-아래 코드로 `app.py`를 **전체 교체**해 주시기 바랍니다. 
-
-```python
 # app.py
 import streamlit as st
 import pandas as pd
@@ -280,4 +266,3 @@ elif selected_name:
                 if any(loc.get("type") == typ for loc in selected.get("locations", [])):
                     names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == typ])
                     st.button(f"{btn_label}\n{names}", on_click=set_view, args=(btn_label,), use_container_width=True)
-```
