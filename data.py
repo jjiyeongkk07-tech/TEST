@@ -129,6 +129,27 @@ suppliers_data = [
         "locations": [
             {"name": "본사 및 공장", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길 59", "lat": 37.0700, "lon": 127.4200, "country": "대한민국"}
         ]
+    },
+    {
+        "name": "유니온머티리얼즈",
+        "industry": "세라믹/페라이트", 
+        "sub_industry": "자동차 및 전기전자용 부품소재",
+        "hq": "대구 본사", 
+        "kr": "포항 공장", 
+        "gl": "중국 및 베트남 법인",
+        "desc": "유니온머티리얼즈는 2000년 설립된 파인세라믹스 및 자성재료 전문 기업으로, 페라이트 마그네트, 세라믹 절삭공구, 산업용 세라믹 부품 등을 생산해 전 세계 자동차, 전기전자, 기계 산업에 핵심 소재를 공급하고 있습니다.",
+        "products": [
+            "페라이트 마그네트",
+            "파인세라믹스",
+            "세라믹/PCBN 절삭공구"
+        ],
+        "certs": ["IATF 16949", "ISO 14001", "ISO 9001"],
+        "customers": {"Bosch 등 글로벌 부품사": 50, "국내 자동차/모터 부품사": 30, "가전/전자부품사": 15, "기타": 5},
+        "locations": [
+            {"name": "대구 본사 및 공장", "type": "hq", "address": "대구광역시 달서구 성서공단남로 151(월암동)", "lat": 35.8364, "lon": 128.4837, "country": "대한민국"},
+            {"name": "포항 공장", "type": "kr", "address": "경상북도 포항시 남구 대송로", "lat": 35.9904, "lon": 129.3800, "country": "대한민국"},
+            {"name": "중국 법인(유니온툴텍공구)", "type": "gl_cn", "address": "중국 허베이성 싼허시 옌자오", "lat": 39.9500, "lon": 116.8167, "country": "중국"}
+        ]
     }
 ]
 
@@ -209,6 +230,15 @@ excel_img_data = {
             "https://mjtech.co.kr/images/sub/rnd/certification-img-2.png",
             "https://mjtech.co.kr/images/sub/rnd/certification-img-3.png",
             "https://mjtech.co.kr/images/sub/rnd/certification-img-1.png"
+        ]
+    },
+    "유니온머티리얼즈": {
+        "prod_imgs": [
+            "https://www.unionmaterials.com/images/kor/product/ferrite_img01.jpg",
+            "https://www.unionmaterials.com/images/kor/product/ceramic_img01.jpg"
+        ],
+        "cert_imgs": [
+            "https://www.unionmaterials.com/images/kor/company/cert_img01.jpg"
         ]
     }
 }
