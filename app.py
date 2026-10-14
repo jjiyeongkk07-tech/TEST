@@ -52,9 +52,14 @@ def render_zoomable_image(img_data):
             let isDragging = false;
             let startX, startY;
 
-            // 마우스 휠로 확대/축소
+            // 마우스 휠로 이미지 확대/축소 제어
             container.addEventListener('wheel', (e) => {{
-                e.preventDefault();
+                // ✅ 수정된 부분: Ctrl 키(웹페이지 줌)나 트랙패드 핀치 줌 시 브라우저 기본 이벤트를 막지 않고 허용
+                if (e.ctrlKey || e.metaKey) {{
+                    return; // 이렇게 하면 전체 페이지 크기 비율 조절이 정상적으로 작동합니다.
+                }}
+                
+                e.preventDefault(); // 일반 스크롤 시 페이지만 넘어가는 것을 방지하고 이미지 줌을 우선 실행
                 let zoomSpeed = 0.002;
                 scale += e.deltaY * -zoomSpeed;
                 scale = Math.min(Math.max(0.5, scale), 10); // 0.5배 ~ 10배까지 허용
@@ -114,7 +119,7 @@ html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 .stApp { background: linear-gradient(135deg, #F9F8F6 0%, #EFEBE5 100%); }
 .block-container { 
     background-color: #ffffff; padding: 3rem 4rem !important; margin-top: 1rem; margin-bottom: 3rem;
-    border-radius: 16px; border: 1px solid #E5E0D8; box-shadow: 0 15px 35px rgba(100, 90, 80, 0.08);
+    border-radius: 16px; max-width: 1400px; border: 1px solid #E5E0D8; box-shadow: 0 15px 35px rgba(100, 90, 80, 0.08);
 }
 #MainMenu { visibility: hidden; } 
 footer { visibility: hidden; }
