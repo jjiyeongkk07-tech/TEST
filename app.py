@@ -125,12 +125,17 @@ header { background-color: transparent !important; }
 [data-testid="stSidebar"] h3 { 
     font-size: 24px !important; 
 }
-/* 💡 업종, 업체, 국가 탭 글자 크기 및 굵기 대폭 상향 */
-[data-testid="stSidebar"] [data-baseweb="tab"] p,
-[data-testid="stSidebar"] [data-baseweb="tab"] span { 
-    font-size: 18.5px !important; 
-    font-weight: 800 !important;
+
+/* 💡 업종, 업체, 국가 탭 글자 크기 및 굵기, 패딩 대폭 상향 (확실히 커지도록 !important 강제 적용) */
+[data-testid="stSidebar"] button[role="tab"] {
+    padding: 12px 10px !important;
 }
+[data-testid="stSidebar"] button[role="tab"] p,
+[data-testid="stSidebar"] button[role="tab"] span { 
+    font-size: 22px !important; 
+    font-weight: 900 !important;
+}
+
 [data-testid="stSidebar"] label, 
 [data-testid="stSidebar"] div.stRadio > label,
 [data-testid="stSidebar"] .stSelectbox label {
