@@ -116,7 +116,34 @@ html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 #MainMenu { visibility: hidden; } 
 footer { visibility: hidden; }
 header { background-color: transparent !important; }
-[data-testid="stSidebar"] { background-color: #Fdfcfb !important; border-right: 1px solid #E5E0D8 !important; }
+
+/* 💡 사이드바 영역 CSS 추가: 글자 크기 키우기 */
+[data-testid="stSidebar"] { 
+    background-color: #Fdfcfb !important; 
+    border-right: 1px solid #E5E0D8 !important; 
+}
+[data-testid="stSidebar"] h3 { 
+    font-size: 24px !important; 
+}
+[data-testid="stSidebar"] [data-baseweb="tab"] p { 
+    font-size: 16px !important; 
+    font-weight: 700 !important;
+}
+[data-testid="stSidebar"] label, 
+[data-testid="stSidebar"] div.stRadio > label,
+[data-testid="stSidebar"] .stSelectbox label {
+    font-size: 16.5px !important; 
+    font-weight: 700 !important;
+    color: #2C2A29 !important;
+}
+[data-testid="stSidebar"] div[role="radiogroup"] label p,
+[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] span {
+    font-size: 16px !important; 
+    color: #4A4441 !important;
+}
+[data-testid="stSidebar"] .stTextInput input {
+    font-size: 16px !important;
+}
 
 /* ✅ 완벽한 가로 정렬을 위한 내부 컴포넌트 높이 고정 */
 .section-header { 
@@ -255,13 +282,17 @@ with st.sidebar:
     if search_term: filtered = [s for s in filtered if search_term.lower() in s.get("name", "").lower()]
 
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
+    
+    # 💡 라디오 버튼 상단 타이틀 추가 스타일 지정
+    st.markdown("<div style='font-size: 17.5px; font-weight: 900; color: #2C2A29; margin-bottom: 10px;'>📊 분석할 업체 선택</div>", unsafe_allow_html=True)
+    
     options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
     
     # 🌟 업체명('name')을 기준으로 오름차순 정렬(가나다 순)하여 추가
     for s in sorted(filtered, key=lambda x: x.get('name', '')): 
         options_sidebar_map[s['name']] = s['name']
         
-    selected_display_name = st.radio("📊 분석할 업체 선택", list(options_sidebar_map.keys()), on_change=reset_map_view)
+    selected_display_name = st.radio("", list(options_sidebar_map.keys()), on_change=reset_map_view, label_visibility="collapsed")
     selected_name = options_sidebar_map[selected_display_name]
 
 
