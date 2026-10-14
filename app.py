@@ -311,7 +311,6 @@ def go_to_main():
 
 st.button("🌍 글로벌 SCM 및 파트너사 인프라 분석", on_click=go_to_main, use_container_width=True)
 
-
 with st.sidebar:
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
     
@@ -347,14 +346,13 @@ with st.sidebar:
         
     options_list = list(options_sidebar_map.keys())
 
-    # 검색으로 인해 기존 선택된 업체가 사라진 경우 에러 방지용 안전장치
     if st.session_state.selected_company not in options_list:
         st.session_state.selected_company = "🏠 종합 메인 화면"
 
     selected_display_name = st.radio(
         "", 
         options_list, 
-        key="selected_company", # 세션 상태(Session state)와 연결
+        key="selected_company",
         on_change=reset_map_view, 
         label_visibility="collapsed"
     )
@@ -374,8 +372,30 @@ if selected_name == "🏠 종합 메인 화면":
     st.markdown("<div class='section-title'>🗺️ 전 세계 거점 분포도</div>", unsafe_allow_html=True)
     if all_locations:
         df_all = pd.DataFrame(all_locations)
+        
+        # ✅ [수정된 부분] 종합 메인화면: 국내(파란색) / 해외(골드색) 구분
+        def get_main_color(row):
+            if row.get('type') in ['hq', 'kr']:
+                return [41, 128, 185, 220] # 파란색 (국내)
+            else:
+                return [196, 164, 124, 220] # 골드색 (해외)
+                
+        df_all['color'] = df_all.apply(get_main_color, axis=1)
+
         view_state = pdk.ViewState(latitude=35.0, longitude=127.0, zoom=1.5, pitch=0)
-        layer = pdk.Layer("ScatterplotLayer", data=df_all, get_position='[lon, lat]', get_fill_color=[196, 164, 124, 200], get_line_color=[255, 255, 255], stroked=True, line_width_min_pixels=1, get_radius=100000, radius_min_pixels=6, radius_max_pixels=15, pickable=True)
+        layer = pdk.Layer(
+            "ScatterplotLayer", 
+            data=df_all, 
+            get_position='[lon, lat]', 
+            get_fill_color='color', # 새로 추가한 색상 적용
+            get_line_color=[255, 255, 255], 
+            stroked=True, 
+            line_width_min_pixels=1, 
+            get_radius=100000, 
+            radius_min_pixels=6, 
+            radius_max_pixels=15, 
+            pickable=True
+        )
         st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}\n{address}"}))
 
 elif selected_name:
@@ -393,10 +413,8 @@ elif selected_name:
 
         col_left, col_right = st.columns(2)
 
-        # ---------------- 좌측: 핵심 생산 품목 ----------------
         with col_left:
             st.markdown("<div class='section-header'>🌟 핵심 생산 품목</div>", unsafe_allow_html=True)
-            
             prod_list = company_images.get("prod_imgs", [])
             if prod_list:
                 img_cols = st.columns(len(prod_list))
@@ -405,7 +423,6 @@ elif selected_name:
                         img_data = get_base64_image(img_url)
                         if img_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>", unsafe_allow_html=True)
-                            
                             if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True):
                                 show_popup_modal(img_data)
             else:
@@ -423,10 +440,8 @@ elif selected_name:
                 st.markdown("<div class='tag-wrap-box'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
 
 
-        # ---------------- 우측: 품질 및 ESG 인증 ----------------
         with col_right:
             st.markdown("<div class='section-header'>🏅 품질 및 ESG 인증</div>", unsafe_allow_html=True)
-            
             cert_list = company_images.get("cert_imgs", [])
             if cert_list:
                 cert_cols = st.columns(len(cert_list))
@@ -435,7 +450,6 @@ elif selected_name:
                         cert_data = get_base64_image(cert_url)
                         if cert_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>", unsafe_allow_html=True)
-                            
                             if st.button("🔍 확대 보기", key=f"btn_cert_{idx}", use_container_width=True):
                                 show_popup_modal(cert_data)
             else:
@@ -460,10 +474,17 @@ elif selected_name:
             current_view = st.session_state.map_view
             target_type_key = map_view_mapping.get(current_view, "all")
 
+            # ✅ [수정된 부분] 개별 업체 화면: 기본적으로 국내(파란색), 해외(골드색) 구분
             def get_color(row):
-                if current_view == "전체 뷰": return location_colors["all_view"]
-                if row['type'] == target_type_key: return location_colors.get(row['type'], location_colors["all_view"])
-                return location_colors["default_dim"]
+                is_domestic = row.get('type') in ['hq', 'kr']
+                active_color = [41, 128, 185, 220] if is_domestic else [196, 164, 124, 220]
+                dim_color = [200, 200, 200, 100]
+                
+                if current_view == "전체 뷰": 
+                    return active_color
+                if row['type'] == target_type_key: 
+                    return active_color
+                return dim_color
 
             def get_radius(row):
                 if current_view == "전체 뷰": return map_radius_settings["all_view"]
@@ -481,12 +502,23 @@ elif selected_name:
                         center_lat, center_lon, zoom_lvl = target_df['lat'].mean(), target_df['lon'].mean(), (5.5 if len(target_df) > 1 else 9.0)
                 
                 view_state = pdk.ViewState(latitude=center_lat, longitude=center_lon, zoom=zoom_lvl, pitch=0, transition_duration=1200)
-                layer = pdk.Layer("ScatterplotLayer", data=df_loc, get_position='[lon, lat]', get_fill_color='color', get_line_color=[255, 255, 255], stroked=True, line_width_min_pixels=2, get_radius='radius', radius_min_pixels=6, radius_max_pixels=30, pickable=True)
+                layer = pdk.Layer(
+                    "ScatterplotLayer", 
+                    data=df_loc, 
+                    get_position='[lon, lat]', 
+                    get_fill_color='color', # 새로 추가한 색상 적용
+                    get_line_color=[255, 255, 255], 
+                    stroked=True, 
+                    line_width_min_pixels=2, 
+                    get_radius='radius', 
+                    radius_min_pixels=6, 
+                    radius_max_pixels=30, 
+                    pickable=True
+                )
                 st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}\n{address}"}), height=600)
 
         with text_col:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
-            # 글로벌 네트워크 버튼에만 type="primary"를 부여하여 CSS 분리 적용
             st.button("🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True, type="primary")
             
             for typ, btn_label in [("hq", "🏢 국내(본사)"), ("kr", "🏭 국내(지사)"), ("gl_cn", "🌐 해외(중국)"), ("gl_us", "🌎 해외(북미)")]:
