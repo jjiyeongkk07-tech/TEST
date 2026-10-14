@@ -90,6 +90,26 @@ suppliers_data = [
             {"name": "경기(분당)사무소", "type": "kr", "address": "경기도 성남시 분당구 황새울로 360번길 21 신영펠리스타워11층", "lat": 37.3827, "lon": 127.1189, "country": "대한민국"},
             {"name": "중국(소주)법인", "type": "gl_cn", "address": "3-103 No.61 Jiepu Road SIP, 215126 Suzhou, China", "lat": 31.3285, "lon": 120.7850, "country": "중국"}
         ]
+    },
+    {
+        "name": "평화기공(주)",
+        "industry": "가공(DIECASTING)",
+        "sub_industry": "자동차 경량화 및 가전용 알루미늄 부품",
+        "hq": "대구 본사",
+        "kr": "-",
+        "gl": "-",
+        "desc": "평화기공(주)은 1985년 설립된 알루미늄 다이캐스팅 기반의 정밀 부품 업체로, 자동차 경량화 부품 및 가전용 알루미늄 부품을 생산하며, 최근 전기차·로봇·대형 다이캐스팅 부품으로 사업 영역을 확장하고 있습니다.",
+        "products": [
+            "트랜스퍼 케이스", 
+            "엔진 마운트 브라켓", 
+            "브레이크 부품", 
+            "냉장고·에어컨 컴프레서 부품"
+        ],
+        "certs": ["IATF 16949", "ISO 45001"],
+        "customers": {"TESLA": 25, "LG전자": 25, "삼성전자": 20, "르노코리아": 15, "BorgWarner 등 기타": 15},
+        "locations": [
+            {"name": "평화기공(주) 본사 및 공장", "type": "hq", "address": "대구광역시 달성군 논공읍 논공중앙로 395", "lat": 35.7485, "lon": 128.4552, "country": "대한민국"}
+        ]
     }
 ]
 
@@ -143,13 +163,21 @@ excel_img_data = {
             "http://www.kimchunbrg.com/images/sub/cert_01.jpg"
         ]
     },
-    # 💡 새롭게 추가된 업체 이미지 매핑
     "한국NMB(주)": {
         "prod_imgs": [
             "https://product.minebeamitsumi.com/en/product/category/bearing/spherical/__icsFiles/afieldfile/2026/01/14/file_01_90.png",
             "https://product.minebeamitsumi.com/en/product/category/rotary/steppingmotor/hybrid/__icsFiles/afieldfile/2024/08/02/hybrid_1.png"
         ],
         "cert_imgs": []
+    },
+    "평화기공(주)": {
+        "prod_imgs": [
+            "https://ph.co.kr/common/images/sub/affiliate_product_11_1.jpg",
+            "https://ph.co.kr/common/images/sub/affiliate_product_11_2.jpg"
+        ],
+        "cert_imgs": [
+            "https://ph.co.kr/common/images/sub/affiliate_cert_11_1.jpg"
+        ]
     }
 }
 
