@@ -219,9 +219,14 @@ div.stButton > button[kind="primary"] p {
     font-size: 17.5px !important; 
 }
 
-/* 최상단 타이틀 버튼을 위한 CSS (앵커를 활용해 첫번째 버튼만 단독 타겟팅) */
-div:has(.main-title-anchor) { height: 0px; margin: 0; padding: 0; overflow: hidden; }
-div:has(.main-title-anchor) + div button {
+/* 🚨 렌더링 에러 해결: div 대신 div.element-container로 명확히 타겟팅 */
+div.element-container:has(.main-title-anchor) { 
+    height: 0px !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+    overflow: hidden !important; 
+}
+div.element-container:has(.main-title-anchor) + div.element-container button {
     background-color: #2C2A29 !important; 
     padding: 30px 40px !important; 
     border-radius: 12px !important; 
@@ -235,11 +240,11 @@ div:has(.main-title-anchor) + div button {
     cursor: pointer !important;
     transition: all 0.2s ease !important;
 }
-div:has(.main-title-anchor) + div button:hover {
+div.element-container:has(.main-title-anchor) + div.element-container button:hover {
     background-color: #353332 !important;
     transform: none !important;
 }
-div:has(.main-title-anchor) + div button p {
+div.element-container:has(.main-title-anchor) + div.element-container button p {
     font-size: 34px !important; 
     font-weight: 900 !important; 
     color: #ffffff !important; 
@@ -342,7 +347,7 @@ with st.sidebar:
         
     options_list = list(options_sidebar_map.keys())
 
-    # 🚨 [핵심 수정] 필터링(검색)으로 인해 기존 선택된 업체가 사라진 경우 에러를 막기 위해 초기화
+    # 검색으로 인해 기존 선택된 업체가 사라진 경우 에러 방지용 안전장치
     if st.session_state.selected_company not in options_list:
         st.session_state.selected_company = "🏠 종합 메인 화면"
 
@@ -488,4 +493,3 @@ elif selected_name:
                 if any(loc.get("type") == typ for loc in selected.get("locations", [])):
                     names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == typ])
                     st.button(f"{btn_label}\n{names}", on_click=set_view, args=(btn_label,), use_container_width=True, type="primary")
-
