@@ -52,19 +52,14 @@ def render_zoomable_image(img_data):
             let isDragging = false;
             let startX, startY;
 
-            // 마우스 휠로 이미지 확대/축소 제어
+            // ✅ 마우스 휠로 확대/축소 (브라우저 전체 페이지 줌과 충돌 방지)
             container.addEventListener('wheel', (e) => {{
-                // ✅ 수정된 부분: Ctrl 키(웹페이지 줌)나 트랙패드 핀치 줌 시 브라우저 기본 이벤트를 막지 않고 허용
-                if (e.ctrlKey || e.metaKey) {{
-                    return; // 이렇게 하면 전체 페이지 크기 비율 조절이 정상적으로 작동합니다.
-                }}
-                
-                e.preventDefault(); // 일반 스크롤 시 페이지만 넘어가는 것을 방지하고 이미지 줌을 우선 실행
+                // e.preventDefault(); <- 브라우저 고유의 줌(Ctrl+휠) 및 스크롤을 막지 않도록 제거함
                 let zoomSpeed = 0.002;
                 scale += e.deltaY * -zoomSpeed;
                 scale = Math.min(Math.max(0.5, scale), 10); // 0.5배 ~ 10배까지 허용
                 img.style.transform = `translate(${{translateX}}px, ${{translateY}}px) scale(${{scale}})`;
-            }}, {{ passive: false }});
+            }}, {{ passive: true }}); // passive: true를 통해 브라우저 전체 확대/축소를 절대 막지 않음
 
             // 마우스 클릭 드래그로 이미지 이동 (Pan 기능)
             img.addEventListener('mousedown', (e) => {{
@@ -111,7 +106,7 @@ else:
         st.session_state.popup_img = img_data
         st.rerun()
 
-# 2. 테마 CSS 설정
+# 2. 테마 CSS 설정 (레이아웃 1400px 제한 등 완벽 유지)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
