@@ -231,11 +231,18 @@ st.markdown("<div style='background-color: #2C2A29; padding: 30px 40px; border-r
 
 with st.sidebar:
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
+    
+    # 💡 세트(Set)를 리스트로 변환 후 오름차순(가나다순) 정렬 처리
     all_countries_set = set()
     for s in suppliers:
         for loc in s.get("locations", []): all_countries_set.add(loc["country"])
-    industry_list = ["전체"] + list(set(s.get("industry", "미분류") for s in suppliers if s.get("industry") != "미분류"))
-    country_list = ["전체"] + list(all_countries_set)
+    
+    raw_industry_list = list(set(s.get("industry", "미분류") for s in suppliers if s.get("industry") != "미분류"))
+    raw_country_list = list(all_countries_set)
+    
+    # 리스트 오름차순 정렬 후 맨 앞에 "전체" 추가
+    industry_list = ["전체"] + sorted(raw_industry_list)
+    country_list = ["전체"] + sorted(raw_country_list)
 
     tab_industry, tab_company, tab_country = st.tabs(["🏷️ 업종", "🏢 업체", "🌍 국가"])
     with tab_industry: selected_industry = st.selectbox("조회할 업종을 선택하세요", industry_list, on_change=reset_map_view, label_visibility="collapsed")
