@@ -103,7 +103,7 @@ else:
         st.session_state.popup_img = img_data
         st.rerun()
 
-# 2. 테마 CSS 설정 (기존과 100% 동일)
+# 2. 테마 CSS 설정 (버튼 크기 축소 및 배지 크기 확대 적용)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -137,9 +137,10 @@ header { background-color: transparent !important; }
     align-items: flex-start; padding-top: 20px; margin-top: 20px;
     border-top: 1px dashed #E5E0D8; min-height: 70px;
 }
+/* 💡 배지 크기 확대 (폰트 사이즈 및 패딩 증가) */
 .unified-tag { 
-    font-size: 14.5px; font-weight: 800; color: #4A4441; text-align: center; 
-    background: #F8F9FA; padding: 10px 18px; border-radius: 30px; 
+    font-size: 16.5px; font-weight: 800; color: #4A4441; text-align: center; 
+    background: #F8F9FA; padding: 12px 24px; border-radius: 30px; 
     border: 1px solid #D1D5DB; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     white-space: nowrap;
 }
@@ -152,15 +153,16 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; line-height: 1.8; font-weight: 400; }
 
 /* ✅ 버튼 스타일 (가운데 정렬 및 그림자 유지) */
+/* 💡 버튼 크기 축소 (폰트 사이즈 및 패딩 감소) */
 div.stButton > button { 
     background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
-    border-radius: 12px !important; color: #2C2A29 !important; 
-    padding: 15px 25px !important; width: 100% !important; height: auto !important; 
+    border-radius: 10px !important; color: #2C2A29 !important; 
+    padding: 8px 14px !important; width: 100% !important; height: auto !important; 
     display: block !important; text-align: center !important; 
     transition: all 0.2s ease !important; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; 
 }
 div.stButton > button p { 
-    font-size: 16px !important; font-weight: 800 !important; color: #2C2A29 !important; 
+    font-size: 14px !important; font-weight: 800 !important; color: #2C2A29 !important; 
     white-space: pre-wrap !important; line-height: 1.5 !important; 
     text-align: center !important; 
     margin: 0 !important; display: block !important; 
