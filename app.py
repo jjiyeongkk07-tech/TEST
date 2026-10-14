@@ -114,7 +114,7 @@ html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 .stApp { background: linear-gradient(135deg, #F9F8F6 0%, #EFEBE5 100%); }
 .block-container { 
     background-color: #ffffff; padding: 3rem 4rem !important; margin-top: 1rem; margin-bottom: 3rem;
-    border-radius: 16px; max-width: 1400px; border: 1px solid #E5E0D8; box-shadow: 0 15px 35px rgba(100, 90, 80, 0.08);
+    border-radius: 16px; border: 1px solid #E5E0D8; box-shadow: 0 15px 35px rgba(100, 90, 80, 0.08);
 }
 #MainMenu { visibility: hidden; } 
 footer { visibility: hidden; }
