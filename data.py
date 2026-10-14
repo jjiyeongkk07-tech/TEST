@@ -100,10 +100,9 @@ suppliers_data = [
         "gl": "-",
         "desc": "평화기공(주)은 1985년 설립된 알루미늄 다이캐스팅 기반의 정밀 부품 업체로, 자동차 경량화 부품 및 가전용 알루미늄 부품을 생산하며, 최근 전기차·로봇·대형 다이캐스팅 부품으로 사업 영역을 확장하고 있습니다.",
         "products": [
-            "트랜스퍼 케이스", 
-            "엔진 마운트 브라켓", 
-            "브레이크 부품", 
-            "냉장고·에어컨 컴프레서 부품"
+            "Stator Block",
+            "Base Cover",
+            "Transfer Case"
         ],
         "certs": ["IATF 16949", "ISO 45001", "ESG 경영"],
         "customers": {"TESLA": 25, "LG전자": 25, "삼성전자": 20, "르노코리아": 15, "BorgWarner 등 기타": 15},
@@ -172,8 +171,9 @@ excel_img_data = {
     },
     "평화기공(주)": {
         "prod_imgs": [
-            "https://ph.co.kr/common/images/sub/affiliate_product_11_1.jpg",
-            "https://ph.co.kr/common/images/sub/affiliate_product_11_2.jpg"
+            "https://ph.co.kr/upload/prod/6-14_K1KM3613(0).png",
+            "https://ph.co.kr/upload/prod/6-12_K1KM3614(0).png",
+            "https://ph.co.kr/upload/prod/6-1_K1KM3561(0).png"
         ],
         "cert_imgs": [
             "https://ph.co.kr/common/images/sub/affiliate_cert_11_1.jpg"
