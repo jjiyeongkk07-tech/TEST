@@ -103,7 +103,7 @@ else:
         st.session_state.popup_img = img_data
         st.rerun()
 
-# 2. 테마 CSS 설정 (버튼 크기 축소 및 배지 크기 확대 적용)
+# 2. 테마 CSS 설정
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -137,7 +137,6 @@ header { background-color: transparent !important; }
     align-items: flex-start; padding-top: 20px; margin-top: 20px;
     border-top: 1px dashed #E5E0D8; min-height: 70px;
 }
-/* 💡 배지 크기 확대 (폰트 사이즈 및 패딩 증가) */
 .unified-tag { 
     font-size: 16.5px; font-weight: 800; color: #4A4441; text-align: center; 
     background: #F8F9FA; padding: 12px 24px; border-radius: 30px; 
@@ -152,8 +151,7 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; line-height: 1.8; font-weight: 400; }
 
-/* ✅ 버튼 스타일 (가운데 정렬 및 그림자 유지) */
-/* 💡 버튼 크기 축소 (폰트 사이즈 및 패딩 감소) */
+/* ✅ 일반 버튼 스타일 (확대 보기 - 크기 축소 유지) */
 div.stButton > button { 
     background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
     border-radius: 10px !important; color: #2C2A29 !important; 
@@ -170,6 +168,15 @@ div.stButton > button p {
 div.stButton > button:hover { 
     background-color: #FDFCFB !important; border-color: #C4A47C !important; 
     transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; 
+}
+
+/* 💡 거점 표시 전용 버튼 스타일 (글자 크기 및 여백 확대) */
+div.stButton > button[kind="primary"] {
+    padding: 14px 20px !important; 
+    border-radius: 12px !important;
+}
+div.stButton > button[kind="primary"] p {
+    font-size: 17.5px !important; 
 }
 </style>
 """
@@ -376,9 +383,10 @@ elif selected_name:
 
         with text_col:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
-            st.button("🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True)
+            # 💡 글로벌 네트워크 버튼에만 type="primary"를 부여하여 CSS 분리 적용
+            st.button("🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True, type="primary")
             
             for typ, btn_label in [("hq", "🏢 국내(본사)"), ("kr", "🏭 국내(지사)"), ("gl_cn", "🌐 해외(중국)"), ("gl_us", "🌎 해외(북미)")]:
                 if any(loc.get("type") == typ for loc in selected.get("locations", [])):
                     names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == typ])
-                    st.button(f"{btn_label}\n{names}", on_click=set_view, args=(btn_label,), use_container_width=True)
+                    st.button(f"{btn_label}\n{names}", on_click=set_view, args=(btn_label,), use_container_width=True, type="primary")
