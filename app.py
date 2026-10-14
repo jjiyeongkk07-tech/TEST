@@ -158,6 +158,14 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
     font-size: 16px !important;
 }
 
+/* 메트릭 라벨(검색된 파트너사 등) 폰트 크기 변경 */
+[data-testid="stMetricLabel"] > div,
+[data-testid="stMetricLabel"] > div > p {
+    font-size: 17.5px !important; 
+    font-weight: 900 !important;
+    color: #2C2A29 !important;
+}
+
 /* 완벽한 가로 정렬을 위한 내부 컴포넌트 높이 고정 */
 .section-header { 
     color: #2C2A29; text-align: center; font-weight: 900; font-size: 20px; 
@@ -396,7 +404,10 @@ if selected_name == "🏠 종합 메인 화면":
             radius_max_pixels=15, 
             pickable=True
         )
-        st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}\n{address}"}))
+        
+        # ✅ 지도 반복 방지 설정 추가
+        view = pdk.View(type="MapView", repeat=False)
+        st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, views=[view], layers=[layer], tooltip={"text": "{name}\n{address}"}))
 
 elif selected_name:
     selected = next((s for s in filtered if s["name"] == selected_name), None)
@@ -515,7 +526,10 @@ elif selected_name:
                     radius_max_pixels=30, 
                     pickable=True
                 )
-                st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, layers=[layer], tooltip={"text": "{name}\n{address}"}), height=600)
+                
+                # ✅ 지도 반복 방지 설정 추가
+                view = pdk.View(type="MapView", repeat=False)
+                st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, views=[view], layers=[layer], tooltip={"text": "{name}\n{address}"}), height=600)
 
         with text_col:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
