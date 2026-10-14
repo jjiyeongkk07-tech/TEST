@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import pydeck as pdk
 import urllib.request
@@ -22,22 +23,87 @@ def set_view(view):
 def reset_map_view():
     st.session_state.map_view = "전체 뷰"
 
+# 🚀 줌/드래그가 가능한 이미지 HTML 컴포넌트 함수 정의
+def render_zoomable_image(img_data):
+    html_code = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <style>
+        body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #F9F8F6; overflow: hidden; border-radius: 12px; }}
+        .img-container {{ width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }}
+        img {{ max-width: 95%; max-height: 95%; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); cursor: grab; transform-origin: center; }}
+        img:active {{ cursor: grabbing; }}
+    </style>
+    </head>
+    <body>
+        <div class="img-container" id="container">
+            <img id="zoom-img" src="data:image/jpeg;base64,{img_data}">
+        </div>
+        <script>
+            const img = document.getElementById('zoom-img');
+            const container = document.getElementById('container');
+            let scale = 1;
+            let translateX = 0;
+            let translateY = 0;
+            let isDragging = false;
+            let startX, startY;
+
+            // 마우스 휠로 확대/축소
+            container.addEventListener('wheel', (e) => {{
+                e.preventDefault();
+                let zoomSpeed = 0.002;
+                scale += e.deltaY * -zoomSpeed;
+                scale = Math.min(Math.max(0.5, scale), 10); // 0.5배 ~ 10배까지 허용
+                img.style.transform = `translate(${{translateX}}px, ${{translateY}}px) scale(${{scale}})`;
+            }}, {{ passive: false }});
+
+            // 마우스 클릭 드래그로 이미지 이동 (Pan 기능)
+            img.addEventListener('mousedown', (e) => {{
+                e.preventDefault();
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+            }});
+
+            window.addEventListener('mouseup', () => {{
+                isDragging = false;
+            }});
+
+            window.addEventListener('mouseleave', () => {{
+                isDragging = false;
+            }});
+
+            window.addEventListener('mousemove', (e) => {{
+                if (!isDragging) return;
+                e.preventDefault();
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                img.style.transform = `translate(${{translateX}}px, ${{translateY}}px) scale(${{scale}})`;
+            }});
+        </script>
+    </body>
+    </html>
+    """
+    components.html(html_code, height=650, scrolling=False)
+
+
 # 🚀 팝업 모달 함수 정의 (Streamlit 공식 다이얼로그 기능 활용)
 if hasattr(st, "dialog"):
     @st.dialog("🔍 이미지 확대 보기", width="large")
     def show_popup_modal(img_data):
-        st.markdown(f"<div style='text-align:center; background:#F9F8F6; padding:20px; border-radius:12px; margin-bottom: 20px;'><img src='data:image/jpeg;base64,{img_data}' style='max-width:100%; max-height:75vh; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1);'></div>", unsafe_allow_html=True)
+        render_zoomable_image(img_data)
 elif hasattr(st, "experimental_dialog"):
     @st.experimental_dialog("🔍 이미지 확대 보기", width="large")
     def show_popup_modal(img_data):
-        st.markdown(f"<div style='text-align:center; background:#F9F8F6; padding:20px; border-radius:12px; margin-bottom: 20px;'><img src='data:image/jpeg;base64,{img_data}' style='max-width:100%; max-height:75vh; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1);'></div>", unsafe_allow_html=True)
+        render_zoomable_image(img_data)
 else:
     # 구버전 Streamlit 호환성 유지용 폴백
     def show_popup_modal(img_data):
         st.session_state.popup_img = img_data
         st.rerun()
 
-# 2. 테마 CSS 설정 (기존과 100% 동일, 빈 공간 유발하던 a태그 CSS 제거)
+# 2. 테마 CSS 설정 (기존과 100% 동일)
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -142,7 +208,8 @@ if not hasattr(st, "dialog") and not hasattr(st, "experimental_dialog"):
             if st.button("❌ 닫기", use_container_width=True, key="fallback_close"):
                 st.session_state.popup_img = None
                 st.rerun()
-        st.markdown(f"<div style='text-align: center; background:#F9F8F6; padding: 20px; border-radius: 12px; margin-bottom: 20px;'><img src='data:image/jpeg;base64,{st.session_state.popup_img}' style='max-width: 100%; border-radius: 8px;'></div>", unsafe_allow_html=True)
+        # 폴백 시에도 줌 기능이 포함된 컴포넌트로 호출
+        render_zoomable_image(st.session_state.popup_img)
         st.markdown("<hr style='border: 2px solid #2C2A29; margin-bottom: 40px;'>", unsafe_allow_html=True)
 
 # 4. 초기 데이터 로드 
@@ -227,7 +294,6 @@ elif selected_name:
                         if img_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>", unsafe_allow_html=True)
                             
-                            # 🚀 버튼을 클릭하면 위에서 정의한 팝업 모달창이 실행됩니다!
                             if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True):
                                 show_popup_modal(img_data)
             else:
@@ -258,7 +324,6 @@ elif selected_name:
                         if cert_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>", unsafe_allow_html=True)
                             
-                            # 🚀 버튼을 클릭하면 위에서 정의한 팝업 모달창이 실행됩니다!
                             if st.button("🔍 확대 보기", key=f"btn_cert_{idx}", use_container_width=True):
                                 show_popup_modal(cert_data)
             else:
