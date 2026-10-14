@@ -113,7 +113,7 @@ suppliers_data = [
     },
     {
         "name": "(주)엠제이텍",
-        "industry": "모터 코어/정밀 금형", 
+        "industry": "PRESS(CORE)", 
         "sub_industry": "자동차 및 전기전자용 모터 코어",
         "hq": "경기 안성 본사", 
         "kr": "-", 
@@ -125,7 +125,7 @@ suppliers_data = [
             "정밀 금형",
             "자동검사 지그"
         ],
-        "certs": ["IATF 16949", "ISO 14001", "ISO 9001", "SQ 인증"],
+        "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
         "customers": {"국내 자동차 및 부품사": 60, "일본/대만 등 해외수출": 30, "기타": 10},
         "locations": [
             {"name": "본사 및 공장", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길 59", "lat": 37.0700, "lon": 127.4200, "country": "대한민국"}
