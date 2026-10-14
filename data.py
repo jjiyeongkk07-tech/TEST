@@ -105,7 +105,7 @@ suppliers_data = [
             "브레이크 부품", 
             "냉장고·에어컨 컴프레서 부품"
         ],
-        "certs": ["IATF 16949", "ISO 45001"],
+        "certs": ["IATF 16949", "ISO 45001", "ESG 경영"],
         "customers": {"TESLA": 25, "LG전자": 25, "삼성전자": 20, "르노코리아": 15, "BorgWarner 등 기타": 15},
         "locations": [
             {"name": "평화기공(주) 본사 및 공장", "type": "hq", "address": "대구광역시 달성군 논공읍 논공중앙로 395", "lat": 35.7485, "lon": 128.4552, "country": "대한민국"}
