@@ -83,7 +83,7 @@ suppliers_data = [
             "Hybrid stepping motors"
         ],
         "certs": [], 
-        "customers": {"LG-MAGNA","현대모비스","SNT Motiv","기타"}, 
+        "customers": {"LG-MAGNA", "현대모비스", "SNT Motiv", "기타"}, 
         "locations": [
             {"name": "본사", "type": "hq", "address": "부산광역시 사상구 새벽로 167번길 85-6(감전동, 제1,2,3,4층 제에이동호)", "lat": 35.1538, "lon": 128.9830, "country": "대한민국"},
             {"name": "모덕Office", "type": "kr", "address": "부산광역시 사상구 모덕로 57 3층", "lat": 35.1743, "lon": 128.9822, "country": "대한민국"},
@@ -97,7 +97,7 @@ suppliers_data = [
         "sub_industry": "자동차 경량화 및 가전용 알루미늄 부품",
         "hq": "대구 본사",
         "kr": "-",
-        "gl": "중국 법인",  # 글로벌 네트워크 정보 업데이트
+        "gl": "중국 법인",
         "desc": "평화기공(주)은 1985년 설립된 알루미늄 다이캐스팅 기반의 정밀 부품 업체로, 자동차 경량화 부품 및 가전용 알루미늄 부품을 생산하며, 최근 전기차·로봇·대형 다이캐스팅 부품으로 사업 영역을 확장하고 있습니다.",
         "products": [
             "Stator Block",
@@ -108,7 +108,27 @@ suppliers_data = [
         "customers": {"TESLA": 25, "LG전자": 25, "삼성전자": 20, "르노코리아": 15, "BorgWarner 등 기타": 15},
         "locations": [
             {"name": "평화기공(주) 본사 및 공장", "type": "hq", "address": "대구광역시 달성군 논공읍 논공중앙로 395", "lat": 35.7485, "lon": 128.4552, "country": "대한민국"},
-            {"name": "천진평화기공기차부건유한공사", "type": "gl_cn", "address": "중국 톈진시 우칭구 이셴과학공업원 고속도로 19호", "lat": 39.3800, "lon": 117.0400, "country": "중국"}  # 해외계열사 추가
+            {"name": "천진평화기공기차부건유한공사", "type": "gl_cn", "address": "중국 톈진시 우칭구 이셴과학공업원 고속도로 19호", "lat": 39.3800, "lon": 117.0400, "country": "중국"}
+        ]
+    },
+    {
+        "name": "(주)엠제이텍",
+        "industry": "모터 코어/정밀 금형", 
+        "sub_industry": "자동차 및 전기전자용 모터 코어",
+        "hq": "경기 안성 본사", 
+        "kr": "-", 
+        "gl": "-",
+        "desc": "(주)엠제이텍은 모터 코어와 정밀 금형을 개발·제조하는 전문 기업으로, 자동차 및 가전제품용 구동 모터 코어를 비롯해 모터 코어 적층용 금형을 생산하여 국내외 기업과 일본, 대만 등지에 제품을 공급하고 있습니다.",
+        "products": [
+            "자동차용 모터 코어",
+            "가전용 모터 코어",
+            "정밀 금형",
+            "자동검사 지그"
+        ],
+        "certs": ["IATF 16949", "ISO 14001", "ISO 9001", "SQ 인증"],
+        "customers": {"국내 자동차 및 부품사": 60, "일본/대만 등 해외수출": 30, "기타": 10},
+        "locations": [
+            {"name": "본사 및 공장", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길 59", "lat": 37.0700, "lon": 127.4200, "country": "대한민국"}
         ]
     }
 ]
@@ -178,6 +198,16 @@ excel_img_data = {
         ],
         "cert_imgs": [
             "https://ph.co.kr/common/images/sub/affiliate_cert_11_1.jpg"
+        ]
+    },
+    "(주)엠제이텍": {
+        "prod_imgs": [
+            "https://mjtech.co.kr/images/product_core_01.jpg",
+            "https://mjtech.co.kr/images/product_mold_01.jpg"
+        ],
+        "cert_imgs": [
+            "https://mjtech.co.kr/images/cert_iatf16949.jpg",
+            "https://mjtech.co.kr/images/cert_iso14001.jpg"
         ]
     }
 }
