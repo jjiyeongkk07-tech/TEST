@@ -12,6 +12,7 @@ from data import suppliers_data, excel_img_data, map_view_mapping, location_colo
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 
+# --- 세션 초기화 ---
 if "map_view" not in st.session_state:
     st.session_state.map_view = "전체 뷰"
 if "popup_img" not in st.session_state:
@@ -119,7 +120,7 @@ html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 footer { visibility: hidden; }
 header { background-color: transparent !important; }
 
-/* 💡 사이드바 영역 CSS 추가: 글자 크기 키우기 */
+/* 사이드바 영역 CSS 추가: 글자 크기 키우기 */
 [data-testid="stSidebar"] { 
     background-color: #Fdfcfb !important; 
     border-right: 1px solid #E5E0D8 !important; 
@@ -128,7 +129,7 @@ header { background-color: transparent !important; }
     font-size: 24px !important; 
 }
 
-/* 🚀 업종, 업체, 국가 탭 글씨 크기를 '분석할 업체 선택'과 완벽히 동일하게(17.5px) 강제 적용 */
+/* 업종, 업체, 국가 탭 글씨 크기를 '분석할 업체 선택'과 완벽히 동일하게(17.5px) 강제 적용 */
 div[data-testid="stSidebar"] button[data-baseweb="tab"] p,
 div[data-testid="stSidebar"] button[data-baseweb="tab"] span,
 div[data-testid="stSidebar"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {
@@ -157,7 +158,7 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
     font-size: 16px !important;
 }
 
-/* ✅ 완벽한 가로 정렬을 위한 내부 컴포넌트 높이 고정 */
+/* 완벽한 가로 정렬을 위한 내부 컴포넌트 높이 고정 */
 .section-header { 
     color: #2C2A29; text-align: center; font-weight: 900; font-size: 20px; 
     border-bottom: 3px solid #E5E0D8; padding-bottom: 12px; margin-bottom: 15px; 
@@ -170,7 +171,7 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
 }
 .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-/* ✅ 하단 태그 가로 정렬 (양쪽 모두 동일한 디자인 적용) */
+/* 하단 태그 가로 정렬 (양쪽 모두 동일한 디자인 적용) */
 .tag-wrap-box { 
     display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; 
     align-items: flex-start; padding-top: 20px; margin-top: 20px;
@@ -183,14 +184,14 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
     white-space: nowrap;
 }
 
-/* ✅ 텍스트 및 기본 요소 */
+/* 텍스트 및 기본 요소 */
 h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .main-title { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; }
 .section-title { font-size: 24px; font-weight: 900; color: #2C2A29 !important; margin-top: 45px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 3px solid #E5E0D8; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 .desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; line-height: 1.8; font-weight: 400; }
 
-/* ✅ 일반 버튼 스타일 (확대 보기 - 크기 축소 유지) */
+/* 일반 버튼 스타일 (확대 보기 - 크기 축소 유지) */
 div.stButton > button { 
     background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
     border-radius: 10px !important; color: #2C2A29 !important; 
@@ -209,7 +210,7 @@ div.stButton > button:hover {
     transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; 
 }
 
-/* 💡 거점 표시 전용 버튼 스타일 (글자 크기 및 여백 확대) */
+/* 거점 표시 전용 버튼 스타일 (글자 크기 및 여백 확대) */
 div.stButton > button[kind="primary"] {
     padding: 14px 20px !important; 
     border-radius: 12px !important;
@@ -218,7 +219,7 @@ div.stButton > button[kind="primary"] p {
     font-size: 17.5px !important; 
 }
 
-/* 💡 최상단 타이틀 버튼을 위한 CSS (앵커를 활용해 첫번째 버튼만 단독 타겟팅) */
+/* 최상단 타이틀 버튼을 위한 CSS (앵커를 활용해 첫번째 버튼만 단독 타겟팅) */
 div:has(.main-title-anchor) { height: 0px; margin: 0; padding: 0; overflow: hidden; }
 div:has(.main-title-anchor) + div button {
     background-color: #2C2A29 !important; 
@@ -296,7 +297,7 @@ if "excel_img_data" not in st.session_state: st.session_state.excel_img_data = e
 suppliers = st.session_state.suppliers
 
 # 5. 헤더 및 사이드바 
-# 👇 기존 디자인을 유지하면서 클릭 시 메인으로 가는 기능 추가
+# 타이틀 클릭 시 메인 화면으로 돌아가는 버튼 
 st.markdown("<div class='main-title-anchor'></div>", unsafe_allow_html=True)
 
 def go_to_main():
@@ -309,7 +310,7 @@ st.button("🌍 글로벌 SCM 및 파트너사 인프라 분석", on_click=go_to
 with st.sidebar:
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
     
-    # 💡 세트(Set)를 리스트로 변환 후 오름차순(가나다순) 정렬 처리
+    # 필터 옵션 리스트 생성
     all_countries_set = set()
     for s in suppliers:
         for loc in s.get("locations", []): all_countries_set.add(loc["country"])
@@ -317,7 +318,6 @@ with st.sidebar:
     raw_industry_list = list(set(s.get("industry", "미분류") for s in suppliers if s.get("industry") != "미분류"))
     raw_country_list = list(all_countries_set)
     
-    # 리스트 오름차순 정렬 후 맨 앞에 "전체" 추가
     industry_list = ["전체"] + sorted(raw_industry_list)
     country_list = ["전체"] + sorted(raw_country_list)
 
@@ -333,18 +333,22 @@ with st.sidebar:
 
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
     
-    # 💡 라디오 버튼 상단 타이틀 추가 스타일 지정
     st.markdown("<div style='font-size: 17.5px; font-weight: 900; color: #2C2A29; margin-bottom: 10px;'>📊 분석할 업체 선택</div>", unsafe_allow_html=True)
     
     options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
     
-    # 🌟 업체명('name')을 기준으로 오름차순 정렬(가나다 순)하여 추가
     for s in sorted(filtered, key=lambda x: x.get('name', '')): 
         options_sidebar_map[s['name']] = s['name']
         
+    options_list = list(options_sidebar_map.keys())
+
+    # 🚨 [핵심 수정] 필터링(검색)으로 인해 기존 선택된 업체가 사라진 경우 에러를 막기 위해 초기화
+    if st.session_state.selected_company not in options_list:
+        st.session_state.selected_company = "🏠 종합 메인 화면"
+
     selected_display_name = st.radio(
         "", 
-        list(options_sidebar_map.keys()), 
+        options_list, 
         key="selected_company", # 세션 상태(Session state)와 연결
         on_change=reset_map_view, 
         label_visibility="collapsed"
@@ -477,7 +481,7 @@ elif selected_name:
 
         with text_col:
             st.markdown("<p style='color:#C4A47C !important; font-weight:800; font-size:15px; margin-bottom:10px;'>🖱️ 거점을 클릭하면 지도가 이동합니다.</p>", unsafe_allow_html=True)
-            # 💡 글로벌 네트워크 버튼에만 type="primary"를 부여하여 CSS 분리 적용
+            # 글로벌 네트워크 버튼에만 type="primary"를 부여하여 CSS 분리 적용
             st.button("🌍 전체 뷰\n모든 거점 확인", on_click=set_view, args=("전체 뷰",), use_container_width=True, type="primary")
             
             for typ, btn_label in [("hq", "🏢 국내(본사)"), ("kr", "🏭 국내(지사)"), ("gl_cn", "🌐 해외(중국)"), ("gl_us", "🌎 해외(북미)")]:
