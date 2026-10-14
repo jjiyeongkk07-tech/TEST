@@ -16,6 +16,8 @@ if "map_view" not in st.session_state:
     st.session_state.map_view = "전체 뷰"
 if "popup_img" not in st.session_state:
     st.session_state.popup_img = None
+if "selected_company" not in st.session_state:
+    st.session_state.selected_company = "🏠 종합 메인 화면"
 
 def set_view(view):
     st.session_state.map_view = view
@@ -215,6 +217,36 @@ div.stButton > button[kind="primary"] {
 div.stButton > button[kind="primary"] p {
     font-size: 17.5px !important; 
 }
+
+/* 💡 최상단 타이틀 버튼을 위한 CSS (앵커를 활용해 첫번째 버튼만 단독 타겟팅) */
+div:has(.main-title-anchor) { height: 0px; margin: 0; padding: 0; overflow: hidden; }
+div:has(.main-title-anchor) + div button {
+    background-color: #2C2A29 !important; 
+    padding: 30px 40px !important; 
+    border-radius: 12px !important; 
+    margin-bottom: 20px !important; 
+    border: none !important;
+    border-bottom: 4px solid #C4A47C !important;
+    width: 100% !important;
+    text-align: left !important;
+    display: block !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+div:has(.main-title-anchor) + div button:hover {
+    background-color: #353332 !important;
+    transform: none !important;
+}
+div:has(.main-title-anchor) + div button p {
+    font-size: 34px !important; 
+    font-weight: 900 !important; 
+    color: #ffffff !important; 
+    margin: 0 !important; 
+    line-height: 1.2 !important; 
+    letter-spacing: -1px !important; 
+    text-align: left !important;
+}
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -264,7 +296,15 @@ if "excel_img_data" not in st.session_state: st.session_state.excel_img_data = e
 suppliers = st.session_state.suppliers
 
 # 5. 헤더 및 사이드바 
-st.markdown("<div style='background-color: #2C2A29; padding: 30px 40px; border-radius: 12px; margin-bottom: 20px; border-bottom: 4px solid #C4A47C;'><div class='main-title'>🌍 글로벌 SCM 및 파트너사 인프라 분석</div></div>", unsafe_allow_html=True)
+# 👇 기존 디자인을 유지하면서 클릭 시 메인으로 가는 기능 추가
+st.markdown("<div class='main-title-anchor'></div>", unsafe_allow_html=True)
+
+def go_to_main():
+    st.session_state.selected_company = "🏠 종합 메인 화면"
+    st.session_state.map_view = "전체 뷰"
+
+st.button("🌍 글로벌 SCM 및 파트너사 인프라 분석", on_click=go_to_main, use_container_width=True)
+
 
 with st.sidebar:
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
@@ -302,7 +342,13 @@ with st.sidebar:
     for s in sorted(filtered, key=lambda x: x.get('name', '')): 
         options_sidebar_map[s['name']] = s['name']
         
-    selected_display_name = st.radio("", list(options_sidebar_map.keys()), on_change=reset_map_view, label_visibility="collapsed")
+    selected_display_name = st.radio(
+        "", 
+        list(options_sidebar_map.keys()), 
+        key="selected_company", # 세션 상태(Session state)와 연결
+        on_change=reset_map_view, 
+        label_visibility="collapsed"
+    )
     selected_name = options_sidebar_map[selected_display_name]
 
 
@@ -438,3 +484,4 @@ elif selected_name:
                 if any(loc.get("type") == typ for loc in selected.get("locations", [])):
                     names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == typ])
                     st.button(f"{btn_label}\n{names}", on_click=set_view, args=(btn_label,), use_container_width=True, type="primary")
+
