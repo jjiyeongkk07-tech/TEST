@@ -1,8 +1,8 @@
-import streamlit as st
+# ==========================================
+# data.py
+# ==========================================
 
-# ==========================================
-# 1. 업체 상세 정보 리스트 (전체 복구 및 유니온머티리얼즈 업데이트 완료)
-# ==========================================
+# 1. 업체 상세 정보 리스트
 suppliers_data = [
     {
         "name": "(주)성우",
@@ -159,9 +159,7 @@ suppliers_data = [
     }
 ]
 
-# ==========================================
-# 2. 업체별 이미지 URL 딕셔너리 (전체 복구 및 유니온 업데이트 완료)
-# ==========================================
+# 2. 업체별 이미지 URL 딕셔너리
 excel_img_data = {
     "(주)성우": {
         "prod_imgs": [
@@ -252,9 +250,7 @@ excel_img_data = {
     }
 }
 
-# ==========================================
 # 3. 글로벌 네트워크 (지도 시각화) 관련 설정값 모음
-# ==========================================
 map_view_mapping = {
     "전체 뷰": "all",
     "🏢 국내(본사)": "hq",
@@ -277,81 +273,3 @@ map_radius_settings = {
     "highlighted": 300000,
     "dimmed": 40000
 }
-
-
-# ==========================================
-# 4. Streamlit 화면 렌더링 (UI)
-# ==========================================
-# 스타일 CSS 적용
-st.markdown("""
-    <style>
-    .badge-industry { background-color: #d4b886; color: white; padding: 4px 12px; border-radius: 4px; font-size: 14px; font-weight: bold; margin-right: 8px;}
-    .badge-sub { border: 1px solid #ccc; color: #555; padding: 4px 12px; border-radius: 4px; font-size: 14px;}
-    .desc-box { border-left: 4px solid #d4b886; background-color: #f9f9f9; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 30px; font-size: 15px; color: #333;}
-    .pill-btn { display: inline-block; border: 1px solid #d4b886; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; color: #333; margin: 4px; background: white;}
-    </style>
-""", unsafe_allow_html=True)
-
-# 사이드바에서 업체 선택
-st.sidebar.header("🏢 업체 선택")
-company_names = [s["name"] for s in suppliers_data]
-target_company = st.sidebar.selectbox("상세 정보를 볼 업체를 선택하세요", company_names, index=company_names.index("유니온머티리얼즈"))
-
-# 선택된 업체 데이터 필터링
-company_info = next((item for item in suppliers_data if item["name"] == target_company), None)
-company_imgs = excel_img_data.get(target_company, {"prod_imgs": [], "cert_imgs": []})
-
-if company_info:
-    # --- 01. 기업 개요 (타이틀 포함) ---
-    st.markdown(f"""
-        <div style='display: flex; align-items: center; gap: 10px; margin-bottom: 30px;'>
-            <h1 style='margin: 0; padding: 0;'>{company_info['name']}</h1>
-            <span class='badge-industry'>{company_info['industry']}</span>
-            <span class='badge-sub'>{company_info['sub_industry']}</span>
-        </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### 01. 기업 개요")
-    st.markdown(f"<div class='desc-box'>📖 {company_info['desc']}</div>", unsafe_allow_html=True)
-
-    # --- 02. 핵심 역량 및 품질 인증 ---
-    st.markdown("### 02. 핵심 역량 및 품질 인증")
-    st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("<h5 style='text-align: center;'>🌟 핵심 생산 품목</h5>", unsafe_allow_html=True)
-        # 글자 배지 출력
-        prod_html = "".join([f"<span class='pill-btn' style='border-color:#eee;'>{p}</span>" for p in company_info["products"]])
-        st.markdown(f"<div style='text-align:center; margin-bottom:15px;'>{prod_html}</div>", unsafe_allow_html=True)
-        
-        # 실제 이미지 렌더링 출력부
-        if company_imgs["prod_imgs"]:
-            for img_url in company_imgs["prod_imgs"]:
-                st.image(img_url, use_column_width=True)
-        else:
-            st.write("등록된 이미지가 없습니다.")
-
-    with col2:
-        st.markdown("<h5 style='text-align: center;'>🏅 품질 및 ESG 인증</h5>", unsafe_allow_html=True)
-        # 글자 배지 출력
-        cert_html = "".join([f"<span class='pill-btn' style='border-color:#eee;'>{c}</span>" for c in company_info["certs"]])
-        st.markdown(f"<div style='text-align:center; margin-bottom:15px;'>{cert_html}</div>", unsafe_allow_html=True)
-        
-        # 실제 이미지 렌더링 출력부
-        if company_imgs["cert_imgs"]:
-            for img_url in company_imgs["cert_imgs"]:
-                st.image(img_url, use_column_width=True)
-        else:
-            st.write("등록된 이미지가 없습니다.")
-
-    # --- 03. 주요 고객사 ---
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 03. 주요 고객사")
-    st.markdown("<hr style='margin: 10px 0;'>", unsafe_allow_html=True)
-    
-    customers_html = ""
-    for customer, share in company_info["customers"].items():
-        customers_html += f"<div class='pill-btn'>🤝 {customer} ({share}%)</div>"
-    st.markdown(customers_html, unsafe_allow_html=True)
