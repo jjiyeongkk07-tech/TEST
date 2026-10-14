@@ -125,9 +125,11 @@ header { background-color: transparent !important; }
 [data-testid="stSidebar"] h3 { 
     font-size: 24px !important; 
 }
-[data-testid="stSidebar"] [data-baseweb="tab"] p { 
-    font-size: 16px !important; 
-    font-weight: 700 !important;
+/* 💡 업종, 업체, 국가 탭 글자 크기 및 굵기 대폭 상향 */
+[data-testid="stSidebar"] [data-baseweb="tab"] p,
+[data-testid="stSidebar"] [data-baseweb="tab"] span { 
+    font-size: 18.5px !important; 
+    font-weight: 800 !important;
 }
 [data-testid="stSidebar"] label, 
 [data-testid="stSidebar"] div.stRadio > label,
