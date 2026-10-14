@@ -158,19 +158,15 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
     font-size: 16px !important;
 }
 
-/* ✅ 메트릭(검색된 파트너사 등) 라벨 및 숫자 텍스트 확실하게 키우기 */
-div[data-testid="stMetricLabel"] > div,
-div[data-testid="stMetricLabel"] p,
-div[data-testid="stMetricLabel"] span {
+/* ✅ 메트릭(검색된 파트너사 등) 라벨 폰트 크기 강력 적용 */
+[data-testid="stMetricLabel"], 
+[data-testid="stMetricLabel"] div,
+[data-testid="stMetricLabel"] p,
+[data-testid="stMetricLabel"] span,
+[data-testid="stMetricLabel"] label {
     font-size: 19px !important; 
     font-weight: 900 !important;
     color: #2C2A29 !important;
-}
-div[data-testid="stMetricValue"] > div,
-div[data-testid="stMetricValue"] p,
-div[data-testid="stMetricValue"] span {
-    font-size: 34px !important;
-    font-weight: 900 !important;
 }
 
 /* 완벽한 가로 정렬을 위한 내부 컴포넌트 높이 고정 */
@@ -388,7 +384,7 @@ if selected_name == "🏠 종합 메인 화면":
     if all_locations:
         df_all = pd.DataFrame(all_locations)
         
-        # ✅ [수정된 부분] 종합 메인화면: 국내(파란색) / 해외(골드색) 구분
+        # ✅ 종합 메인화면: 국내(파란색) / 해외(골드색) 구분
         def get_main_color(row):
             if row.get('type') in ['hq', 'kr']:
                 return [41, 128, 185, 220] # 파란색 (국내)
@@ -493,7 +489,7 @@ elif selected_name:
             current_view = st.session_state.map_view
             target_type_key = map_view_mapping.get(current_view, "all")
 
-            # ✅ [수정된 부분] 개별 업체 화면: 기본적으로 국내(파란색), 해외(골드색) 구분
+            # ✅ 개별 업체 화면: 기본적으로 국내(파란색), 해외(골드색) 구분
             def get_color(row):
                 is_domestic = row.get('type') in ['hq', 'kr']
                 active_color = [41, 128, 185, 220] if is_domestic else [196, 164, 124, 220]
