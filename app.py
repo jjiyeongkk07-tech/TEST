@@ -158,10 +158,10 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
     font-size: 16px !important;
 }
 
-/* 메트릭 라벨(검색된 파트너사 등) 폰트 크기 변경 */
-[data-testid="stMetricLabel"] > div,
-[data-testid="stMetricLabel"] > div > p {
-    font-size: 17.5px !important; 
+/* 메트릭 라벨(검색된 파트너사 등) 폰트 크기 강력 적용 */
+[data-testid="stMetricLabel"], 
+[data-testid="stMetricLabel"] * {
+    font-size: 20px !important; 
     font-weight: 900 !important;
     color: #2C2A29 !important;
 }
@@ -405,8 +405,8 @@ if selected_name == "🏠 종합 메인 화면":
             pickable=True
         )
         
-        # ✅ 지도 반복 방지 설정 추가
-        view = pdk.View(type="MapView", repeat=False)
+        # ✅ 지도 반복 방지 + 컨트롤러(줌/마우스 조작) 활성화 적용
+        view = pdk.View(type="MapView", repeat=False, controller=True)
         st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, views=[view], layers=[layer], tooltip={"text": "{name}\n{address}"}))
 
 elif selected_name:
@@ -527,8 +527,8 @@ elif selected_name:
                     pickable=True
                 )
                 
-                # ✅ 지도 반복 방지 설정 추가
-                view = pdk.View(type="MapView", repeat=False)
+                # ✅ 지도 반복 방지 + 컨트롤러(줌/마우스 조작) 활성화 적용
+                view = pdk.View(type="MapView", repeat=False, controller=True)
                 st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, views=[view], layers=[layer], tooltip={"text": "{name}\n{address}"}), height=600)
 
         with text_col:
