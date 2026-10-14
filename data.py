@@ -132,7 +132,7 @@ suppliers_data = [
     },
     {
         "name": "유니온머티리얼즈",
-        "industry": "세라믹/페라이트", 
+        "industry": "소결(MAGNET)", 
         "sub_industry": "자동차 및 전기전자용 부품소재",
         "hq": "대구 본사", 
         "kr": "포항 공장", 
