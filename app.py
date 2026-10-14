@@ -27,14 +27,10 @@ if hasattr(st, "dialog"):
     @st.dialog("🔍 이미지 확대 보기", width="large")
     def show_popup_modal(img_data):
         st.markdown(f"<div style='text-align:center; background:#F9F8F6; padding:20px; border-radius:12px; margin-bottom: 20px;'><img src='data:image/jpeg;base64,{img_data}' style='max-width:100%; max-height:75vh; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1);'></div>", unsafe_allow_html=True)
-        if st.button("❌ 닫기", use_container_width=True):
-            st.rerun()
 elif hasattr(st, "experimental_dialog"):
     @st.experimental_dialog("🔍 이미지 확대 보기", width="large")
     def show_popup_modal(img_data):
         st.markdown(f"<div style='text-align:center; background:#F9F8F6; padding:20px; border-radius:12px; margin-bottom: 20px;'><img src='data:image/jpeg;base64,{img_data}' style='max-width:100%; max-height:75vh; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1);'></div>", unsafe_allow_html=True)
-        if st.button("❌ 닫기", use_container_width=True):
-            st.rerun()
 else:
     # 구버전 Streamlit 호환성 유지용 폴백
     def show_popup_modal(img_data):
