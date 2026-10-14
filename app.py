@@ -126,16 +126,19 @@ header { background-color: transparent !important; }
     font-size: 24px !important; 
 }
 
-/* 💡 업종, 업체, 국가 탭 글자 크기 및 굵기, 패딩 대폭 상향 (확실히 커지도록 !important 강제 적용) */
-[data-testid="stSidebar"] button[role="tab"] {
-    padding: 12px 10px !important;
-}
-[data-testid="stSidebar"] button[role="tab"] p,
-[data-testid="stSidebar"] button[role="tab"] span { 
-    font-size: 22px !important; 
+/* 🚀 업종, 업체, 국가 탭 글씨 크기를 '분석할 업체 선택'과 완벽히 동일하게(17.5px) 강제 적용 */
+div[data-testid="stSidebar"] button[data-baseweb="tab"] p,
+div[data-testid="stSidebar"] button[data-baseweb="tab"] span,
+div[data-testid="stSidebar"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {
+    font-size: 17.5px !important; 
     font-weight: 900 !important;
+    color: #2C2A29 !important;
+}
+div[data-testid="stSidebar"] button[data-baseweb="tab"] {
+    padding: 10px 5px !important; 
 }
 
+/* 다른 선택박스, 라디오 버튼 텍스트 크기 유지 */
 [data-testid="stSidebar"] label, 
 [data-testid="stSidebar"] div.stRadio > label,
 [data-testid="stSidebar"] .stSelectbox label {
