@@ -158,12 +158,19 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
     font-size: 16px !important;
 }
 
-/* 메트릭 라벨(검색된 파트너사 등) 폰트 크기 강력 적용 */
-[data-testid="stMetricLabel"], 
-[data-testid="stMetricLabel"] * {
-    font-size: 20px !important; 
+/* ✅ 메트릭(검색된 파트너사 등) 라벨 및 숫자 텍스트 확실하게 키우기 */
+div[data-testid="stMetricLabel"] > div,
+div[data-testid="stMetricLabel"] p,
+div[data-testid="stMetricLabel"] span {
+    font-size: 19px !important; 
     font-weight: 900 !important;
     color: #2C2A29 !important;
+}
+div[data-testid="stMetricValue"] > div,
+div[data-testid="stMetricValue"] p,
+div[data-testid="stMetricValue"] span {
+    font-size: 34px !important;
+    font-weight: 900 !important;
 }
 
 /* 완벽한 가로 정렬을 위한 내부 컴포넌트 높이 고정 */
@@ -390,12 +397,13 @@ if selected_name == "🏠 종합 메인 화면":
                 
         df_all['color'] = df_all.apply(get_main_color, axis=1)
 
-        view_state = pdk.ViewState(latitude=35.0, longitude=127.0, zoom=1.5, pitch=0)
+        # ✅ min_zoom=1.5 추가: 축소를 제한하여 가로 반복 생성 원천 차단
+        view_state = pdk.ViewState(latitude=35.0, longitude=127.0, zoom=1.5, min_zoom=1.5, max_zoom=15, pitch=0)
         layer = pdk.Layer(
             "ScatterplotLayer", 
             data=df_all, 
             get_position='[lon, lat]', 
-            get_fill_color='color', # 새로 추가한 색상 적용
+            get_fill_color='color', 
             get_line_color=[255, 255, 255], 
             stroked=True, 
             line_width_min_pixels=1, 
@@ -405,8 +413,8 @@ if selected_name == "🏠 종합 메인 화면":
             pickable=True
         )
         
-        # ✅ 지도 반복 방지 + 컨트롤러(줌/마우스 조작) 활성화 적용
-        view = pdk.View(type="MapView", repeat=False, controller=True)
+        # ✅ 줌, 마우스 드래그 조작 활성화 (controller=True)
+        view = pdk.View(type="MapView", controller=True, repeat=False)
         st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, views=[view], layers=[layer], tooltip={"text": "{name}\n{address}"}))
 
 elif selected_name:
@@ -506,18 +514,20 @@ elif selected_name:
                 df_loc['color'] = df_loc.apply(get_color, axis=1)
                 df_loc['radius'] = df_loc.apply(get_radius, axis=1)
                 
-                center_lat, center_lon, zoom_lvl = 35.0, 150.0, 1.0 
+                # ✅ 특정 업체의 초기 줌 레벨을 1.5로 고정하여 충돌 방지
+                center_lat, center_lon, zoom_lvl = 35.0, 150.0, 1.5 
                 if current_view != "전체 뷰":
                     target_df = df_loc[df_loc['type'] == target_type_key]
                     if not target_df.empty: 
                         center_lat, center_lon, zoom_lvl = target_df['lat'].mean(), target_df['lon'].mean(), (5.5 if len(target_df) > 1 else 9.0)
                 
-                view_state = pdk.ViewState(latitude=center_lat, longitude=center_lon, zoom=zoom_lvl, pitch=0, transition_duration=1200)
+                # ✅ min_zoom=1.5 추가: 축소를 제한하여 가로 반복 생성 원천 차단
+                view_state = pdk.ViewState(latitude=center_lat, longitude=center_lon, zoom=zoom_lvl, min_zoom=1.5, max_zoom=15, pitch=0, transition_duration=1200)
                 layer = pdk.Layer(
                     "ScatterplotLayer", 
                     data=df_loc, 
                     get_position='[lon, lat]', 
-                    get_fill_color='color', # 새로 추가한 색상 적용
+                    get_fill_color='color', 
                     get_line_color=[255, 255, 255], 
                     stroked=True, 
                     line_width_min_pixels=2, 
@@ -527,8 +537,8 @@ elif selected_name:
                     pickable=True
                 )
                 
-                # ✅ 지도 반복 방지 + 컨트롤러(줌/마우스 조작) 활성화 적용
-                view = pdk.View(type="MapView", repeat=False, controller=True)
+                # ✅ 줌, 마우스 드래그 조작 활성화 (controller=True)
+                view = pdk.View(type="MapView", controller=True, repeat=False)
                 st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, views=[view], layers=[layer], tooltip={"text": "{name}\n{address}"}), height=600)
 
         with text_col:
