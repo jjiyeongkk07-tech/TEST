@@ -139,11 +139,13 @@ suppliers_data = [
         "gl": "중국 및 베트남 법인",
         "desc": "유니온머티리얼즈는 2000년 설립된 파인세라믹스 및 자성재료 전문 기업으로, 페라이트 마그네트, 세라믹 절삭공구, 산업용 세라믹 부품 등을 생산해 전 세계 자동차, 전기전자, 기계 산업에 핵심 소재를 공급하고 있습니다.",
         "products": [
-            "페라이트 마그네트",
             "파인세라믹스",
-            "세라믹/PCBN 절삭공구"
+            "페라이트마그네트"
         ],
-        "certs": ["IATF 16949", "ISO 14001", "ISO 9001"],
+        "certs": [
+            "KSA-ISO-인증서",
+            "품질/환경경영 시스템 인증"
+        ],
         "customers": {"Bosch 등 글로벌 부품사": 50, "국내 자동차/모터 부품사": 30, "가전/전자부품사": 15, "기타": 5},
         "locations": [
             {"name": "대구 본사 및 공장", "type": "hq", "address": "대구광역시 달서구 성서공단남로 151(월암동)", "lat": 35.8364, "lon": 128.4837, "country": "대한민국"},
@@ -234,11 +236,12 @@ excel_img_data = {
     },
     "유니온머티리얼즈": {
         "prod_imgs": [
-            "https://www.unionmaterials.com/images/kor/product/ferrite_img01.jpg",
-            "https://www.unionmaterials.com/images/kor/product/ceramic_img01.jpg"
+            "https://unionmaterials.com/kor/images/products/01_02_img_02.jpg",
+            "https://unionmaterials.com/kor/images/products/01_02_img_03.jpg"
         ],
         "cert_imgs": [
-            "https://www.unionmaterials.com/images/kor/company/cert_img01.jpg"
+            "https://unionmaterials.com/kor/images/products/01_img_02.gif",
+            "https://unionmaterials.com/kor/images/products/02_img_03.gif"
         ]
     }
 }
