@@ -19,8 +19,8 @@ suppliers_data = [
         "certs": ["IATF16949", "ISO14001", "SQ 인증", "ESG 경영"],
         "customers": {"영세율기타": 53, "(주)LG에너지솔루션": 14, "효성전기": 5, "(주)태성메탈": 4},
         "locations": [
-            {"name": "(주)성우 구미1사업장(본사)", "type": "hq", "address": "경북 구미시 3공단2로 107", "lat": 36.1018, "lon": 128.4223, "country": "대한민국"},
-            {"name": "(주)성우 R&D Center", "type": "kr", "address": "경북 구미시 산동읍 도중리 115", "lat": 36.1601, "lon": 128.4682, "country": "대한민국"},
+            {"name": "(주)성우 구미1사업장", "type": "hq", "address": "경북 구미시 3공단2로 107", "lat": 36.1018, "lon": 128.4223, "country": "대한민국"},
+            {"name": "R&D Center", "type": "kr", "address": "경북 구미시 산동읍 도중리 115", "lat": 36.1601, "lon": 128.4682, "country": "대한민국"},
             {"name": "천안사업장", "type": "kr", "address": "충남 천안시 동남구 성남면 5산단2로 133", "lat": 36.7580, "lon": 127.2750, "country": "대한민국"},
             {"name": "중국 남경 사업장(설립예정)", "type": "gl_cn", "address": "No.9, Hengda Road, Nanjing, China", "lat": 32.0602, "lon": 118.7968, "country": "중국"},
             {"name": "중국 추저우 사업장(설립예정)", "type": "gl_cn", "address": "중국 안후이성 추저우시", "lat": 32.3024, "lon": 118.3186, "country": "중국"},
@@ -143,7 +143,7 @@ suppliers_data = [
         "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
         "customers": {"효성전기": 12, "선진알앤디(주)": 11, "두원공조": 10, "(주)엠넥스": 9},
         "locations": [
-            {"name": "본사 및 공장", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길 59", "lat": 37.0700, "lon": 127.4200, "country": "대한민국"}
+            {"name": "(주)엠제이텍 본사 및 공장", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길 59", "lat": 37.0700, "lon": 127.4200, "country": "대한민국"}
         ]
     },
     {
@@ -215,7 +215,7 @@ suppliers_data = [
         "locations": [
             # ✅ 변경: 양산 본사 주소로 갱신
             # TODO(미확인): lat/lon 은 동면 금오5길 일대 추정 좌표 → 정확 좌표 확인 후 갱신
-            {"name": "양산 본사", "type": "hq", "address": "경상남도 양산시 동면 금오5길 18-34", "lat": 35.3135, "lon": 129.1245, "country": "대한민국"}
+            {"name": "에이치에스테크(주) 본사", "type": "hq", "address": "경상남도 양산시 동면 금오5길 18-34", "lat": 35.3135, "lon": 129.1245, "country": "대한민국"}
         ]
     }
 ]
