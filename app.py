@@ -300,21 +300,20 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 .section-title .hp-arw{ font-size: 12px; }
 
 /* === 03. 주요 고객사 매입 비중 (TOP 4 전용, 100% 스택바) === */
-/* ✅ 수정 1: 글자 크기 축소 (21px -> 16px), 막대 높이 64px -> 56px */
-/* ✅ 수정 2: 폭에 따라 16px / 14px / 12.5px 3단계 자동 적용 */
+/* ✅ 수정: 글자 크기 확대 (기본 18px), 그림자(text-shadow) 완벽 제거, 글자 굵기(900) 강화 */
 .cust-box { padding: 24px 28px; background: #FDFCFB; border: 1px solid #E5E0D8;
             border-radius: 12px; margin-bottom: 10px; }
 .cust-stack { display: flex; height: 56px; border-radius: 8px; overflow: hidden;
               border: 1px solid #E5E0D8; }
 .cust-seg { display: flex; align-items: center; justify-content: center;
-            font-size: 16px !important; font-weight: 800 !important;
-            letter-spacing: -0.3px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.10);
+            font-size: 18px !important; font-weight: 900 !important;
+            letter-spacing: -0.5px;
+            text-shadow: none !important;
             white-space: nowrap; overflow: hidden;
-            padding: 0 4px;
+            padding: 0 6px;
             transition: filter 0.2s ease; cursor: default; }
-.cust-seg.seg-md { font-size: 14px !important; }
-.cust-seg.seg-sm { font-size: 12.5px !important; text-shadow: none; padding: 0 2px; }
+.cust-seg.seg-md { font-size: 15px !important; }
+.cust-seg.seg-sm { font-size: 13px !important; padding: 0 2px; }
 .cust-seg:hover { filter: brightness(1.08); }
 </style>
 """
