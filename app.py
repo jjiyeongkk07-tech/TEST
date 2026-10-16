@@ -291,14 +291,6 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 .hp-arw{ font-size: 13px; opacity: 0.7; }
 .hp-link:hover .hp-arw{ opacity: 1; }
 
-/* 섹션 헤더(01. 기업 개요) 안에 들어간 배지는 제목과 균형 맞춰 축소 */
-.section-title .hp-link{
-    font-size: 14px;
-    font-weight: 700;
-    padding: 5px 14px 5px 11px;
-}
-.section-title .hp-arw{ font-size: 12px; }
-
 /* === 03. 주요 고객사 매입 비중 (TOP 4 전용, 100% 스택바) === */
 /* ✅ 수정: 글자 크기 확대 (기본 18px), 그림자(text-shadow) 완벽 제거, 글자 굵기(900) 강화 */
 .cust-box { padding: 24px 28px; background: #FDFCFB; border: 1px solid #E5E0D8;
@@ -322,12 +314,15 @@ st.markdown(css, unsafe_allow_html=True)
 # 3. 데이터 및 변환 함수
 CUSTOMER_TOP_N = 4                      # 개별 표기할 상위 고객사 수
 CUSTOMER_SHOW_ETC = False               # ✅ True로 바꾸면 '기타' 구간이 다시 표시됨
-CUSTOMER_PALETTE = [                    # TOP 4 전용 (진한 → 연한 골드)
-    ("#8A6F43", "#ffffff"),
-    ("#A9865A", "#ffffff"),
-    ("#C4A47C", "#ffffff"),
-    ("#D8C19D", "#2C2A29"),
+
+# ✅ 고대비 골드톤 팔레트로 수정됨
+CUSTOMER_PALETTE = [                    
+    ("#5A3D22", "#ffffff"),  # 1위: 매우 짙은 브라운 배경 + 흰색 글씨
+    ("#9A7B54", "#ffffff"),  # 2위: 짙은 골드 배경 + 흰색 글씨
+    ("#D1BA9C", "#2C2A29"),  # 3위: 연한 베이지 배경 + 진한 회색 글씨
+    ("#F4EBE3", "#2C2A29"),  # 4위: 매우 연한 베이지 배경 + 진한 회색 글씨
 ]
+
 ETC_COLOR = ("#EFE9DE", "#2C2A29")      # '기타' 구간 (CUSTOMER_SHOW_ETC=True일 때만 사용)
 
 def _parse_ratio(v):
@@ -714,3 +709,4 @@ elif selected_name:
                 if any(loc.get("type") == typ for loc in selected.get("locations", [])):
                     names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == typ])
                     st.button(f"{btn_label}\n{names}", on_click=set_view, args=(btn_label,), use_container_width=True, type="primary")
+
