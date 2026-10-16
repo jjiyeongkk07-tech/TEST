@@ -300,16 +300,20 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 .section-title .hp-arw{ font-size: 12px; }
 
 /* === 03. 주요 고객사 매입 비중 (TOP 4 + 기타, 100% 스택바) === */
+/* ✅ 수정 1: 협력사명/비율 글자 크기 확대 (15px -> 21px), 막대 높이 52px -> 64px */
+/* ✅ 수정 2: 막대 아래 축(.cust-axis) 관련 CSS 전면 삭제 */
 .cust-box { padding: 28px 30px; background: #FDFCFB; border: 1px solid #E5E0D8;
             border-radius: 12px; margin-bottom: 10px; }
-.cust-stack { display: flex; height: 52px; border-radius: 8px; overflow: hidden;
+.cust-stack { display: flex; height: 64px; border-radius: 8px; overflow: hidden;
               border: 1px solid #E5E0D8; }
 .cust-seg { display: flex; align-items: center; justify-content: center;
-            font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden;
+            font-size: 21px !important; font-weight: 900 !important;
+            letter-spacing: -0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.12);
+            white-space: nowrap; overflow: hidden;
             transition: filter 0.2s ease; cursor: default; }
+.cust-seg.seg-sm { font-size: 17px !important; text-shadow: none; }
 .cust-seg:hover { filter: brightness(1.08); }
-.cust-axis { display: flex; justify-content: space-between; margin-top: 8px; }
-.cust-axis span { font-size: 12px !important; color: #A8A09A !important; font-weight: 700 !important; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -396,25 +400,28 @@ def get_customer_tags_html(customers):
         rows.append(("기타", etc_val, etc_val / base * 100.0,
                      ETC_COLOR[0], ETC_COLOR[1], tip))
 
-    # 100% 스택바 (범례가 없으므로 라벨을 최대한 조각 안에 노출)
+    # ✅ 수정 1: 글자가 커진 만큼 '이름+비율' 노출 기준을 11% -> 14%로 상향 (잘림 방지)
+    #    4~8% 구간은 seg-sm 클래스로 17px 적용
     segs = ""
     for name, val, w, bg, fg, tip in rows:
-        if w >= 11:
+        cls = "cust-seg"
+        if w >= 14:
             label = f"{name} {_fmt_ratio(val)}%"
+        elif w >= 8:
+            label = f"{_fmt_ratio(val)}%"
         elif w >= 4:
             label = f"{_fmt_ratio(val)}%"
+            cls += " seg-sm"
         else:
             label = ""
         title = tip or f"{name} {_fmt_ratio(val)}%"
         segs += (
-            f"<div class='cust-seg' style='width:{w:.4f}%; background:{bg};"
+            f"<div class='{cls}' style='width:{w:.4f}%; background:{bg};"
             f" color:{fg} !important;' title='{title}'>{label}</div>"
         )
 
-    axis = ("<div class='cust-axis'><span>0%</span><span>25%</span>"
-            "<span>50%</span><span>75%</span><span>100%</span></div>")
-
-    return f"<div class='cust-box'><div class='cust-stack'>{segs}</div>{axis}</div>"
+    # ✅ 수정 2: 막대바 아래 비율 축(0% / 25% / 50% / 75% / 100%) 완전 삭제
+    return f"<div class='cust-box'><div class='cust-stack'>{segs}</div></div>"
 
 # 🌐 홈페이지 링크 배지 HTML 생성 (<a> 태그만 반환하여 원하는 위치에 삽입)
 def get_homepage_link_html(company):
