@@ -195,24 +195,27 @@ suppliers_data = [
         ]
     },
     {
-        "name": "항성산업사",
-        "homepage": "http://www.hangseong.co.kr/",
+        # ✅ 변경: 항성산업사 → 에이치에스테크(주)
+        "name": "에이치에스테크(주)",
+        "homepage": "http://www.hstechkorea.com/",
         "industry": "PRESS(CASE)",
         "sub_industry": "자동차 공조용 모터 및 프레스 부품",
         "hq": "부산 강서 본사",
         "kr": "-",
         "gl": "-",
-        "desc": "항성산업사는 자동차 공조(HVAC)용 블로어 모터와 모터 케이스·커버 등 프레스 부품을 전문적으로 생산하는 부산 소재 자동차부품 제조기업입니다.\nDC 모터 케이스 관련 발명특허 및 모터 케이스 자석 자동조립 시스템 특허를 확보하며 프레스 가공과 자동화 조립 기술을 축적해 왔습니다.",
+        "desc": "에이치에스테크(주)는 자동차 공조(HVAC)용 블로어 모터와 모터 케이스·커버 등 프레스 부품을 전문적으로 생산하는 부산 소재 자동차부품 제조기업입니다.\nDC 모터 케이스 관련 발명특허 및 모터 케이스 자석 자동조립 시스템 특허를 확보하며 프레스 가공과 자동화 조립 기술을 축적해 왔습니다.",
         "products": [
             "HVAC Blower Motors",
             "일체형 Motors",
             "기타 프레스 제품류"
         ],
+        # TODO(미확인): hstechkorea.com 인증 페이지 확인 후 갱신
         "certs": ["IATF16949"],
-        # ✅ 수정: 쉼표 중복(,,) 제거 → SyntaxError 해결
+        # TODO(미확인): 거래처 비중은 기존 항성산업사 수치를 그대로 유지
         "customers": {"효성전기": 97, "사람과기술": 1, "신광기업": 1},
         "locations": [
-            {"name": "항성산업사", "type": "hq", "address": "부산광역시 강서구 지사동 1200-1", "lat": 35.1145, "lon": 128.8460, "country": "대한민국"}
+            # TODO(미확인): 신규 법인 주소/좌표 확인 필요 (기존 소재지 유지)
+            {"name": "에이치에스테크(주)", "type": "hq", "address": "부산광역시 강서구 지사동 1200-1", "lat": 35.1145, "lon": 128.8460, "country": "대한민국"}
         ]
     }
 ]
@@ -259,6 +262,8 @@ excel_img_data = {
             "https://www.snccable.co.kr/_company/image/certiA14001.gif"
         ]
     },
+    # NOTE: 아래 "(주)김천베아링" 키는 suppliers_data 에 존재하지 않는 레거시 항목입니다.
+    #       현재 업체명은 "한국NMB(주)" 이므로 조회에 사용되지 않습니다. (필요 시 삭제)
     "(주)김천베아링": {
         "prod_imgs": [
             "http://www.kimchunbrg.com/images/main/visual_01.jpg",
@@ -307,14 +312,16 @@ excel_img_data = {
             "https://unionmaterials.com/kor/images/products/02_img_03.gif"
         ]
     },
-    "항성산업사": {
+    # ✅ 변경: 항성산업사 → 에이치에스테크(주)
+    # TODO(미확인): hstechkorea.com 이미지 확인 후 교체 (현재는 기존 hangseong.co.kr 경로 유지)
+    "에이치에스테크(주)": {
         "prod_imgs": [
             "http://www.hangseong.co.kr/img/sub/hvac.PNG",   # HVAC Blower Motors
             "http://www.hangseong.co.kr/img/sub/case.PNG",   # 일체형 Motors
             "http://www.hangseong.co.kr/img/sub/Etc.png"     # 기타 프레스 제품류
         ],
         "cert_imgs": [
-            "http://www.hangseong.co.kr/img/sub/cense.PNG"     # IATF16949
+            "http://www.hangseong.co.kr/img/sub/cense.PNG"   # IATF16949
         ]
     }
 }
