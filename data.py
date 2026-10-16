@@ -270,13 +270,9 @@ excel_img_data = {
         "cert_imgs": []
     },
     "평화기공(주)": {
-        "prod_imgs": [
-            "https://ph.co.kr/upload/prod/6-14_K1KM3613(0).png",
-            "https://ph.co.kr/upload/prod/6-12_K1KM3614(0).png",
-            "https://ph.co.kr/upload/prod/6-1_K1KM3561(0).png"
-        ],
+        "prod_imgs": [],
         "cert_imgs": [
-            "https://ph.co.kr/common/images/sub/affiliate_cert_11_1.jpg"
+            "[]"
         ]
     },
     "(주)엠제이텍": {
