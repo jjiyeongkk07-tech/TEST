@@ -299,7 +299,7 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 }
 .section-title .hp-arw{ font-size: 12px; }
 
-/* === 03. 주요 고객사 매입 비중[TOP4] (TOP 4 + 기타, 100% 스택바) === */
+/* === 03. 주요 고객사 매입 비중 (TOP 4 + 기타, 100% 스택바) === */
 .cust-box { padding: 28px 30px; background: #FDFCFB; border: 1px solid #E5E0D8;
             border-radius: 12px; margin-bottom: 10px; }
 .cust-stack { display: flex; height: 52px; border-radius: 8px; overflow: hidden;
