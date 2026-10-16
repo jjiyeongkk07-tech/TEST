@@ -2,10 +2,13 @@
 # data.py
 # ==========================================
 
+from urllib.parse import urlparse
+
 # 1. 업체 상세 정보 리스트
 suppliers_data = [
     {
         "name": "(주)성우",
+        "homepage": "https://www.e-sungwoo.co.kr/",
         "industry": "PRESS(CASE)", 
         "sub_industry": "2차전지 및 전장부품",
         "hq": "경북 구미 본사", 
@@ -26,6 +29,7 @@ suppliers_data = [
     },
     {
         "name": "(주)한성전장",
+        "homepage": "http://www.hansungeec.co.kr/",
         "industry": "임가공(조립)",
         "sub_industry": "자동차 전장 및 전자부품",
         "hq": "경남 양산 본사", 
@@ -44,6 +48,7 @@ suppliers_data = [
     },
     {
         "name": "(주)브이씨텍",
+        "homepage": "http://www.vctech.co.kr/",
         "industry": "PCB",
         "sub_industry": "제어장치 및 전장품",
         "hq": "경기 군포 본사",
@@ -59,6 +64,7 @@ suppliers_data = [
     },
     {
         "name": "(주)상농전선",
+        "homepage": "https://www.snccable.co.kr/main/main.html",
         "industry": "가공(MAGNET WIRE)",
         "sub_industry": "에나멜선 및 절연코드",
         "hq": "경남 양산 본사",
@@ -76,6 +82,7 @@ suppliers_data = [
     },
     {
         "name": "한국NMB(주)",
+        "homepage": "https://www.kimchunbrg.com/main.php",
         "industry": "Bearing",
         "sub_industry": "Rotary Components/Actuator",
         "hq": "부산 본사",
@@ -97,6 +104,7 @@ suppliers_data = [
     },
     {
         "name": "평화기공(주)",
+        "homepage": "https://ph.co.kr/kr/sub/affiliate/sample/view.asp?a_idx=11",
         "industry": "가공(DIECASTING)",
         "sub_industry": "자동차 경량화 및 가전용 알루미늄 부품",
         "hq": "대구 본사",
@@ -120,6 +128,7 @@ suppliers_data = [
     },
     {
         "name": "(주)엠제이텍",
+        "homepage": "http://www.mjtec.co.kr/",
         "industry": "PRESS(CORE)", 
         "sub_industry": "자동차 및 전기전자용 모터 코어",
         "hq": "경기 안성 본사", 
@@ -139,6 +148,7 @@ suppliers_data = [
     },
     {
         "name": "유니온머티리얼즈",
+        "homepage": "https://unionmaterials.com/eng/html/main.html",
         "industry": "소결(MAGNET)", 
         "sub_industry": "자동차 및 전기전자용 부품소재",
         "hq": "대구 본사", 
@@ -162,6 +172,7 @@ suppliers_data = [
     },
     {
         "name": "(주)에이테크오토모티브",
+        "homepage": "http://www.atauto.co.kr/",
         "industry": "사출",
         "sub_industry": "자동차 엔진·전장 및 전기차 부품",
         "hq": "경북 경주 공장",
@@ -185,6 +196,7 @@ suppliers_data = [
     },
     {
         "name": "항성산업사",
+        "homepage": "http://www.hangseong.co.kr/",
         "industry": "PRESS(CASE)",
         "sub_industry": "자동차 공조용 모터 및 프레스 부품",
         "hq": "부산 강서 본사",
@@ -337,3 +349,82 @@ map_radius_settings = {
 def is_remote_image(src: str) -> bool:
     """이미지 경로가 원격 URL인지 로컬 파일 경로인지 판별합니다."""
     return str(src).lower().startswith(("http://", "https://"))
+
+
+# ==========================================
+# 5. 홈페이지 링크 (업체명 아래 배지형 링크)
+# ==========================================
+
+# 5-1. 업체명 -> 홈페이지 URL (suppliers_data 의 "homepage" 백업/조회용)
+supplier_homepages = {s["name"]: s.get("homepage", "") for s in suppliers_data}
+
+
+# 5-2. 배지 스타일 (앱에서 1회만 주입하면 됩니다)
+HOMEPAGE_BADGE_CSS = """
+<style>
+.sw-hp{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    margin:2px 0 6px 0;
+    padding:4px 12px 4px 10px;
+    border:1px solid rgba(148,163,184,0.45);
+    border-radius:999px;
+    background:rgba(148,163,184,0.10);
+    font-size:0.82rem;
+    font-weight:500;
+    line-height:1.5;
+    letter-spacing:0.01em;
+    color:#2563eb !important;
+    text-decoration:none !important;
+    transition:all .18s ease;
+    white-space:nowrap;
+}
+.sw-hp:hover{
+    border-color:#2563eb;
+    background:rgba(37,99,235,0.10);
+    box-shadow:0 1px 6px rgba(37,99,235,0.18);
+    transform:translateY(-1px);
+}
+.sw-hp .sw-hp-ico{ font-size:0.9rem; line-height:1; filter:grayscale(0.15); }
+.sw-hp .sw-hp-txt{ font-family:"Pretendard","Segoe UI",sans-serif; }
+.sw-hp .sw-hp-arw{ font-size:0.78rem; opacity:0.65; }
+.sw-hp:hover .sw-hp-arw{ opacity:1; }
+.sw-hp-none{
+    display:inline-block; margin:2px 0 6px 0; padding:4px 10px;
+    border:1px dashed rgba(148,163,184,0.45); border-radius:999px;
+    font-size:0.80rem; color:#94a3b8;
+}
+</style>
+"""
+
+
+# 5-3. URL -> 표시용 도메인 (www. 제거)
+def get_homepage_domain(url: str) -> str:
+    """홈페이지 URL에서 화면에 표시할 도메인만 추출합니다."""
+    if not url or str(url).strip() in ("", "-"):
+        return ""
+    host = urlparse(str(url)).netloc or str(url)
+    return host[4:] if host.lower().startswith("www.") else host
+
+
+# 5-4. 배지 HTML 생성
+def render_homepage_badge(url: str, label: str = None) -> str:
+    """업체명 바로 아래에 삽입할 홈페이지 배지 HTML을 반환합니다.
+    url 이 없으면 '홈페이지 정보 없음' 배지를 반환합니다."""
+    if not url or str(url).strip() in ("", "-"):
+        return '<span class="sw-hp-none">홈페이지 정보 없음</span>'
+    text = label or get_homepage_domain(url)
+    return (
+        f'<a class="sw-hp" href="{url}" target="_blank" rel="noopener noreferrer" title="{url}">'
+        f'<span class="sw-hp-ico">🌐</span>'
+        f'<span class="sw-hp-txt">{text}</span>'
+        f'<span class="sw-hp-arw">↗</span>'
+        f'</a>'
+    )
+
+
+# 5-5. 업체명으로 바로 배지 만들기 (suppliers_data 조회)
+def render_homepage_badge_by_name(name: str) -> str:
+    """업체명만으로 홈페이지 배지 HTML을 반환합니다."""
+    return render_homepage_badge(supplier_homepages.get(name, ""))
