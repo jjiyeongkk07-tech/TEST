@@ -299,20 +299,22 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 }
 .section-title .hp-arw{ font-size: 12px; }
 
-/* === 03. 주요 고객사 매입 비중 (TOP 4 + 기타, 100% 스택바) === */
-/* ✅ 수정 1: 협력사명/비율 글자 크기 확대 (15px -> 21px), 막대 높이 52px -> 64px */
-/* ✅ 수정 2: 막대 아래 축(.cust-axis) 관련 CSS 전면 삭제 */
-.cust-box { padding: 28px 30px; background: #FDFCFB; border: 1px solid #E5E0D8;
+/* === 03. 주요 고객사 매입 비중 (TOP 4 전용, 100% 스택바) === */
+/* ✅ 수정 1: 글자 크기 축소 (21px -> 16px), 막대 높이 64px -> 56px */
+/* ✅ 수정 2: 폭에 따라 16px / 14px / 12.5px 3단계 자동 적용 */
+.cust-box { padding: 24px 28px; background: #FDFCFB; border: 1px solid #E5E0D8;
             border-radius: 12px; margin-bottom: 10px; }
-.cust-stack { display: flex; height: 64px; border-radius: 8px; overflow: hidden;
+.cust-stack { display: flex; height: 56px; border-radius: 8px; overflow: hidden;
               border: 1px solid #E5E0D8; }
 .cust-seg { display: flex; align-items: center; justify-content: center;
-            font-size: 21px !important; font-weight: 900 !important;
-            letter-spacing: -0.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.12);
+            font-size: 16px !important; font-weight: 800 !important;
+            letter-spacing: -0.3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.10);
             white-space: nowrap; overflow: hidden;
+            padding: 0 4px;
             transition: filter 0.2s ease; cursor: default; }
-.cust-seg.seg-sm { font-size: 17px !important; text-shadow: none; }
+.cust-seg.seg-md { font-size: 14px !important; }
+.cust-seg.seg-sm { font-size: 12.5px !important; text-shadow: none; padding: 0 2px; }
 .cust-seg:hover { filter: brightness(1.08); }
 </style>
 """
@@ -320,13 +322,14 @@ st.markdown(css, unsafe_allow_html=True)
 
 # 3. 데이터 및 변환 함수
 CUSTOMER_TOP_N = 4                      # 개별 표기할 상위 고객사 수
+CUSTOMER_SHOW_ETC = False               # ✅ True로 바꾸면 '기타' 구간이 다시 표시됨
 CUSTOMER_PALETTE = [                    # TOP 4 전용 (진한 → 연한 골드)
     ("#8A6F43", "#ffffff"),
     ("#A9865A", "#ffffff"),
     ("#C4A47C", "#ffffff"),
     ("#D8C19D", "#2C2A29"),
 ]
-ETC_COLOR = ("#EFE9DE", "#2C2A29")      # '기타' 구간
+ETC_COLOR = ("#EFE9DE", "#2C2A29")      # '기타' 구간 (CUSTOMER_SHOW_ETC=True일 때만 사용)
 
 def _parse_ratio(v):
     """35, 35.5, '35%', '약 35' 등을 float으로 변환. 불가하면 None."""
@@ -342,6 +345,13 @@ def _is_etc(name):
 
 def _fmt_ratio(v):
     return f"{v:.0f}" if abs(v - round(v)) < 0.05 else f"{v:.1f}"
+
+def _short_name(name):
+    """막대 안에 표기할 때 법인 접두/접미어를 제거해 글자 수 절약. (툴팁은 원본 유지)"""
+    s = str(name).strip()
+    s = re.sub(r"^$\s*주\s*$\s*|^㈜\s*|^주식회사\s*", "", s)
+    s = re.sub(r"\s*$\s*주\s*$$|\s*㈜$|\s*주식회사$", "", s)
+    return s.strip() or str(name).strip()
 
 def _legacy_customer_tags(names):
     """비중 정보가 전혀 없는 업체는 기존 둥근 태그 방식 그대로 유지."""
@@ -366,50 +376,46 @@ def get_customer_tags_html(customers):
 
     items = [(str(k).strip(), _parse_ratio(v)) for k, v in customers.items()]
 
-    rated     = [(k, v) for k, v in items if v is not None and v > 0 and not _is_etc(k)]
-    etc_given = sum(v for k, v in items if v is not None and v > 0 and _is_etc(k))
-    unrated   = [k for k, v in items if (v is None or v <= 0) and not _is_etc(k)]
+    # ✅ 수정 1: '기타' 키와 비중 미기재 업체는 집계에서 제외 (TOP 4만 사용)
+    rated = [(k, v) for k, v in items if v is not None and v > 0 and not _is_etc(k)]
 
-    # 비중이 하나도 없으면 기존 태그로 폴백
-    if not rated and etc_given <= 0:
+    if not rated:
         return _legacy_customer_tags([k for k, _ in items])
 
     # 비중 내림차순 → 상위 4개사만 개별 표기
     rated.sort(key=lambda x: -x[1])
-    top, rest = rated[:CUSTOMER_TOP_N], rated[CUSTOMER_TOP_N:]
-
-    total_all = sum(v for _, v in rated) + etc_given
-    base      = total_all if total_all > 100.0 else 100.0   # 100 초과 시 자동 정규화
-
-    # 기타 = 직접 입력한 기타 + 5위 이하 합산 + 잔여분
-    etc_val   = etc_given + sum(v for _, v in rest)
-    remainder = 100.0 - total_all
-    if remainder > 0.5:
-        etc_val += remainder
-
-    # 기타에 흡수된 업체명 (5위 이하 + 비중 미기재)
-    absorbed = [k for k, _ in rest] + unrated
+    top = rated[:CUSTOMER_TOP_N]
 
     rows = []
-    for i, (name, val) in enumerate(top):
-        bg, fg = CUSTOMER_PALETTE[i % len(CUSTOMER_PALETTE)]
-        rows.append((name, val, val / base * 100.0, bg, fg, ""))
-    if etc_val > 0.5:
-        tip = ("기타 " + _fmt_ratio(etc_val) + "%"
-               + (" (" + ", ".join(absorbed) + " 포함)" if absorbed else ""))
-        rows.append(("기타", etc_val, etc_val / base * 100.0,
-                     ETC_COLOR[0], ETC_COLOR[1], tip))
+    if CUSTOMER_SHOW_ETC:
+        # (옵션) 기타 구간 포함 모드 — 100% 기준으로 잔여분을 기타로 표시
+        total_all = sum(v for _, v in rated)
+        base = total_all if total_all > 100.0 else 100.0
+        for i, (name, val) in enumerate(top):
+            bg, fg = CUSTOMER_PALETTE[i % len(CUSTOMER_PALETTE)]
+            rows.append((name, val, val / base * 100.0, bg, fg, ""))
+        etc_val = sum(v for _, v in rated[CUSTOMER_TOP_N:]) + max(0.0, 100.0 - total_all)
+        if etc_val > 0.5:
+            rows.append(("기타", etc_val, etc_val / base * 100.0,
+                         ETC_COLOR[0], ETC_COLOR[1], ""))
+    else:
+        # ✅ 기본 모드: TOP 4 합계를 100%로 환산해 막대를 꽉 채움 (라벨은 입력값 그대로)
+        base = sum(v for _, v in top) or 100.0
+        for i, (name, val) in enumerate(top):
+            bg, fg = CUSTOMER_PALETTE[i % len(CUSTOMER_PALETTE)]
+            rows.append((name, val, val / base * 100.0, bg, fg, ""))
 
-    # ✅ 수정 1: 글자가 커진 만큼 '이름+비율' 노출 기준을 11% -> 14%로 상향 (잘림 방지)
-    #    4~8% 구간은 seg-sm 클래스로 17px 적용
+    # ✅ 수정 2: 구간 폭에 따라 글자 크기와 라벨 형태를 3단계로 자동 조절
     segs = ""
     for name, val, w, bg, fg, tip in rows:
+        disp = _short_name(name)
         cls = "cust-seg"
-        if w >= 14:
-            label = f"{name} {_fmt_ratio(val)}%"
-        elif w >= 8:
-            label = f"{_fmt_ratio(val)}%"
-        elif w >= 4:
+        if w >= 26:
+            label = f"{disp} {_fmt_ratio(val)}%"
+        elif w >= 13:
+            label = f"{disp} {_fmt_ratio(val)}%"
+            cls += " seg-md"
+        elif w >= 3:
             label = f"{_fmt_ratio(val)}%"
             cls += " seg-sm"
         else:
@@ -420,7 +426,7 @@ def get_customer_tags_html(customers):
             f" color:{fg} !important;' title='{title}'>{label}</div>"
         )
 
-    # ✅ 수정 2: 막대바 아래 비율 축(0% / 25% / 50% / 75% / 100%) 완전 삭제
+    # 막대바 아래 비율 축(0% / 25% / 50% / 75% / 100%)은 표시하지 않음
     return f"<div class='cust-box'><div class='cust-stack'>{segs}</div></div>"
 
 # 🌐 홈페이지 링크 배지 HTML 생성 (<a> 태그만 반환하여 원하는 위치에 삽입)
