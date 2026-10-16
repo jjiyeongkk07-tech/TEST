@@ -185,7 +185,7 @@ suppliers_data = [
     },
     {
         "name": "항성산업사",
-        "industry": "PRESS(MOTOR CASE)",
+        "industry": "PRESS(CASE)",
         "sub_industry": "자동차 공조용 모터 및 프레스 부품",
         "hq": "부산 강서 본사",
         "kr": "-",
@@ -294,13 +294,6 @@ excel_img_data = {
             "https://unionmaterials.com/kor/images/products/02_img_03.gif"
         ]
     },
-    "(주)에이테크오토모티브": {
-        "prod_imgs": [],
-        "cert_imgs": [
-            "assets/atauto_sq_PL670.jpg",   # SQ 인증서 PL670 (사업장코드 SSPM01, 주관 현대케피코)
-            "assets/atauto_sq_PL958.jpg"    # SQ 인증서 PL958 (사업장코드 SSPM02, 주관 만도)
-        ]
-    },
     "항성산업사": {
         "prod_imgs": [
             "http://www.hangseong.co.kr/img/sub/hvac.PNG",   # HVAC Blower Motors
@@ -308,7 +301,7 @@ excel_img_data = {
             "http://www.hangseong.co.kr/img/sub/Etc.png"     # 기타 프레스 제품류
         ],
         "cert_imgs": [
-            "http://www.hangseong.co.kr/img/sub/Etc.png"     # IATF16949 (※ 제품 이미지와 동일 경로 - 확인 필요)
+            "http://www.hangseong.co.kr/img/sub/cense.PNG"     # IATF16949 (※ 제품 이미지와 동일 경로 - 확인 필요)
         ]
     }
 }
