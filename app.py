@@ -5,6 +5,7 @@ import pydeck as pdk
 import urllib.request
 import ssl
 import base64
+import re
 
 # 🌟 data.py 파일에서 데이터 및 설정 정보 가져오기
 from data import suppliers_data, excel_img_data, map_view_mapping, location_colors, map_radius_settings, get_homepage_domain
@@ -297,19 +298,123 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
     padding: 5px 14px 5px 11px;
 }
 .section-title .hp-arw{ font-size: 12px; }
+
+/* === 03. 주요 고객사 매입 비중 (TOP 4 + 기타, 100% 스택바) === */
+.cust-box { padding: 28px 30px; background: #FDFCFB; border: 1px solid #E5E0D8;
+            border-radius: 12px; margin-bottom: 10px; }
+.cust-stack { display: flex; height: 52px; border-radius: 8px; overflow: hidden;
+              border: 1px solid #E5E0D8; }
+.cust-seg { display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden;
+            transition: filter 0.2s ease; cursor: default; }
+.cust-seg:hover { filter: brightness(1.08); }
+.cust-axis { display: flex; justify-content: space-between; margin-top: 8px; }
+.cust-axis span { font-size: 12px !important; color: #A8A09A !important; font-weight: 700 !important; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
 
 # 3. 데이터 및 변환 함수
-def get_customer_tags_html(customers):
-    if not customers: return "<p style='color: #8A817C; font-size: 15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
-    tags_html = "<div style='display: flex; flex-wrap: wrap; gap: 15px;'>"
-    customer_list = customers.keys() if isinstance(customers, dict) else customers
-    for comp in customer_list:
-        tags_html += f"<div style='padding: 14px 28px; background: #ffffff; border: 2px solid #C4A47C; border-radius: 40px; font-size: 18px; font-weight: 900; color: #2C2A29; box-shadow: 0 6px 12px rgba(196, 164, 124, 0.15); display: flex; align-items: center;'>🤝 {comp}</div>"
+CUSTOMER_TOP_N = 4                      # 개별 표기할 상위 고객사 수
+CUSTOMER_PALETTE = [                    # TOP 4 전용 (진한 → 연한 골드)
+    ("#8A6F43", "#ffffff"),
+    ("#A9865A", "#ffffff"),
+    ("#C4A47C", "#ffffff"),
+    ("#D8C19D", "#2C2A29"),
+]
+ETC_COLOR = ("#EFE9DE", "#2C2A29")      # '기타' 구간
+
+def _parse_ratio(v):
+    """35, 35.5, '35%', '약 35' 등을 float으로 변환. 불가하면 None."""
+    if v is None or isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    m = re.search(r"(\d+(?:\.\d+)?)", str(v).replace(",", ""))
+    return float(m.group(1)) if m else None
+
+def _is_etc(name):
+    return name.strip() in ("기타", "기타고객", "기타 고객사", "기타 등", "ETC", "etc", "Others")
+
+def _fmt_ratio(v):
+    return f"{v:.0f}" if abs(v - round(v)) < 0.05 else f"{v:.1f}"
+
+def _legacy_customer_tags(names):
+    """비중 정보가 전혀 없는 업체는 기존 둥근 태그 방식 그대로 유지."""
+    tags_html = "<div style='display:flex; flex-wrap:wrap; gap:15px;'>"
+    for comp in names:
+        tags_html += (
+            "<div style='padding:14px 28px; background:#ffffff; border:2px solid #C4A47C;"
+            " border-radius:40px; font-size:18px; font-weight:900; color:#2C2A29;"
+            " box-shadow:0 6px 12px rgba(196,164,124,0.15); display:flex; align-items:center;'>"
+            f"🤝 {comp}</div>"
+        )
     tags_html += "</div>"
-    return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
+    return f"<div class='cust-box'>{tags_html}</div>"
+
+def get_customer_tags_html(customers):
+    if not customers:
+        return "<p style='color:#8A817C; font-size:15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
+
+    # 리스트(비중 미입력)로 들어온 기존 데이터는 기존 디자인 유지
+    if not isinstance(customers, dict):
+        return _legacy_customer_tags(list(customers))
+
+    items = [(str(k).strip(), _parse_ratio(v)) for k, v in customers.items()]
+
+    rated     = [(k, v) for k, v in items if v is not None and v > 0 and not _is_etc(k)]
+    etc_given = sum(v for k, v in items if v is not None and v > 0 and _is_etc(k))
+    unrated   = [k for k, v in items if (v is None or v <= 0) and not _is_etc(k)]
+
+    # 비중이 하나도 없으면 기존 태그로 폴백
+    if not rated and etc_given <= 0:
+        return _legacy_customer_tags([k for k, _ in items])
+
+    # 비중 내림차순 → 상위 4개사만 개별 표기
+    rated.sort(key=lambda x: -x[1])
+    top, rest = rated[:CUSTOMER_TOP_N], rated[CUSTOMER_TOP_N:]
+
+    total_all = sum(v for _, v in rated) + etc_given
+    base      = total_all if total_all > 100.0 else 100.0   # 100 초과 시 자동 정규화
+
+    # 기타 = 직접 입력한 기타 + 5위 이하 합산 + 잔여분
+    etc_val   = etc_given + sum(v for _, v in rest)
+    remainder = 100.0 - total_all
+    if remainder > 0.5:
+        etc_val += remainder
+
+    # 기타에 흡수된 업체명 (5위 이하 + 비중 미기재)
+    absorbed = [k for k, _ in rest] + unrated
+
+    rows = []
+    for i, (name, val) in enumerate(top):
+        bg, fg = CUSTOMER_PALETTE[i % len(CUSTOMER_PALETTE)]
+        rows.append((name, val, val / base * 100.0, bg, fg, ""))
+    if etc_val > 0.5:
+        tip = ("기타 " + _fmt_ratio(etc_val) + "%"
+               + (" (" + ", ".join(absorbed) + " 포함)" if absorbed else ""))
+        rows.append(("기타", etc_val, etc_val / base * 100.0,
+                     ETC_COLOR[0], ETC_COLOR[1], tip))
+
+    # 100% 스택바 (범례가 없으므로 라벨을 최대한 조각 안에 노출)
+    segs = ""
+    for name, val, w, bg, fg, tip in rows:
+        if w >= 11:
+            label = f"{name} {_fmt_ratio(val)}%"
+        elif w >= 4:
+            label = f"{_fmt_ratio(val)}%"
+        else:
+            label = ""
+        title = tip or f"{name} {_fmt_ratio(val)}%"
+        segs += (
+            f"<div class='cust-seg' style='width:{w:.4f}%; background:{bg};"
+            f" color:{fg} !important;' title='{title}'>{label}</div>"
+        )
+
+    axis = ("<div class='cust-axis'><span>0%</span><span>25%</span>"
+            "<span>50%</span><span>75%</span><span>100%</span></div>")
+
+    return f"<div class='cust-box'><div class='cust-stack'>{segs}</div>{axis}</div>"
 
 # 🌐 홈페이지 링크 배지 HTML 생성 (<a> 태그만 반환하여 원하는 위치에 삽입)
 def get_homepage_link_html(company):
@@ -529,7 +634,7 @@ elif selected_name:
                 st.markdown("<div class='tag-wrap-box'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
 
 
-        st.markdown("<div class='section-title' style='margin-top: 40px;'><span class='section-num'>03.</span> 주요 고객사</div>", unsafe_allow_html=True)
+        st.markdown("<div class='section-title' style='margin-top: 40px;'><span class='section-num'>03.</span> 주요 고객사 및 매입 비중</div>", unsafe_allow_html=True)
         st.markdown(get_customer_tags_html(selected.get('customers', [])), unsafe_allow_html=True)
 
         st.markdown("<div class='section-title' style='margin-top: 50px;'><span class='section-num'>04.</span> 글로벌 네트워크</div>", unsafe_allow_html=True)
