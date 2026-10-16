@@ -271,9 +271,7 @@ excel_img_data = {
     },
     "평화기공(주)": {
         "prod_imgs": [],
-        "cert_imgs": [
-            "[]"
-        ]
+        "cert_imgs": []
     },
     "(주)엠제이텍": {
         "prod_imgs": [
