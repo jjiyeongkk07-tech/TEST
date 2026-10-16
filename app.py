@@ -7,7 +7,7 @@ import ssl
 import base64
 
 # 🌟 data.py 파일에서 데이터 및 설정 정보 가져오기
-from data import suppliers_data, excel_img_data, map_view_mapping, location_colors, map_radius_settings
+from data import suppliers_data, excel_img_data, map_view_mapping, location_colors, map_radius_settings, get_homepage_domain
 
 # 1. 페이지 설정
 st.set_page_config(page_title="글로벌 SCM 분석", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
@@ -264,6 +264,31 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
     letter-spacing: -1px !important; 
     text-align: left !important;
 }
+
+/* 🌐 업체명 아래 홈페이지 링크 배지 (베이지/골드 테마 적용) */
+.hp-link{
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 16px 7px 13px;
+    background: #FDFCFB;
+    border: 1px solid #E5E0D8;
+    border-left: 3px solid #C4A47C;
+    border-radius: 30px;
+    font-size: 15px; font-weight: 800;
+    text-decoration: none !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.hp-link span{ color: #8A6F43 !important; }
+.hp-link:hover{
+    background: #ffffff;
+    border-color: #C4A47C;
+    box-shadow: 0 6px 12px rgba(196,164,124,0.20);
+    transform: translateY(-2px);
+}
+.hp-link:hover span{ color: #2C2A29 !important; }
+.hp-arw{ font-size: 13px; opacity: 0.7; }
+.hp-link:hover .hp-arw{ opacity: 1; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -277,6 +302,21 @@ def get_customer_tags_html(customers):
         tags_html += f"<div style='padding: 14px 28px; background: #ffffff; border: 2px solid #C4A47C; border-radius: 40px; font-size: 18px; font-weight: 900; color: #2C2A29; box-shadow: 0 6px 12px rgba(196, 164, 124, 0.15); display: flex; align-items: center;'>🤝 {comp}</div>"
     tags_html += "</div>"
     return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
+
+# 🌐 업체명 아래에 표시할 홈페이지 배지 HTML 생성
+def get_homepage_html(company):
+    url = str(company.get("homepage", "") or "").strip()
+    if not url or url == "-":
+        return "<div style='margin-bottom:25px;'></div>"
+    domain = get_homepage_domain(url) or url
+    return (
+        f"<div style='margin-bottom:25px;'>"
+        f"<a class='hp-link' href='{url}' target='_blank' rel='noopener noreferrer' title='{url}'>"
+        f"<span style='font-size:15px;'>🌐</span>"
+        f"<span>{domain}</span>"
+        f"<span class='hp-arw'>↗</span>"
+        f"</a></div>"
+    )
 
 @st.cache_data(show_spinner=False)
 def get_base64_image(url):
@@ -416,9 +456,12 @@ if selected_name == "🏠 종합 메인 화면":
 elif selected_name:
     selected = next((s for s in filtered if s["name"] == selected_name), None)
     if selected:
-        badge_html = f"<div style='margin-bottom:25px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;'><h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing:-1px;'>{selected.get('name', '')}</h2><span style='background:#C4A47C; color:#ffffff !important; padding:6px 14px; font-size:16px; font-weight:900; border-radius:6px;'>{selected.get('industry', '')}</span>"
+        badge_html = f"<div style='margin-bottom:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;'><h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing:-1px;'>{selected.get('name', '')}</h2><span style='background:#C4A47C; color:#ffffff !important; padding:6px 14px; font-size:16px; font-weight:900; border-radius:6px;'>{selected.get('industry', '')}</span>"
         if selected.get('sub_industry'): badge_html += f"<span style='background:#FDFCFB; border:1px solid #E5E0D8; color:#8A817C !important; padding:5px 12px; font-size:14px; font-weight:700; border-radius:4px;'>{selected.get('sub_industry', '')}</span>"
-        st.markdown(badge_html + "</div>", unsafe_allow_html=True)
+        badge_html += "</div>"
+        # 🌐 업체명 아래 홈페이지 링크 배지 추가
+        badge_html += get_homepage_html(selected)
+        st.markdown(badge_html, unsafe_allow_html=True)
 
         st.markdown("<div class='section-title'><span class='section-num'>01.</span> 기업 개요</div>", unsafe_allow_html=True)
         st.markdown(f"<div class='desc-box'>📖 {selected.get('desc', '등록된 기업 개요가 없습니다.')}</div>", unsafe_allow_html=True)
