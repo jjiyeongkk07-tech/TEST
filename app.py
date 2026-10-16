@@ -265,7 +265,7 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
     text-align: left !important;
 }
 
-/* 🌐 업체명 아래 홈페이지 링크 배지 (베이지/골드 테마 적용) */
+/* 🌐 홈페이지 링크 배지 (베이지/골드 테마) */
 .hp-link{
     display: inline-flex; align-items: center; gap: 8px;
     padding: 7px 16px 7px 13px;
@@ -289,6 +289,14 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 .hp-link:hover span{ color: #2C2A29 !important; }
 .hp-arw{ font-size: 13px; opacity: 0.7; }
 .hp-link:hover .hp-arw{ opacity: 1; }
+
+/* 섹션 헤더(01. 기업 개요) 안에 들어간 배지는 제목과 균형 맞춰 축소 */
+.section-title .hp-link{
+    font-size: 14px;
+    font-weight: 700;
+    padding: 5px 14px 5px 11px;
+}
+.section-title .hp-arw{ font-size: 12px; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -303,19 +311,17 @@ def get_customer_tags_html(customers):
     tags_html += "</div>"
     return f"<div style='padding: 30px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px;'>{tags_html}</div>"
 
-# 🌐 업체명 아래에 표시할 홈페이지 배지 HTML 생성
-def get_homepage_html(company):
+# 🌐 홈페이지 링크 배지 HTML 생성 (<a> 태그만 반환하여 원하는 위치에 삽입)
+def get_homepage_link_html(company):
     url = str(company.get("homepage", "") or "").strip()
     if not url or url == "-":
-        return "<div style='margin-bottom:25px;'></div>"
+        return ""
     domain = get_homepage_domain(url) or url
     return (
-        f"<div style='margin-bottom:25px;'>"
         f"<a class='hp-link' href='{url}' target='_blank' rel='noopener noreferrer' title='{url}'>"
         f"<span style='font-size:15px;'>🌐</span>"
         f"<span>{domain}</span>"
-        f"<span class='hp-arw'>↗</span>"
-        f"</a></div>"
+        f"<span class='hp-arw'>↗</span></a>"
     )
 
 @st.cache_data(show_spinner=False)
@@ -456,14 +462,17 @@ if selected_name == "🏠 종합 메인 화면":
 elif selected_name:
     selected = next((s for s in filtered if s["name"] == selected_name), None)
     if selected:
-        badge_html = f"<div style='margin-bottom:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;'><h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing:-1px;'>{selected.get('name', '')}</h2><span style='background:#C4A47C; color:#ffffff !important; padding:6px 14px; font-size:16px; font-weight:900; border-radius:6px;'>{selected.get('industry', '')}</span>"
+        badge_html = f"<div style='margin-bottom:25px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;'><h2 style='margin:0; font-weight:900; font-size:42px; letter-spacing:-1px;'>{selected.get('name', '')}</h2><span style='background:#C4A47C; color:#ffffff !important; padding:6px 14px; font-size:16px; font-weight:900; border-radius:6px;'>{selected.get('industry', '')}</span>"
         if selected.get('sub_industry'): badge_html += f"<span style='background:#FDFCFB; border:1px solid #E5E0D8; color:#8A817C !important; padding:5px 12px; font-size:14px; font-weight:700; border-radius:4px;'>{selected.get('sub_industry', '')}</span>"
-        badge_html += "</div>"
-        # 🌐 업체명 아래 홈페이지 링크 배지 추가
-        badge_html += get_homepage_html(selected)
-        st.markdown(badge_html, unsafe_allow_html=True)
+        st.markdown(badge_html + "</div>", unsafe_allow_html=True)
 
-        st.markdown("<div class='section-title'><span class='section-num'>01.</span> 기업 개요</div>", unsafe_allow_html=True)
+        # 🌐 '01. 기업 개요' 헤더 줄 오른쪽 끝에 홈페이지 링크 배지 배치
+        st.markdown(
+            "<div class='section-title'><span class='section-num'>01.</span> 기업 개요"
+            f"<span style='margin-left:auto;'>{get_homepage_link_html(selected)}</span>"
+            "</div>",
+            unsafe_allow_html=True
+        )
         st.markdown(f"<div class='desc-box'>📖 {selected.get('desc', '등록된 기업 개요가 없습니다.')}</div>", unsafe_allow_html=True)
         
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
