@@ -351,96 +351,21 @@ def is_remote_image(src: str) -> bool:
     return str(src).lower().startswith(("http://", "https://"))
 
 
-# ==========================================
-# 5. 홈페이지 링크 (업체명 아래 배지형 링크)
-# ==========================================
+# 5. 홈페이지 링크 관련 헬퍼
+#    - 업체명 아래 배지형 링크 표시에 사용
 
-# 5-1. 업체명 -> 홈페이지 URL 조회용 맵
+# 업체명 -> 홈페이지 URL 조회용 맵
 supplier_homepages = {s["name"]: s.get("homepage", "") for s in suppliers_data}
 
 
-# 5-2. 배지 스타일
-HOMEPAGE_BADGE_CSS = """
-<style>
-.sw-hp{
-    display:inline-flex;
-    align-items:center;
-    gap:7px;
-    margin:2px 0 6px 0;
-    padding:4px 12px 4px 10px;
-    border:1px solid rgba(148,163,184,0.45);
-    border-radius:999px;
-    background:rgba(148,163,184,0.10);
-    font-size:0.82rem;
-    font-weight:500;
-    line-height:1.5;
-    letter-spacing:0.01em;
-    color:#2563eb !important;
-    text-decoration:none !important;
-    transition:all .18s ease;
-    white-space:nowrap;
-}
-.sw-hp:hover{
-    border-color:#2563eb;
-    background:rgba(37,99,235,0.10);
-    box-shadow:0 1px 6px rgba(37,99,235,0.18);
-    transform:translateY(-1px);
-}
-.sw-hp .sw-hp-ico{ font-size:0.9rem; line-height:1; }
-.sw-hp .sw-hp-txt{ font-family:"Pretendard","Segoe UI",sans-serif; }
-.sw-hp .sw-hp-arw{ font-size:0.78rem; opacity:0.65; }
-.sw-hp:hover .sw-hp-arw{ opacity:1; }
-.sw-hp-none{
-    display:inline-block; margin:2px 0 6px 0; padding:4px 10px;
-    border:1px dashed rgba(148,163,184,0.45); border-radius:999px;
-    font-size:0.80rem; color:#94a3b8;
-}
-</style>
-"""
-
-
-# 5-3. URL -> 표시용 도메인 (www. 제거)
 def get_homepage_domain(url: str) -> str:
-    """홈페이지 URL에서 화면에 표시할 도메인만 추출합니다."""
+    """홈페이지 URL에서 화면에 표시할 도메인만 추출합니다. (www. 제거)"""
     if not url or str(url).strip() in ("", "-"):
         return ""
     host = urlparse(str(url)).netloc or str(url)
     return host[4:] if host.lower().startswith("www.") else host
 
 
-# 5-4. 배지 HTML 생성
-def render_homepage_badge(url: str, label: str = None) -> str:
-    """업체명 바로 아래에 삽입할 홈페이지 배지 HTML을 반환합니다."""
-    if not url or str(url).strip() in ("", "-"):
-        return '<span class="sw-hp-none">홈페이지 정보 없음</span>'
-    text = label or get_homepage_domain(url)
-    return (
-        f'<a class="sw-hp" href="{url}" target="_blank" rel="noopener noreferrer" title="{url}">'
-        f'<span class="sw-hp-ico">🌐</span>'
-        f'<span class="sw-hp-txt">{text}</span>'
-        f'<span class="sw-hp-arw">↗</span>'
-        f'</a>'
-    )
-
-
-# 5-5. 업체명으로 바로 배지 만들기
-def render_homepage_badge_by_name(name: str) -> str:
-    """업체명만으로 홈페이지 배지 HTML을 반환합니다."""
-    return render_homepage_badge(supplier_homepages.get(name, ""))
-
-
-# 5-6. 화면 출력 (CSS 세션당 1회 자동 주입) — 앱에서는 이 함수만 호출
-def show_homepage(supplier, label: str = None):
-    """업체 dict 또는 업체명 문자열을 받아 홈페이지 배지를 화면에 출력합니다."""
-    import streamlit as st
-
-    if not st.session_state.get("_sw_hp_css_injected"):
-        st.markdown(HOMEPAGE_BADGE_CSS, unsafe_allow_html=True)
-        st.session_state["_sw_hp_css_injected"] = True
-
-    if isinstance(supplier, dict):
-        url = supplier.get("homepage", "")
-    else:
-        url = supplier_homepages.get(str(supplier), "")
-
-    st.markdown(render_homepage_badge(url, label), unsafe_allow_html=True)
+def get_homepage_url(name: str) -> str:
+    """업체명으로 홈페이지 URL을 조회합니다."""
+    return supplier_homepages.get(str(name), "")
