@@ -522,3 +522,68 @@ def get_all_customer_shares() -> dict:
 def get_homepage(company_name: str) -> str:
     """업체의 공식 홈페이지 주소를 반환합니다. 없으면 빈 문자열."""
     return get_supplier(company_name).get("homepage", "")
+
+
+# ==========================================
+# 6. 화면 출력용 HTML 생성 헬퍼
+#    - 기존 레이아웃을 바꾸지 않고, 필요한 위치에 한 줄만 호출해 사용합니다.
+#    - Streamlit 예) st.markdown(render_homepage_html(s["name"]), unsafe_allow_html=True)
+# ==========================================
+
+def render_homepage_html(company_name: str, label_prefix: str = "🔗 ") -> str:
+    """
+    업체명 아래에 넣을 홈페이지 링크 HTML을 반환합니다.
+    홈페이지 정보가 없으면 빈 문자열을 반환하므로 그대로 출력해도 안전합니다.
+    """
+    url = get_homepage(company_name)
+    if not url:
+        return ""
+
+    display = url.replace("https://", "").replace("http://", "").rstrip("/")
+    return (
+        f"<div style='margin:2px 0 10px 0;font-size:13px;'>"
+        f"<a href='{url}' target='_blank' rel='noopener noreferrer' "
+        f"style='color:#2563EB;text-decoration:none;'>{label_prefix}{display}</a>"
+        f"</div>"
+    )
+
+
+def render_customer_share_html(company_name: str) -> str:
+    """
+    주요 고객사 비중을 가로 막대(HTML)로 반환합니다.
+    비중 미공개 업체는 고객사명 나열 + 미공개 문구로 대체합니다.
+    """
+    share_info = get_customer_shares(company_name)
+    if not share_info["items"]:
+        return "<div style='font-size:13px;color:#6B7280;'>-</div>"
+
+    cfg = customer_share_bar_settings
+
+    if not share_info["disclosed"]:
+        names = " · ".join(item["name"] for item in share_info["items"])
+        return (
+            f"<div style='font-size:13px;line-height:1.6;'>{names}"
+            f"<div style='color:#6B7280;font-size:12px;margin-top:4px;'>"
+            f"{customer_share_undisclosed_text}</div></div>"
+        )
+
+    rows = []
+    for item in share_info["items"]:
+        ratio = item["share"] / share_info["total"] if share_info["total"] else 0
+        width_pct = round(ratio * 100, 1)
+        percent_text = (
+            f"<span style='width:46px;text-align:right;font-size:13px;"
+            f"font-variant-numeric:tabular-nums;'>{item['share']}%</span>"
+            if cfg["show_percent_text"] else ""
+        )
+        rows.append(
+            f"<div style='display:flex;align-items:center;gap:8px;margin:5px 0;'>"
+            f"<span style='width:{cfg['label_width']}px;font-size:13px;'>{item['name']}</span>"
+            f"<span style='flex:1;background:{cfg['track_color']};"
+            f"border-radius:{cfg['bar_radius']}px;height:{cfg['bar_height']}px;overflow:hidden;'>"
+            f"<span style='display:block;width:{width_pct}%;background:{item['color']};"
+            f"height:{cfg['bar_height']}px;border-radius:{cfg['bar_radius']}px;'></span></span>"
+            f"{percent_text}</div>"
+        )
+
+    return "<div>" + "".join(rows) + "</div>"
