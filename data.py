@@ -176,9 +176,9 @@ suppliers_data = [
         "certs": ["SQ 인증", "ESG 경영"],
         "customers": {"현대자동차": 0, "기아": 0, "현대케피코": 0, "만도": 0, "기타": 0},
         "locations": [
-            {"name": "경주공장(메인)", "type": "hq", "address": "경상북도 경주시 안강읍 안현로 955-6 (사방리 129)", "lat": 36.0075, "lon": 129.1880, "country": "대한민국"},
-            {"name": "안성 1공장(SSPM01)", "type": "kr", "address": "경기도 안성시 보개면 이전리 308번지", "lat": 37.0300, "lon": 127.3100, "country": "대한민국"},
-            {"name": "안성 2공장(SSPM02)", "type": "kr", "address": "경기도 안성시 보개면 오림길 71", "lat": 37.0325, "lon": 127.3140, "country": "대한민국"},
+            {"name": "경주공장", "type": "hq", "address": "경상북도 경주시 안강읍 안현로 955-6 (사방리 129)", "lat": 36.0075, "lon": 129.1880, "country": "대한민국"},
+            {"name": "안성 1공장", "type": "kr", "address": "경기도 안성시 보개면 이전리 308번지", "lat": 37.0300, "lon": 127.3100, "country": "대한민국"},
+            {"name": "안성 2공장", "type": "kr", "address": "경기도 안성시 보개면 오림길 71", "lat": 37.0325, "lon": 127.3140, "country": "대한민국"},
             {"name": "중국(르자오)공장", "type": "gl_cn", "address": "중국 산둥성 르자오시", "lat": 35.4164, "lon": 119.5269, "country": "중국"},
             {"name": "베트남(하이즈엉)공장", "type": "gl_vn", "address": "Factory D1-A, Lot 5, Road No.1, Cam Dien Industrial Park, Cam Giang, Hai Duong, Vietnam", "lat": 20.9400, "lon": 106.2050, "country": "베트남"}
         ]
@@ -282,46 +282,6 @@ excel_img_data = {
             "assets/atauto_sq_PL958.jpg"    # SQ 인증서 PL958 (사업장코드 SSPM02, 주관 만도)
         ]
     }
-}
-
-# 2-1. 인증서 상세 메타데이터 (첨부 인증서 기준)
-cert_detail_data = {
-    "(주)에이테크오토모티브": [
-        {
-            "cert_name": "SQ 인증서",
-            "cert_no": "PL670",
-            "company": "(주)에이테크오토모티브",
-            "ceo": "강석우",
-            "biz_no": "1248644180",
-            "vendor_code": "SSPM",
-            "site_code": "SSPM01",
-            "cert_type": "사출",
-            "grade": "G",
-            "address": "경기도 안성시 보개면 이전리 308번지",
-            "issued_date": "2025-03-18",
-            "expiry_date": "2026-03-31",
-            "host": "주식회사 현대케피코",
-            "sponsor": "현대자동차·기아",
-            "img": "assets/atauto_sq_PL670.jpg"
-        },
-        {
-            "cert_name": "SQ 인증서",
-            "cert_no": "PL958",
-            "company": "(주)에이테크오토모티브",
-            "ceo": "강석우",
-            "biz_no": "1248644180",
-            "vendor_code": "SSPM",
-            "site_code": "SSPM02",
-            "cert_type": "사출",
-            "grade": "G",
-            "address": "경기도 안성시 보개면 오림길 71",
-            "issued_date": "2025-04-29",
-            "expiry_date": "2026-05-31",
-            "host": "주식회사 만도",
-            "sponsor": "현대자동차·기아",
-            "img": "assets/atauto_sq_PL958.jpg"
-        }
-    ]
 }
 
 # 3. 글로벌 네트워크 (지도 시각화) 관련 설정값 모음
