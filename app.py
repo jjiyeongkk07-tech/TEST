@@ -292,7 +292,6 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 .hp-link:hover .hp-arw{ opacity: 1; }
 
 /* === 03. 주요 고객사 매입 비중 (TOP 4 전용, 100% 스택바) === */
-/* ✅ 수정: 글자 크기 확대 (기본 18px), 그림자(text-shadow) 완벽 제거, 글자 굵기(900) 강화 */
 .cust-box { padding: 24px 28px; background: #FDFCFB; border: 1px solid #E5E0D8;
             border-radius: 12px; margin-bottom: 10px; }
 .cust-stack { display: flex; height: 56px; border-radius: 8px; overflow: hidden;
@@ -304,6 +303,14 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
             white-space: nowrap; overflow: hidden;
             padding: 0 6px;
             transition: filter 0.2s ease; cursor: default; }
+
+/* ✅ 수정: Streamlit이 강제로 p 태그나 span으로 감싸도 부모의 색(흰색)을 무조건 유지하도록 설정 */
+.cust-seg p, .cust-seg span, .cust-seg div {
+    color: inherit !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 .cust-seg.seg-md { font-size: 15px !important; }
 .cust-seg.seg-sm { font-size: 13px !important; padding: 0 2px; }
 .cust-seg:hover { filter: brightness(1.08); }
@@ -370,7 +377,7 @@ def get_customer_tags_html(customers):
 
     items = [(str(k).strip(), _parse_ratio(v)) for k, v in customers.items()]
 
-    # ✅ 수정 1: '기타' 키와 비중 미기재 업체는 집계에서 제외 (TOP 4만 사용)
+    # '기타' 키와 비중 미기재 업체는 집계에서 제외 (TOP 4만 사용)
     rated = [(k, v) for k, v in items if v is not None and v > 0 and not _is_etc(k)]
 
     if not rated:
@@ -382,7 +389,6 @@ def get_customer_tags_html(customers):
 
     rows = []
     if CUSTOMER_SHOW_ETC:
-        # (옵션) 기타 구간 포함 모드 — 100% 기준으로 잔여분을 기타로 표시
         total_all = sum(v for _, v in rated)
         base = total_all if total_all > 100.0 else 100.0
         for i, (name, val) in enumerate(top):
@@ -390,16 +396,14 @@ def get_customer_tags_html(customers):
             rows.append((name, val, val / base * 100.0, bg, fg, ""))
         etc_val = sum(v for _, v in rated[CUSTOMER_TOP_N:]) + max(0.0, 100.0 - total_all)
         if etc_val > 0.5:
-            rows.append(("기타", etc_val, etc_val / base * 100.0,
-                         ETC_COLOR[0], ETC_COLOR[1], ""))
+            rows.append(("기타", etc_val, etc_val / base * 100.0, ETC_COLOR[0], ETC_COLOR[1], ""))
     else:
-        # ✅ 기본 모드: TOP 4 합계를 100%로 환산해 막대를 꽉 채움 (라벨은 입력값 그대로)
+        # 기본 모드: TOP 4 합계를 100%로 환산해 막대를 꽉 채움
         base = sum(v for _, v in top) or 100.0
         for i, (name, val) in enumerate(top):
             bg, fg = CUSTOMER_PALETTE[i % len(CUSTOMER_PALETTE)]
             rows.append((name, val, val / base * 100.0, bg, fg, ""))
 
-    # ✅ 수정 2: 구간 폭에 따라 글자 크기와 라벨 형태를 3단계로 자동 조절
     segs = ""
     for name, val, w, bg, fg, tip in rows:
         disp = _short_name(name)
@@ -415,12 +419,14 @@ def get_customer_tags_html(customers):
         else:
             label = ""
         title = tip or f"{name} {_fmt_ratio(val)}%"
+        
+        # ✅ 수정: span 태그를 추가하여 글씨 색상(fg)을 최우선(!important)으로 강력하게 고정
         segs += (
-            f"<div class='{cls}' style='width:{w:.4f}%; background:{bg};"
-            f" color:{fg} !important;' title='{title}'>{label}</div>"
+            f"<div class='{cls}' style='width:{w:.4f}%; background:{bg}; color:{fg} !important;' title='{title}'>"
+            f"<span style='color:{fg} !important;'>{label}</span>"
+            f"</div>"
         )
 
-    # 막대바 아래 비율 축(0% / 25% / 50% / 75% / 100%)은 표시하지 않음
     return f"<div class='cust-box'><div class='cust-stack'>{segs}</div></div>"
 
 # 🌐 홈페이지 링크 배지 HTML 생성 (<a> 태그만 반환하여 원하는 위치에 삽입)
