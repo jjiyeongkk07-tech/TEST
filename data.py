@@ -199,7 +199,7 @@ suppliers_data = [
         "certs": ["IATF16949"],
         "customers": {"국내 공조/모터 업체": 0, "기타": 0},
         "locations": [
-            {"name": "항성산업사 본사 및 공장", "type": "hq", "address": "부산광역시 강서구 지사동 1200-1", "lat": 35.1145, "lon": 128.8460, "country": "대한민국"}
+            {"name": "항성산업사", "type": "hq", "address": "부산광역시 강서구 지사동 1200-1", "lat": 35.1145, "lon": 128.8460, "country": "대한민국"}
         ]
     }
 ]
