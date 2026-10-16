@@ -262,17 +262,6 @@ excel_img_data = {
             "https://www.snccable.co.kr/_company/image/certiA14001.gif"
         ]
     },
-    # NOTE: 아래 "(주)김천베아링" 키는 suppliers_data 에 존재하지 않는 레거시 항목입니다.
-    #       현재 업체명은 "한국NMB(주)" 이므로 조회에 사용되지 않습니다. (필요 시 삭제)
-    "(주)김천베아링": {
-        "prod_imgs": [
-            "http://www.kimchunbrg.com/images/main/visual_01.jpg",
-            "http://www.kimchunbrg.com/images/main/visual_02.jpg"
-        ],
-        "cert_imgs": [
-            "http://www.kimchunbrg.com/images/sub/cert_01.jpg"
-        ]
-    },
     "한국NMB(주)": {
         "prod_imgs": [
             "https://product.minebeamitsumi.com/en/product/category/bearing/spherical/__icsFiles/afieldfile/2026/01/14/file_01_90.png",
@@ -312,13 +301,10 @@ excel_img_data = {
             "https://unionmaterials.com/kor/images/products/02_img_03.gif"
         ]
     },
-    # ✅ 변경: 항성산업사 → 에이치에스테크(주)
-    # TODO(미확인): hstechkorea.com 이미지 확인 후 교체 (현재는 기존 hangseong.co.kr 경로 유지)
     "에이치에스테크(주)": {
         "prod_imgs": [
-            "http://www.hangseong.co.kr/img/sub/hvac.PNG",   # HVAC Blower Motors
-            "http://www.hangseong.co.kr/img/sub/case.PNG",   # 일체형 Motors
-            "http://www.hangseong.co.kr/img/sub/Etc.png"     # 기타 프레스 제품류
+            "http://www.hstechkorea.com/html/images/sub020101_01.jpg",   # 베큠리프터
+            "http://www.hstechkorea.com/html/images/sub020201_01.jpg",   # 공압기계
         ],
         # ✅ 변경: 인증서 공란 (IATF16949 인증 이미지 제거)
         "cert_imgs": []
