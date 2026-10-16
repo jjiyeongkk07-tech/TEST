@@ -182,6 +182,25 @@ suppliers_data = [
             {"name": "중국(르자오)공장", "type": "gl_cn", "address": "중국 산둥성 르자오시", "lat": 35.4164, "lon": 119.5269, "country": "중국"},
             {"name": "베트남(하이즈엉)공장", "type": "gl_vn", "address": "Factory D1-A, Lot 5, Road No.1, Cam Dien Industrial Park, Cam Giang, Hai Duong, Vietnam", "lat": 20.9400, "lon": 106.2050, "country": "베트남"}
         ]
+    },
+    {
+        "name": "항성산업사",
+        "industry": "PRESS(MOTOR CASE)",
+        "sub_industry": "자동차 공조용 모터 및 프레스 부품",
+        "hq": "부산 강서 본사",
+        "kr": "-",
+        "gl": "-",
+        "desc": "항성산업사는 자동차 공조(HVAC)용 블로어 모터와 모터 케이스·커버 등 프레스 부품을 전문적으로 생산하는 부산 소재 자동차부품 제조기업입니다.\nDC 모터 케이스 관련 발명특허 및 모터 케이스 자석 자동조립 시스템 특허를 확보하며 프레스 가공과 자동화 조립 기술을 축적해 왔습니다.",
+        "products": [
+            "HVAC Blower Motors",
+            "일체형 Motors",
+            "기타 프레스 제품류"
+        ],
+        "certs": ["IATF16949"],
+        "customers": {"국내 공조/모터 업체": 0, "기타": 0},
+        "locations": [
+            {"name": "항성산업사 본사 및 공장", "type": "hq", "address": "부산광역시 강서구 지사동 1200-1", "lat": 35.1145, "lon": 128.8460, "country": "대한민국"}
+        ]
     }
 ]
 
@@ -280,6 +299,16 @@ excel_img_data = {
         "cert_imgs": [
             "assets/atauto_sq_PL670.jpg",   # SQ 인증서 PL670 (사업장코드 SSPM01, 주관 현대케피코)
             "assets/atauto_sq_PL958.jpg"    # SQ 인증서 PL958 (사업장코드 SSPM02, 주관 만도)
+        ]
+    },
+    "항성산업사": {
+        "prod_imgs": [
+            "http://www.hangseong.co.kr/img/sub/hvac.PNG",   # HVAC Blower Motors
+            "http://www.hangseong.co.kr/img/sub/case.PNG",   # 일체형 Motors
+            "http://www.hangseong.co.kr/img/sub/Etc.png"     # 기타 프레스 제품류
+        ],
+        "cert_imgs": [
+            "http://www.hangseong.co.kr/img/sub/Etc.png"     # IATF16949 (※ 제품 이미지와 동일 경로 - 확인 필요)
         ]
     }
 }
