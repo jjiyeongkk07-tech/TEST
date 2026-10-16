@@ -301,7 +301,7 @@ excel_img_data = {
             "http://www.hangseong.co.kr/img/sub/Etc.png"     # 기타 프레스 제품류
         ],
         "cert_imgs": [
-            "http://www.hangseong.co.kr/img/sub/cense.PNG"     # IATF16949 (※ 제품 이미지와 동일 경로 - 확인 필요)
+            "http://www.hangseong.co.kr/img/sub/cense.PNG"     # IATF16949
         ]
     }
 }
