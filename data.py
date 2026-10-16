@@ -200,21 +200,22 @@ suppliers_data = [
         "homepage": "http://www.hstechkorea.com/",
         "industry": "PRESS(CASE)",
         "sub_industry": "자동차 공조용 모터 및 프레스 부품",
-        "hq": "부산 강서 본사",
+        "hq": "경남 양산 본사",
         "kr": "-",
         "gl": "-",
-        "desc": "에이치에스테크(주)는 자동차 공조(HVAC)용 블로어 모터와 모터 케이스·커버 등 프레스 부품을 전문적으로 생산하는 부산 소재 자동차부품 제조기업입니다.\nDC 모터 케이스 관련 발명특허 및 모터 케이스 자석 자동조립 시스템 특허를 확보하며 프레스 가공과 자동화 조립 기술을 축적해 왔습니다.",
+        "desc": "에이치에스테크(주)는 자동차 공조(HVAC)용 블로어 모터와 모터 케이스·커버 등 프레스 부품을 전문적으로 생산하는 경남 양산 소재 자동차부품 제조기업입니다.\nDC 모터 케이스 관련 발명특허 및 모터 케이스 자석 자동조립 시스템 특허를 확보하며 프레스 가공과 자동화 조립 기술을 축적해 왔습니다.",
         "products": [
             "베큠리프터",
             "공압기계",
         ],
-        # TODO(미확인): hstechkorea.com 인증 페이지 확인 후 갱신
-        "certs": ["IATF16949"],
+        # ✅ 변경: 인증서 공란
+        "certs": [],
         # TODO(미확인): 거래처 비중은 기존 항성산업사 수치를 그대로 유지
         "customers": {"효성전기": 97, "사람과기술": 1, "신광기업": 1},
         "locations": [
-            # TODO(미확인): 신규 법인 주소/좌표 확인 필요 (기존 소재지 유지)
-            {"name": "에이치에스테크(주)", "type": "hq", "address": "부산광역시 강서구 지사동 1200-1", "lat": 35.1145, "lon": 128.8460, "country": "대한민국"}
+            # ✅ 변경: 양산 본사 주소로 갱신
+            # TODO(미확인): lat/lon 은 동면 금오5길 일대 추정 좌표 → 정확 좌표 확인 후 갱신
+            {"name": "양산 본사", "type": "hq", "address": "경상남도 양산시 동면 금오5길 18-34", "lat": 35.3135, "lon": 129.1245, "country": "대한민국"}
         ]
     }
 ]
@@ -319,9 +320,8 @@ excel_img_data = {
             "http://www.hangseong.co.kr/img/sub/case.PNG",   # 일체형 Motors
             "http://www.hangseong.co.kr/img/sub/Etc.png"     # 기타 프레스 제품류
         ],
-        "cert_imgs": [
-            "http://www.hangseong.co.kr/img/sub/cense.PNG"   # IATF16949
-        ]
+        # ✅ 변경: 인증서 공란 (IATF16949 인증 이미지 제거)
+        "cert_imgs": []
     }
 }
 
