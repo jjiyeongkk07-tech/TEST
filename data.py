@@ -6,7 +6,6 @@
 suppliers_data = [
     {
         "name": "(주)성우",
-        "homepage": "https://www.e-sungwoo.co.kr",
         "industry": "PRESS(CASE)", 
         "sub_industry": "2차전지 및 전장부품",
         "hq": "경북 구미 본사", 
@@ -27,7 +26,6 @@ suppliers_data = [
     },
     {
         "name": "(주)한성전장",
-        "homepage": "http://www.hansungeec.co.kr",
         "industry": "임가공(조립)",
         "sub_industry": "자동차 전장 및 전자부품",
         "hq": "경남 양산 본사", 
@@ -46,7 +44,6 @@ suppliers_data = [
     },
     {
         "name": "(주)브이씨텍",
-        "homepage": "http://www.vctech.co.kr",
         "industry": "PCB",
         "sub_industry": "제어장치 및 전장품",
         "hq": "경기 군포 본사",
@@ -62,7 +59,6 @@ suppliers_data = [
     },
     {
         "name": "(주)상농전선",
-        "homepage": "https://www.snccable.co.kr",
         "industry": "가공(MAGNET WIRE)",
         "sub_industry": "에나멜선 및 절연코드",
         "hq": "경남 양산 본사",
@@ -80,8 +76,6 @@ suppliers_data = [
     },
     {
         "name": "한국NMB(주)",
-        # 한국NMB는 별도 국문 사이트가 확인되지 않아 모회사(MinebeaMitsumi) 그룹 사이트를 사용
-        "homepage": "https://www.minebeamitsumi.com/kor/",
         "industry": "Bearing",
         "sub_industry": "Rotary Components/Actuator",
         "hq": "부산 본사",
@@ -103,7 +97,6 @@ suppliers_data = [
     },
     {
         "name": "평화기공(주)",
-        "homepage": "https://ph.co.kr",
         "industry": "가공(DIECASTING)",
         "sub_industry": "자동차 경량화 및 가전용 알루미늄 부품",
         "hq": "대구 본사",
@@ -127,7 +120,6 @@ suppliers_data = [
     },
     {
         "name": "(주)엠제이텍",
-        "homepage": "https://mjtech.co.kr",
         "industry": "PRESS(CORE)", 
         "sub_industry": "자동차 및 전기전자용 모터 코어",
         "hq": "경기 안성 본사", 
@@ -147,7 +139,6 @@ suppliers_data = [
     },
     {
         "name": "유니온머티리얼즈",
-        "homepage": "https://www.unionmaterials.com",
         "industry": "소결(MAGNET)", 
         "sub_industry": "자동차 및 전기전자용 부품소재",
         "hq": "대구 본사", 
@@ -171,7 +162,6 @@ suppliers_data = [
     },
     {
         "name": "(주)에이테크오토모티브",
-        "homepage": "http://www.atauto.co.kr",
         "industry": "사출",
         "sub_industry": "자동차 엔진·전장 및 전기차 부품",
         "hq": "경북 경주 공장",
@@ -195,7 +185,6 @@ suppliers_data = [
     },
     {
         "name": "항성산업사",
-        "homepage": "http://www.hangseong.co.kr",
         "industry": "PRESS(CASE)",
         "sub_industry": "자동차 공조용 모터 및 프레스 부품",
         "hq": "부산 강서 본사",
@@ -348,242 +337,3 @@ map_radius_settings = {
 def is_remote_image(src: str) -> bool:
     """이미지 경로가 원격 URL인지 로컬 파일 경로인지 판별합니다."""
     return str(src).lower().startswith(("http://", "https://"))
-
-
-# ==========================================
-# 5. 주요 고객사 비중(Customer Share) 관련 설정 및 헬퍼
-#    - suppliers_data["customers"] 의 값(%)을 비중으로 해석합니다.
-#    - 비중 합계가 0인 업체는 '비중 미공개'로 처리하며, 임의 수치를 생성하지 않습니다.
-# ==========================================
-
-# 비중 막대/차트에 사용할 색상(상위 고객사부터 순서대로 적용, 부족하면 순환)
-customer_share_colors = [
-    "#2563EB",  # 1순위
-    "#16A34A",  # 2순위
-    "#F59E0B",  # 3순위
-    "#DC2626",  # 4순위
-    "#7C3AED",  # 5순위
-    "#0891B2",  # 6순위
-    "#94A3B8"   # 기타/그 외
-]
-
-# '기타' 성격의 항목은 항상 마지막 순서 + 회색으로 표시
-customer_share_etc_keywords = ("기타", "그 외", "etc", "others", "대리점")
-customer_share_etc_color = "#94A3B8"
-
-# 막대형 표시 기본 설정
-customer_share_bar_settings = {
-    "bar_height": 14,          # 막대 두께(px)
-    "bar_radius": 7,           # 막대 라운드(px)
-    "track_color": "#E5E7EB",  # 막대 배경(트랙) 색
-    "label_width": 150,        # 고객사명 라벨 폭(px)
-    "show_percent_text": True, # 막대 우측 % 텍스트 표시 여부
-    "ascii_bar_width": 20,     # 텍스트(ASCII) 막대 길이
-    "ascii_fill_char": "█",
-    "ascii_empty_char": "░"
-}
-
-# 비중이 공개되지 않은 경우 표기 문구
-customer_share_undisclosed_text = "비중 미공개 (주요 거래처 기준)"
-
-
-def _is_etc_customer(customer_name: str) -> bool:
-    """'기타', '그 외', '대리점' 등 잔여 항목인지 판별합니다."""
-    lowered = str(customer_name).lower()
-    return any(keyword.lower() in lowered for keyword in customer_share_etc_keywords)
-
-
-def get_supplier(company_name: str) -> dict:
-    """업체명으로 suppliers_data 내 업체 dict를 반환합니다. 없으면 빈 dict."""
-    for supplier in suppliers_data:
-        if supplier.get("name") == company_name:
-            return supplier
-    return {}
-
-
-def get_customer_shares(company_name: str) -> dict:
-    """
-    업체의 주요 고객사를 '비중 내림차순'으로 정렬하여 반환합니다.
-
-    반환 형식:
-    {
-        "company": "(주)성우",
-        "disclosed": True,                # 비중 수치가 공개되었는지 여부
-        "total": 100,                     # 비중 합계
-        "items": [
-            {"rank": 1, "name": "LG에너지솔루션", "share": 55, "color": "#2563EB", "is_etc": False},
-            ...
-        ]
-    }
-    """
-    supplier = get_supplier(company_name)
-    customers = supplier.get("customers", {}) or {}
-
-    total = sum(customers.values())
-    disclosed = total > 0
-
-    # 정렬 규칙: (1) '기타' 항목은 항상 뒤로, (2) 비중 내림차순, (3) 동일 비중은 원래 입력 순서 유지
-    ordered = sorted(
-        enumerate(customers.items()),
-        key=lambda pair: (_is_etc_customer(pair[1][0]), -pair[1][1], pair[0])
-    )
-
-    items = []
-    color_index = 0
-    for rank, (_, (name, share)) in enumerate(ordered, start=1):
-        is_etc = _is_etc_customer(name)
-        if is_etc:
-            color = customer_share_etc_color
-        else:
-            color = customer_share_colors[color_index % len(customer_share_colors)]
-            color_index += 1
-
-        items.append({
-            "rank": rank,
-            "name": name,
-            "share": share,
-            "color": color,
-            "is_etc": is_etc
-        })
-
-    return {
-        "company": company_name,
-        "disclosed": disclosed,
-        "total": total,
-        "items": items
-    }
-
-
-def get_customer_share_text(company_name: str, separator: str = " · ") -> str:
-    """
-    주요 고객사를 '고객사명 00%' 형태의 한 줄 텍스트로 반환합니다.
-    비중 미공개 업체는 고객사명만 나열합니다.
-    예) "LG에너지솔루션 55% · 효성전기 25% · LG이노텍 15% · 기타 5%"
-    """
-    share_info = get_customer_shares(company_name)
-    if not share_info["items"]:
-        return "-"
-
-    if not share_info["disclosed"]:
-        names = separator.join(item["name"] for item in share_info["items"])
-        return f"{names}  ({customer_share_undisclosed_text})"
-
-    return separator.join(
-        f"{item['name']} {item['share']}%" for item in share_info["items"]
-    )
-
-
-def get_customer_share_bar(company_name: str) -> str:
-    """
-    주요 고객사 비중을 텍스트(ASCII) 막대로 반환합니다. (콘솔/간단 표시용)
-    예)
-      LG에너지솔루션   ███████████░░░░░░░░░  55%
-      효성전기         █████░░░░░░░░░░░░░░░  25%
-    """
-    share_info = get_customer_shares(company_name)
-    if not share_info["items"]:
-        return "-"
-
-    if not share_info["disclosed"]:
-        lines = [f"- {item['name']}" for item in share_info["items"]]
-        return f"{customer_share_undisclosed_text}\n" + "\n".join(lines)
-
-    width = customer_share_bar_settings["ascii_bar_width"]
-    fill_char = customer_share_bar_settings["ascii_fill_char"]
-    empty_char = customer_share_bar_settings["ascii_empty_char"]
-    name_width = max(len(item["name"]) for item in share_info["items"])
-
-    lines = []
-    for item in share_info["items"]:
-        ratio = item["share"] / share_info["total"] if share_info["total"] else 0
-        filled = int(round(ratio * width))
-        bar = fill_char * filled + empty_char * (width - filled)
-        lines.append(f"{item['name'].ljust(name_width)}  {bar}  {item['share']}%")
-
-    return "\n".join(lines)
-
-
-def get_top_customer(company_name: str) -> dict:
-    """비중이 가장 큰 주요 고객사 1곳을 반환합니다('기타' 제외). 없으면 빈 dict."""
-    share_info = get_customer_shares(company_name)
-    if not share_info["disclosed"]:
-        return {}
-    for item in share_info["items"]:
-        if not item["is_etc"]:
-            return item
-    return {}
-
-
-def get_all_customer_shares() -> dict:
-    """전체 업체의 고객사 비중 정보를 {업체명: get_customer_shares(...)} 형태로 반환합니다."""
-    return {supplier["name"]: get_customer_shares(supplier["name"]) for supplier in suppliers_data}
-
-
-def get_homepage(company_name: str) -> str:
-    """업체의 공식 홈페이지 주소를 반환합니다. 없으면 빈 문자열."""
-    return get_supplier(company_name).get("homepage", "")
-
-
-# ==========================================
-# 6. 화면 출력용 HTML 생성 헬퍼
-#    - 기존 레이아웃을 바꾸지 않고, 필요한 위치에 한 줄만 호출해 사용합니다.
-#    - Streamlit 예) st.markdown(render_homepage_html(s["name"]), unsafe_allow_html=True)
-# ==========================================
-
-def render_homepage_html(company_name: str, label_prefix: str = "🔗 ") -> str:
-    """
-    업체명 아래에 넣을 홈페이지 링크 HTML을 반환합니다.
-    홈페이지 정보가 없으면 빈 문자열을 반환하므로 그대로 출력해도 안전합니다.
-    """
-    url = get_homepage(company_name)
-    if not url:
-        return ""
-
-    display = url.replace("https://", "").replace("http://", "").rstrip("/")
-    return (
-        f"<div style='margin:2px 0 10px 0;font-size:13px;'>"
-        f"<a href='{url}' target='_blank' rel='noopener noreferrer' "
-        f"style='color:#2563EB;text-decoration:none;'>{label_prefix}{display}</a>"
-        f"</div>"
-    )
-
-
-def render_customer_share_html(company_name: str) -> str:
-    """
-    주요 고객사 비중을 가로 막대(HTML)로 반환합니다.
-    비중 미공개 업체는 고객사명 나열 + 미공개 문구로 대체합니다.
-    """
-    share_info = get_customer_shares(company_name)
-    if not share_info["items"]:
-        return "<div style='font-size:13px;color:#6B7280;'>-</div>"
-
-    cfg = customer_share_bar_settings
-
-    if not share_info["disclosed"]:
-        names = " · ".join(item["name"] for item in share_info["items"])
-        return (
-            f"<div style='font-size:13px;line-height:1.6;'>{names}"
-            f"<div style='color:#6B7280;font-size:12px;margin-top:4px;'>"
-            f"{customer_share_undisclosed_text}</div></div>"
-        )
-
-    rows = []
-    for item in share_info["items"]:
-        ratio = item["share"] / share_info["total"] if share_info["total"] else 0
-        width_pct = round(ratio * 100, 1)
-        percent_text = (
-            f"<span style='width:46px;text-align:right;font-size:13px;"
-            f"font-variant-numeric:tabular-nums;'>{item['share']}%</span>"
-            if cfg["show_percent_text"] else ""
-        )
-        rows.append(
-            f"<div style='display:flex;align-items:center;gap:8px;margin:5px 0;'>"
-            f"<span style='width:{cfg['label_width']}px;font-size:13px;'>{item['name']}</span>"
-            f"<span style='flex:1;background:{cfg['track_color']};"
-            f"border-radius:{cfg['bar_radius']}px;height:{cfg['bar_height']}px;overflow:hidden;'>"
-            f"<span style='display:block;width:{width_pct}%;background:{item['color']};"
-            f"height:{cfg['bar_height']}px;border-radius:{cfg['bar_radius']}px;'></span></span>"
-            f"{percent_text}</div>"
-        )
-
-    return "<div>" + "".join(rows) + "</div>"
