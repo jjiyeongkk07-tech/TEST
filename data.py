@@ -159,10 +159,35 @@ suppliers_data = [
             {"name": "포항 공장", "type": "kr", "address": "경상북도 포항시 남구 대송로", "lat": 35.9904, "lon": 129.3800, "country": "대한민국"},
             {"name": "중국 법인(유니온툴텍공구)", "type": "gl_cn", "address": "중국 허베이성 싼허시 옌자오", "lat": 39.9500, "lon": 116.8167, "country": "중국"}
         ]
+    },
+    {
+        "name": "(주)에이테크오토모티브",
+        "industry": "사출/금형(MOLD)",
+        "sub_industry": "자동차 엔진·전장 및 전기차 부품",
+        "hq": "경북 경주 공장(메인)",
+        "kr": "경기 안성 1·2공장",
+        "gl": "중국 및 베트남 법인",
+        "desc": "(주)에이테크오토모티브는 자동차용 정밀 금형 설계·제작을 기반으로 엔진 인테이크 매니폴드, 전장 부품, 기어박스 어셈블리 등을 생산하는 자동차부품 전문기업입니다.\n최근에는 인버터 하우징, 전기차 배터리 부품, EPB 액추에이터, 쿨러 하우징, 파워 릴레이 어셈블리 등 전동화 품목으로 사업 영역을 확장하고 있으며, 국내(경주·안성)와 중국·베트남에 생산 거점을 운영하고 있습니다.",
+        "products": [
+            "엔진 인테이크 매니폴드 / 기어박스 어셈블리",
+            "인버터 하우징 / 쿨러 하우징",
+            "전기차 배터리 부품 / EPB 액추에이터 / 파워 릴레이 어셈블리",
+            "자동차용 정밀 금형"
+        ],
+        "certs": ["SQ 인증"],
+        "customers": {"현대자동차": 0, "기아": 0, "현대케피코": 0, "만도": 0, "기타": 0},
+        "locations": [
+            {"name": "경주공장(메인)", "type": "hq", "address": "경상북도 경주시 안강읍 안현로 955-6 (사방리 129)", "lat": 36.0075, "lon": 129.1880, "country": "대한민국"},
+            {"name": "안성 1공장(SSPM01)", "type": "kr", "address": "경기도 안성시 보개면 이전리 308번지", "lat": 37.0300, "lon": 127.3100, "country": "대한민국"},
+            {"name": "안성 2공장(SSPM02)", "type": "kr", "address": "경기도 안성시 보개면 오림길 71", "lat": 37.0325, "lon": 127.3140, "country": "대한민국"},
+            {"name": "중국(르자오)공장", "type": "gl_cn", "address": "중국 산둥성 르자오시", "lat": 35.4164, "lon": 119.5269, "country": "중국"},
+            {"name": "베트남(하이즈엉)공장", "type": "gl_vn", "address": "Factory D1-A, Lot 5, Road No.1, Cam Dien Industrial Park, Cam Giang, Hai Duong, Vietnam", "lat": 20.9400, "lon": 106.2050, "country": "베트남"}
+        ]
     }
 ]
 
 # 2. 업체별 이미지 URL 딕셔너리
+#    - http(s) 로 시작하면 원격 URL, 그 외는 로컬 파일 경로로 처리
 excel_img_data = {
     "(주)성우": {
         "prod_imgs": [
@@ -250,7 +275,54 @@ excel_img_data = {
             "https://unionmaterials.com/kor/images/products/01_img_02.gif",
             "https://unionmaterials.com/kor/images/products/02_img_03.gif"
         ]
+    },
+    "(주)에이테크오토모티브": {
+        "prod_imgs": [],
+        "cert_imgs": [
+            "assets/atauto_sq_PL670.jpg",   # SQ 인증서 PL670 (사업장코드 SSPM01, 주관 현대케피코)
+            "assets/atauto_sq_PL958.jpg"    # SQ 인증서 PL958 (사업장코드 SSPM02, 주관 만도)
+        ]
     }
+}
+
+# 2-1. 인증서 상세 메타데이터 (첨부 인증서 기준)
+cert_detail_data = {
+    "(주)에이테크오토모티브": [
+        {
+            "cert_name": "SQ 인증서",
+            "cert_no": "PL670",
+            "company": "(주)에이테크오토모티브",
+            "ceo": "강석우",
+            "biz_no": "1248644180",
+            "vendor_code": "SSPM",
+            "site_code": "SSPM01",
+            "cert_type": "사출",
+            "grade": "G",
+            "address": "경기도 안성시 보개면 이전리 308번지",
+            "issued_date": "2025-03-18",
+            "expiry_date": "2026-03-31",
+            "host": "주식회사 현대케피코",
+            "sponsor": "현대자동차·기아",
+            "img": "assets/atauto_sq_PL670.jpg"
+        },
+        {
+            "cert_name": "SQ 인증서",
+            "cert_no": "PL958",
+            "company": "(주)에이테크오토모티브",
+            "ceo": "강석우",
+            "biz_no": "1248644180",
+            "vendor_code": "SSPM",
+            "site_code": "SSPM02",
+            "cert_type": "사출",
+            "grade": "G",
+            "address": "경기도 안성시 보개면 오림길 71",
+            "issued_date": "2025-04-29",
+            "expiry_date": "2026-05-31",
+            "host": "주식회사 만도",
+            "sponsor": "현대자동차·기아",
+            "img": "assets/atauto_sq_PL958.jpg"
+        }
+    ]
 }
 
 # 3. 글로벌 네트워크 (지도 시각화) 관련 설정값 모음
@@ -259,7 +331,8 @@ map_view_mapping = {
     "🏢 국내(본사)": "hq",
     "🏭 국내(지사)": "kr",
     "🌐 해외(중국)": "gl_cn",
-    "🌎 해외(북미)": "gl_us"
+    "🌎 해외(북미)": "gl_us",
+    "🌏 해외(베트남)": "gl_vn"
 }
 
 location_colors = {
@@ -267,6 +340,7 @@ location_colors = {
     "kr": [37, 99, 235, 255],     
     "gl_cn": [16, 185, 129, 255], 
     "gl_us": [245, 158, 11, 255], 
+    "gl_vn": [139, 92, 246, 255], 
     "default_dim": [148, 163, 184, 100], 
     "all_view": [196, 164, 124, 220]     
 }
@@ -276,3 +350,9 @@ map_radius_settings = {
     "highlighted": 300000,
     "dimmed": 40000
 }
+
+
+# 4. 이미지 소스 판별 헬퍼 (URL / 로컬 파일 혼용 지원)
+def is_remote_image(src: str) -> bool:
+    """이미지 경로가 원격 URL인지 로컬 파일 경로인지 판별합니다."""
+    return str(src).lower().startswith(("http://", "https://"))
