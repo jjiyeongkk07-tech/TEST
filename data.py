@@ -179,7 +179,7 @@ suppliers_data = [
         "desc": "(주)에이테크경주는 자동차용 정밀 금형 설계·제작을 기반으로 엔진 인테이크 매니폴드, 전장 부품, 기어박스 어셈블리 등을 생산하는 자동차부품 전문기업입니다.\n최근에는 인버터 하우징, 전기차 배터리 부품, EPB 액추에이터, 쿨러 하우징, 파워 릴레이 어셈블리 등 전동화 품목으로 사업 영역을 확장하고 있으며, 국내(경주·안성)와 중국·베트남에 생산 거점을 운영하고 있습니다.",
         "products": [
             "엔진 인테이크 매니폴드",
-            "인버터 하우징 / 쿨러 하우징",
+            "VCM Motor ASM / EGR Motor ASM",
         ],
         "certs": ["SQ 인증", "ESG 경영"],
         "customers": {"(주)에이테크오토모티브": 43, "말레동현필터시스템": 28, "효성전기": 11, "(주)현대케피코": 10},
@@ -302,7 +302,11 @@ excel_img_data = {
         "cert_imgs": []
     },
     "(주)에이테크경주": {
-        "prod_imgs": [],
+        "prod_imgs": [
+            "https://lh3.googleusercontent.com/XvqObZ4oNZ7yf3uf-nloTL0CuYpDJYyxLHWt9Fb_djJi-86trLBU6aSGnhB1ya4GRBYnaHANQ19UVnlZCkNwHiWaMFOUdlwb5CG3yz_yaA=s0",
+            "https://lh3.googleusercontent.com/imJ0h79-BNyZMTQ9Ar489EtMIHVIinyTsIhcO07g8nFJxpDtV5IvBfAhDl9tKBqJaapmGo3wg1gBDgOB_ZXhexMZZtMLkBVSKJjN1B4=s0",
+            "https://lh3.googleusercontent.com/mv6mSykHwz-gq-IXHN-0MhVbyXuABptXpVliDOFFmu_3YG_OKeOunT_0pEyP5Zs7cPLlMxVG6GmEPgnYYvfImlljj4_9Omlz-BlM314=s0"
+        ],
         "cert_imgs": [
             "https://lh3.googleusercontent.com/n3N9I7-3hxL0_EAYP9wix4T4eJ9epdpCTbpeyhgIewnWJA0gaJx8wMGXnQbrdG9OlLhcHeHuiIaBawntq9ST_luiloNArjHSMW61MVOioFh7o3ntsvuE=w600-h600-n",
             "https://lh3.googleusercontent.com/DHN_b-_kZLmredozLJjqntkkhLeIQ_SgAvP35QvdCIBFylCDUpDpsVIsW0s6Fbe9oUIOypiA5jLM5CfdQIW3bjCPbBS1yEy9j10cRM_onmuv0_6nKiCoMA=w600-h600-n",
