@@ -253,7 +253,7 @@ excel_img_data = {
     },
     "(주)상농전선": {
         "prod_imgs": [
-            "https://www.snccable.co.kr/_product/photo/12_1.jpg"
+            "https://www.snccable.co.kr/_product/photo/12_1.jpg",
             "https://www.snccable.co.kr/_product/photo/15_1.jpg"
         ],
         "cert_imgs": [
