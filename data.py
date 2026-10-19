@@ -35,7 +35,7 @@ suppliers_data = [
         "hq": "경남 양산 본사", 
         "kr": "부산 공장", 
         "gl": "-",
-        "desc": "(주)한성전장은 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
+        "desc": "(주)한성전장 첨단 생산설비와 축적된 기술을 바탕으로 고객 맞춤형 Motor 컨트롤러 및 배터리 모듈 부품을 적시에 공급하며, \n제품 기획부터 생산·평가까지 철저한 품질관리를 통해 고객만족과 신뢰를 실현하는 기업입니다.",
         "products": [
             "자동차용 센서 및 일반 전장품 / 자동차용 컨트롤러 / 전기차 배터리 부품 및 와이어 하네스"
         ],
@@ -301,9 +301,9 @@ excel_img_data = {
         ],
         # ✅ 변경: 인증서 공란 (IATF16949 인증 이미지 제거)
         "cert_imgs": []
-    }
-  "(주)에이테크경주": {
-        "prod_imgs": [        ],
+    },
+    "(주)에이테크경주": {
+        "prod_imgs": [],
         "cert_imgs": [
             "https://lh3.googleusercontent.com/n3N9I7-3hxL0_EAYP9wix4T4eJ9epdpCTbpeyhgIewnWJA0gaJx8wMGXnQbrdG9OlLhcHeHuiIaBawntq9ST_luiloNArjHSMW61MVOioFh7o3ntsvuE=w600-h600-n",
             "https://lh3.googleusercontent.com/DHN_b-_kZLmredozLJjqntkkhLeIQ_SgAvP35QvdCIBFylCDUpDpsVIsW0s6Fbe9oUIOypiA5jLM5CfdQIW3bjCPbBS1yEy9j10cRM_onmuv0_6nKiCoMA=w600-h600-n",
@@ -363,3 +363,4 @@ def get_homepage_domain(url: str) -> str:
 def get_homepage_url(name: str) -> str:
     """업체명으로 홈페이지 URL을 조회합니다."""
     return supplier_homepages.get(str(name), "")
+
