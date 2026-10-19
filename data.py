@@ -302,6 +302,14 @@ excel_img_data = {
         # ✅ 변경: 인증서 공란 (IATF16949 인증 이미지 제거)
         "cert_imgs": []
     }
+  "(주)에이테크경주": {
+        "prod_imgs": [        ],
+        "cert_imgs": [
+            "https://lh3.googleusercontent.com/n3N9I7-3hxL0_EAYP9wix4T4eJ9epdpCTbpeyhgIewnWJA0gaJx8wMGXnQbrdG9OlLhcHeHuiIaBawntq9ST_luiloNArjHSMW61MVOioFh7o3ntsvuE=w600-h600-n",
+            "https://lh3.googleusercontent.com/DHN_b-_kZLmredozLJjqntkkhLeIQ_SgAvP35QvdCIBFylCDUpDpsVIsW0s6Fbe9oUIOypiA5jLM5CfdQIW3bjCPbBS1yEy9j10cRM_onmuv0_6nKiCoMA=w600-h600-n",
+            "https://lh3.googleusercontent.com/O74mpv_DZ0CEAFqIJWXrOeim2a9qcElDLIPo7BudQ438eKTeEv0ObLhu_ex6VrSSo17SsR_ECrTlg_jXddvg9fPduI5fvTuwvyONzTmb5BdBDxQlHpIs=w600-h600-n"
+        ]
+    }
 }
 
 # 3. 글로벌 네트워크 (지도 시각화) 관련 설정값 모음
