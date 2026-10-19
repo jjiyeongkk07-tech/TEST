@@ -110,7 +110,8 @@ suppliers_data = [
         "gl": "중국 법인",
         "desc": "평화기공(주)은 1985년 설립된 알루미늄 다이캐스팅 기반의 정밀 부품 업체로, 자동차 경량화 부품 및 가전용 알루미늄 부품을 생산하며, 최근 전기차·로봇·대형 다이캐스팅 부품으로 사업 영역을 확장하고 있습니다.",
         "products": [
-            "Transfer Case/Cover"
+            "Transfer Case",
+            "Fork Shift"
         ],
         "certs": ["IATF 16949", "ISO 45001", "ESG 경영"],
         "customers": {"평화산업(주)": 47, "(주)피에프에스": 14, "LG전자": 4, "(주)진일공업": 4},
@@ -267,7 +268,8 @@ excel_img_data = {
     },
     "평화기공(주)": {
         "prod_imgs": [
-            "https://ph.co.kr/upload/prod/6-1_K1KM3564(0).png"
+            "https://ph.co.kr/upload/prod/6-1_K1KM3564(0).png",
+            "https://ph.co.kr/upload/prod/6-6_K1KM3589(0).png"            
         ],
         "cert_imgs": []
     },
