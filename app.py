@@ -172,16 +172,11 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] { padding: 10px 5px !imp
 }
 .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-.tag-wrap-box { 
-    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; 
-    align-items: flex-start; padding-top: 20px; margin-top: 20px;
-    border-top: 1px dashed #E5E0D8; min-height: 70px;
-}
+/* 태그 및 구분선 CSS */
 .unified-tag { 
-    font-size: 16.5px; font-weight: 800; color: #4A4441 !important; text-align: center; 
-    background: #F8F9FA; padding: 12px 24px; border-radius: 30px; 
+    font-size: 15.5px; font-weight: 800; color: #4A4441 !important; text-align: center; 
+    background: #F8F9FA; padding: 12px 18px; border-radius: 30px; 
     border: 1px solid #D1D5DB; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-    white-space: nowrap;
 }
 
 /* 텍스트 및 기본 요소 */
@@ -304,7 +299,7 @@ def _legacy_customer_tags(names):
     for comp in names:
         tags_html += (
             "<div style='padding:14px 28px; background:#ffffff; border:2px solid #C4A47C;"
-            " border-radius:40px; font-size:18px; font-weight:900; color:#2C2A29 !important;" # 다크모드 대응
+            " border-radius:40px; font-size:18px; font-weight:900; color:#2C2A29 !important;" 
             " box-shadow:0 6px 12px rgba(196,164,124,0.15); display:flex; align-items:center;'>"
             f"🤝 {comp}</div>"
         )
@@ -478,7 +473,6 @@ elif selected_name:
         if selected.get('sub_industry'): badge_html += f"<span style='background:#FDFCFB; border:1px solid #E5E0D8; color:#8A817C !important; padding:5px 12px; font-size:14px; font-weight:700; border-radius:4px;'>{selected.get('sub_industry', '')}</span>"
         st.markdown(badge_html + "</div>", unsafe_allow_html=True)
 
-        # ✅ HTML 렌더링 안정성 확보 (span 추가)
         st.markdown(
             "<div class='section-title'><span class='section-num'>01.</span> <span>기업 개요</span>"
             f"<span style='margin-left:auto;'>{get_homepage_link_html(selected)}</span>"
@@ -486,7 +480,6 @@ elif selected_name:
             unsafe_allow_html=True
         )
         
-        # ✅ 줄바꿈(\n)을 <br>로 변환하여 HTML 깨짐 방지
         desc_text = str(selected.get('desc', '등록된 기업 개요가 없습니다.')).replace('\n', '<br>')
         st.markdown(f"<div class='desc-box'>📖 {desc_text}</div>", unsafe_allow_html=True)
         
@@ -495,51 +488,85 @@ elif selected_name:
 
         col_left, col_right = st.columns(2)
 
+        # ✅ 왼쪽 : 핵심 생산 품목 (태그를 각 이미지 아래에 매칭)
         with col_left:
             st.markdown("<div class='section-header'>🌟 핵심 생산 품목</div>", unsafe_allow_html=True)
             prod_list = company_images.get("prod_imgs", [])
-            if prod_list:
-                img_cols = st.columns(len(prod_list))
-                for idx, img_url in enumerate(prod_list):
-                    with img_cols[idx]:
-                        img_data = get_base64_image(img_url)
-                        if img_data:
-                            st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>", unsafe_allow_html=True)
-                            if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True): show_popup_modal(img_data)
-            else:
-                st.info("등록된 이미지가 없습니다.")
-                
+            
             all_tags = []
             for prod_name in selected.get('products', []):
                 tags = [t.strip() for t in prod_name.replace(" / ", "/").split("/")]
                 all_tags.extend([t for t in tags if t])
                 
-            if all_tags:
-                tags_html = "".join([f"<div class='unified-tag'>{t}</div>" for t in all_tags])
-                st.markdown(f"<div class='tag-wrap-box'>{tags_html}</div>", unsafe_allow_html=True)
+            if not prod_list and not all_tags:
+                st.info("등록된 품목 및 이미지가 없습니다.")
             else:
-                st.markdown("<div class='tag-wrap-box'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
+                num_cols = max(len(prod_list), len(all_tags), 1)
+                img_cols = st.columns(num_cols)
+                
+                for idx in range(num_cols):
+                    with img_cols[idx]:
+                        # 1. 이미지 및 버튼 렌더링
+                        if idx < len(prod_list):
+                            img_data = get_base64_image(prod_list[idx])
+                            if img_data:
+                                st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>", unsafe_allow_html=True)
+                                if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True): show_popup_modal(img_data)
+                            else:
+                                st.markdown("<div class='img-container' style='background:#f8f9fa;'><span style='color:#888;'>로드 실패</span></div>", unsafe_allow_html=True)
+                                st.markdown("<div style='height: 38px;'></div>", unsafe_allow_html=True)
+                        else:
+                            st.markdown("<div class='img-container' style='visibility:hidden;'></div>", unsafe_allow_html=True)
+                            st.markdown("<div style='height: 38px;'></div>", unsafe_allow_html=True)
+                            
+                        # 2. 점선 및 태그(품목명) 렌더링
+                        tag_text = all_tags[idx] if idx < len(all_tags) else ""
+                        if tag_text:
+                            st.markdown(
+                                f"<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'>"
+                                f"<div class='unified-tag' style='display: inline-block; white-space: normal; word-break: keep-all; line-height: 1.3;'>{tag_text}</div>"
+                                f"</div>", unsafe_allow_html=True
+                            )
+                        else:
+                            st.markdown("<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
 
-
+        # ✅ 오른쪽 : 품질 및 ESG 인증 (태그를 각 이미지 아래에 매칭)
         with col_right:
             st.markdown("<div class='section-header'>🏅 품질 및 ESG 인증</div>", unsafe_allow_html=True)
             cert_list = company_images.get("cert_imgs", [])
-            if cert_list:
-                cert_cols = st.columns(len(cert_list))
-                for idx, cert_url in enumerate(cert_list):
-                    with cert_cols[idx]:
-                        cert_data = get_base64_image(cert_url)
-                        if cert_data:
-                            st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>", unsafe_allow_html=True)
-                            if st.button("🔍 확대 보기", key=f"btn_cert_{idx}", use_container_width=True): show_popup_modal(cert_data)
-            else:
-                st.info("등록된 인증서 이미지가 없습니다.")
+            all_certs = selected.get('certs', [])
             
-            if selected.get('certs'):
-                badges = "".join([f"<div class='unified-tag'>{c}</div>" for c in selected['certs']])
-                st.markdown(f"<div class='tag-wrap-box'>{badges}</div>", unsafe_allow_html=True)
+            if not cert_list and not all_certs:
+                st.info("등록된 인증서 및 이미지가 없습니다.")
             else:
-                st.markdown("<div class='tag-wrap-box'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
+                num_cols_cert = max(len(cert_list), len(all_certs), 1)
+                cert_cols = st.columns(num_cols_cert)
+                
+                for idx in range(num_cols_cert):
+                    with cert_cols[idx]:
+                        # 1. 이미지 및 버튼 렌더링
+                        if idx < len(cert_list):
+                            cert_data = get_base64_image(cert_list[idx])
+                            if cert_data:
+                                st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>", unsafe_allow_html=True)
+                                if st.button("🔍 확대 보기", key=f"btn_cert_{idx}", use_container_width=True): show_popup_modal(cert_data)
+                            else:
+                                st.markdown("<div class='img-container' style='background:#f8f9fa;'><span style='color:#888;'>로드 실패</span></div>", unsafe_allow_html=True)
+                                st.markdown("<div style='height: 38px;'></div>", unsafe_allow_html=True)
+                        else:
+                            st.markdown("<div class='img-container' style='visibility:hidden;'></div>", unsafe_allow_html=True)
+                            st.markdown("<div style='height: 38px;'></div>", unsafe_allow_html=True)
+                            
+                        # 2. 점선 및 태그(인증서명) 렌더링
+                        cert_text = all_certs[idx] if idx < len(all_certs) else ""
+                        if cert_text:
+                            st.markdown(
+                                f"<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'>"
+                                f"<div class='unified-tag' style='display: inline-block; white-space: normal; word-break: keep-all; line-height: 1.3;'>{cert_text}</div>"
+                                f"</div>", unsafe_allow_html=True
+                            )
+                        else:
+                            st.markdown("<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
 
 
         st.markdown("<div class='section-title' style='margin-top: 40px;'><span class='section-num'>03.</span> 주요 매출처 및 매입 비중</div>", unsafe_allow_html=True)
