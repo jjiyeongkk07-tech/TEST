@@ -488,7 +488,7 @@ elif selected_name:
 
         col_left, col_right = st.columns(2)
 
-        # ✅ 왼쪽 : 핵심 생산 품목 (태그를 각 이미지 아래에 매칭)
+        # ✅ 왼쪽 : 핵심 생산 품목 (태그를 각 이미지 아래에 매칭 + 정렬 높이 고정)
         with col_left:
             st.markdown("<div class='section-header'>🌟 핵심 생산 품목</div>", unsafe_allow_html=True)
             prod_list = company_images.get("prod_imgs", [])
@@ -514,10 +514,12 @@ elif selected_name:
                                 if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True): show_popup_modal(img_data)
                             else:
                                 st.markdown("<div class='img-container' style='background:#f8f9fa;'><span style='color:#888;'>로드 실패</span></div>", unsafe_allow_html=True)
-                                st.markdown("<div style='height: 38px;'></div>", unsafe_allow_html=True)
+                                # 이미지가 없을 때도 높이를 강제로 맞추기 위한 빈 버튼 구조체 삽입
+                                st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                         else:
                             st.markdown("<div class='img-container' style='visibility:hidden;'></div>", unsafe_allow_html=True)
-                            st.markdown("<div style='height: 38px;'></div>", unsafe_allow_html=True)
+                            # 이미지가 없을 때도 높이를 강제로 맞추기 위한 빈 버튼 구조체 삽입
+                            st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                             
                         # 2. 점선 및 태그(품목명) 렌더링
                         tag_text = all_tags[idx] if idx < len(all_tags) else ""
@@ -530,7 +532,8 @@ elif selected_name:
                         else:
                             st.markdown("<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
 
-        # ✅ 오른쪽 : 품질 및 ESG 인증 (태그를 각 이미지 아래에 매칭)
+
+        # ✅ 오른쪽 : 품질 및 ESG 인증 (태그를 각 이미지 아래에 매칭 + 정렬 높이 고정)
         with col_right:
             st.markdown("<div class='section-header'>🏅 품질 및 ESG 인증</div>", unsafe_allow_html=True)
             cert_list = company_images.get("cert_imgs", [])
@@ -552,10 +555,11 @@ elif selected_name:
                                 if st.button("🔍 확대 보기", key=f"btn_cert_{idx}", use_container_width=True): show_popup_modal(cert_data)
                             else:
                                 st.markdown("<div class='img-container' style='background:#f8f9fa;'><span style='color:#888;'>로드 실패</span></div>", unsafe_allow_html=True)
-                                st.markdown("<div style='height: 38px;'></div>", unsafe_allow_html=True)
+                                st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                         else:
                             st.markdown("<div class='img-container' style='visibility:hidden;'></div>", unsafe_allow_html=True)
-                            st.markdown("<div style='height: 38px;'></div>", unsafe_allow_html=True)
+                            # 이미지가 없을 때도 높이를 강제로 맞추기 위한 빈 버튼 구조체 삽입
+                            st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                             
                         # 2. 점선 및 태그(인증서명) 렌더링
                         cert_text = all_certs[idx] if idx < len(all_certs) else ""
