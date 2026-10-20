@@ -6,6 +6,7 @@ import urllib.request
 import ssl
 import base64
 import re
+from datetime import datetime
 
 # 🌟 data.py 파일에서 데이터 및 설정 정보 가져오기
 from data import suppliers_data, excel_img_data, map_view_mapping, location_colors, map_radius_settings, get_homepage_domain
@@ -486,9 +487,59 @@ elif selected_name:
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
+        # ==========================================
+        # 🔔 [추가] 인증서 유효기간 상태 계산 함수
+        # ==========================================
+        def check_cert_status(expiry_str):
+            if not expiry_str or expiry_str == "-":
+                return "none", "기한없음", "#8A817C"
+            try:
+                today = datetime.today()
+                expiry_date = datetime.strptime(expiry_str, "%Y-%m-%d")
+                days_left = (expiry_date - today).days
+
+                if days_left < 0:
+                    return "expired", "만료됨", "#DC2626"      # 빨강
+                elif days_left <= 90:
+                    return "warning", f"{days_left}일 남음", "#F59E0B" # 주황 (90일 이내 임박)
+                else:
+                    return "valid", "유효", "#10B981"         # 초록
+            except ValueError:
+                return "error", "날짜오류", "#8A817C"
+
+        # ==========================================
+        # 🔔 [추가] 만료/임박 알림 배너 렌더링
+        # ==========================================
+        all_certs = selected.get('certs', [])
+        expired_list = []
+        warning_list = []
+        
+        for cert in all_certs:
+            # 문자열일 경우 하위 호환성 유지, 딕셔너리일 경우 만료일 확인
+            if isinstance(cert, dict) and cert.get("expiry"):
+                status, _, _ = check_cert_status(cert["expiry"])
+                if status == "expired":
+                    expired_list.append(cert["name"])
+                elif status == "warning":
+                    warning_list.append(cert["name"])
+        
+        if expired_list or warning_list:
+            alert_html = """
+            <div style='padding: 16px 20px; border-radius: 12px; margin-bottom: 25px; background-color: #FEF2F2; border: 1px solid #FCA5A5;'>
+                <div style='font-size: 16px; font-weight: 900; color: #DC2626; margin-bottom: 8px;'>
+                    ⚠️ 인증서 유효기간 확인 요망
+                </div>
+            """
+            if expired_list:
+                alert_html += f"<div style='font-size: 14.5px; color: #991B1B;'><b>🔴 갱신 필요 (만료됨):</b> {', '.join(expired_list)}</div>"
+            if warning_list:
+                alert_html += f"<div style='font-size: 14.5px; color: #9A3412; margin-top: 4px;'><b>🟠 만료 임박 (90일 이내):</b> {', '.join(warning_list)}</div>"
+            alert_html += "</div>"
+            st.markdown(alert_html, unsafe_allow_html=True)
+
         col_left, col_right = st.columns(2)
 
-        # ✅ 왼쪽 : 핵심 생산 품목 (태그를 각 이미지 아래에 매칭 + 정렬 높이 고정)
+        # ✅ 왼쪽 : 핵심 생산 품목 
         with col_left:
             st.markdown("<div class='section-header'>🌟 핵심 생산 품목</div>", unsafe_allow_html=True)
             prod_list = company_images.get("prod_imgs", [])
@@ -514,11 +565,9 @@ elif selected_name:
                                 if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True): show_popup_modal(img_data)
                             else:
                                 st.markdown("<div class='img-container' style='background:#f8f9fa;'><span style='color:#888;'>로드 실패</span></div>", unsafe_allow_html=True)
-                                # 이미지가 없을 때도 높이를 강제로 맞추기 위한 빈 버튼 구조체 삽입
                                 st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                         else:
                             st.markdown("<div class='img-container' style='visibility:hidden;'></div>", unsafe_allow_html=True)
-                            # 이미지가 없을 때도 높이를 강제로 맞추기 위한 빈 버튼 구조체 삽입
                             st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                             
                         # 2. 점선 및 태그(품목명) 렌더링
@@ -533,11 +582,10 @@ elif selected_name:
                             st.markdown("<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
 
 
-        # ✅ 오른쪽 : 품질 및 ESG 인증 (태그를 각 이미지 아래에 매칭 + 정렬 높이 고정)
+        # ✅ 오른쪽 : 품질 및 ESG 인증 (상태 배지 추가됨)
         with col_right:
             st.markdown("<div class='section-header'>🏅 품질 및 ESG 인증</div>", unsafe_allow_html=True)
             cert_list = company_images.get("cert_imgs", [])
-            all_certs = selected.get('certs', [])
             
             if not cert_list and not all_certs:
                 st.info("등록된 인증서 및 이미지가 없습니다.")
@@ -558,15 +606,31 @@ elif selected_name:
                                 st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                         else:
                             st.markdown("<div class='img-container' style='visibility:hidden;'></div>", unsafe_allow_html=True)
-                            # 이미지가 없을 때도 높이를 강제로 맞추기 위한 빈 버튼 구조체 삽입
                             st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                             
-                        # 2. 점선 및 태그(인증서명) 렌더링
-                        cert_text = all_certs[idx] if idx < len(all_certs) else ""
-                        if cert_text:
+                        # 2. 점선 및 태그(인증서명, 유효기간) 렌더링
+                        cert_info = all_certs[idx] if idx < len(all_certs) else None
+                        
+                        if cert_info:
+                            # 문자열 형태일 경우 호환성 지원 (이전 방식)
+                            if isinstance(cert_info, str):
+                                display_html = cert_info
+                            # 딕셔너리 형태일 경우 (유효기간 포함)
+                            else:
+                                cert_name = cert_info.get("name", "")
+                                expiry = cert_info.get("expiry", "")
+                                status, badge_text, color = check_cert_status(expiry)
+                                
+                                if expiry:
+                                    badge_html = f"<span style='background-color:{color}; color:white; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:6px; vertical-align:middle;'>{badge_text}</span><br><span style='font-size:13px; color:#8A817C; display:block; margin-top:4px;'>만료일: {expiry}</span>"
+                                else:
+                                    badge_html = ""
+                                    
+                                display_html = f"<span>{cert_name}</span>{badge_html}"
+
                             st.markdown(
                                 f"<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'>"
-                                f"<div class='unified-tag' style='display: inline-block; white-space: normal; word-break: keep-all; line-height: 1.3;'>{cert_text}</div>"
+                                f"<div class='unified-tag' style='display: inline-block; white-space: normal; word-break: keep-all; line-height: 1.3;'>{display_html}</div>"
                                 f"</div>", unsafe_allow_html=True
                             )
                         else:
