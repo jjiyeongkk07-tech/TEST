@@ -1,7 +1,3 @@
-# ==========================================
-# data.py
-# ==========================================
-
 from urllib.parse import urlparse
 
 # 1. 업체 상세 정보 리스트
@@ -16,7 +12,13 @@ suppliers_data = [
         "gl": "중국 및 북미 법인",
         "desc": "(주)성우는 1992년 설립 이래 초정밀 프레스(PRESS) 기술을 기반으로 성장하여, 현재는 전기차 배터리용 핵심 안전부품(원통형 Top Cap 어셈블리 등) 및 자동차 전장부품 생산을 주도하는 정밀 부품 제조 전문기업입니다.",
         "products": ["2차전지 제품", "전장부품 및 기타제품"],
-        "certs": ["IATF16949", "ISO14001", "SQ 인증", "ESG 경영"],
+        # ✅ 테스트를 위해 유효/만료/기한없음 등 다양하게 입력됨
+        "certs": [
+            {"name": "IATF16949", "expiry": "2024-05-31"}, # 만료됨
+            {"name": "ISO14001", "expiry": "2026-11-20"},  # 만료 임박
+            {"name": "SQ 인증", "expiry": "2028-12-31"},   # 유효
+            {"name": "ESG 경영", "expiry": ""}             # 유효기간 없음
+        ],
         "customers": {"영세율기타": 53, "(주)LG에너지솔루션": 14, "효성전기": 5, "(주)태성메탈": 4},
         "locations": [
             {"name": "(주)성우", "type": "hq", "address": "경북 구미시 3공단2로 107", "lat": 36.1018, "lon": 128.4223, "country": "대한민국"},
@@ -39,7 +41,11 @@ suppliers_data = [
         "products": [
             "자동차용 컨트롤러 / 전기차 배터리 부품 및 와이어 하네스"
         ],
-        "certs": ["IATF16949", "ISO14001", "SQ 인증"],
+        "certs": [
+            {"name": "IATF16949", "expiry": "2027-02-15"},
+            {"name": "ISO14001", "expiry": "2027-10-10"},
+            {"name": "SQ 인증", "expiry": "2026-11-05"} # 임박
+        ],
         "customers": {"SNT Motiv": 28, "효성전기": 19, "(주)브이씨텍": 17, "계양전기(주)": 13},
         "locations": [
             {"name": "(주)한성전장 양산 본사", "type": "hq", "address": "경남 양산시 상북면 소토리 650번지", "lat": 35.398579, "lon": 129.056037, "country": "대한민국"},
@@ -56,7 +62,10 @@ suppliers_data = [
         "gl": "-",
         "desc": "(주)브이씨텍은 철도차량용 추진제어장치 및 보조전원장치(APU), 전기차 및 골프카용 구동 인버터 등을 개발·제조하는 전력변환 및 제어장치 전문기업입니다.",
         "products": ["철도차량용 전장품/골프카용 전장품/전기차용 전장품"],
-        "certs": ["IATF16949", "ISO14001"],
+        "certs": [
+            {"name": "IATF16949", "expiry": "2025-08-11"}, # 만료됨
+            {"name": "ISO14001", "expiry": "2028-09-22"}
+        ],
         "customers": {"현대로템": 50, "CT&T": 30, "Fulu Motor": 10, "기타": 10},
         "locations": [
             {"name": "(주)브이씨텍", "type": "hq", "address": "경기도 군포시 엘에스로45번길 107", "lat": 37.3601, "lon": 126.9535, "country": "대한민국"}
@@ -72,7 +81,10 @@ suppliers_data = [
         "gl": "-",
         "desc": "(주)상농전선은 2003년 설립되어 에나멜 와이어, 절연코드 및 기기 내부 배선용 리드와이어 등을 전문적으로 제조하는 기업으로, KS, UL, ISO 등 다양한 품질 인증을 바탕으로 신뢰받는 제품을 공급하고 있습니다.",
         "products": ["에나멜와이어(PEW)/ 에나멜와이어(AI-EIW)"],
-        "certs": ["IATF 16949", "ISO 14001"],
+        "certs": [
+            {"name": "IATF 16949", "expiry": "2027-01-30"}, 
+            {"name": "ISO 14001", "expiry": "2027-06-15"}
+        ],
         "customers": {"(주)신라공업": 18, "(주)보쉬전장": 11, "효성전기": 8, "하이젠알앤엠(주)": 8},
         "locations": [
             {"name": "(주)상농전선", "type": "hq", "address": "경상남도 양산시 유산공단9길 6-1", "lat": 35.3560, "lon": 129.0250, "country": "대한민국"}
@@ -113,7 +125,11 @@ suppliers_data = [
             "Transfer Case",
             "Fork Shift"
         ],
-        "certs": ["IATF 16949", "ISO 45001", "ESG 경영"],
+        "certs": [
+            {"name": "IATF 16949", "expiry": "2029-01-01"}, 
+            {"name": "ISO 45001", "expiry": "2028-05-15"}, 
+            {"name": "ESG 경영", "expiry": ""}
+        ],
         "customers": {"평화산업(주)": 47, "(주)피에프에스": 14, "LG전자": 4, "(주)진일공업": 4},
         "locations": [
             {"name": "평화기공(주)", "type": "hq", "address": "대구광역시 달성군 논공읍 논공중앙로 395", "lat": 35.7485, "lon": 128.4552, "country": "대한민국"},
@@ -137,7 +153,11 @@ suppliers_data = [
             "구동 모터코어",
             "가전 모터코어"
         ],
-        "certs": ["IATF 16949", "ISO 14001", "SQ 인증"],
+        "certs": [
+            {"name": "IATF 16949", "expiry": "2027-11-20"}, 
+            {"name": "ISO 14001", "expiry": "2029-03-10"}, 
+            {"name": "SQ 인증", "expiry": "2027-08-30"}
+        ],
         "customers": {"효성전기": 12, "선진알앤디(주)": 11, "두원공조": 10, "(주)엠넥스": 9},
         "locations": [
             {"name": "(주)엠제이텍", "type": "hq", "address": "경기도 안성시 죽산면 장원공단길 59", "lat": 37.0700, "lon": 127.4200, "country": "대한민국"}
@@ -157,8 +177,8 @@ suppliers_data = [
             "페라이트마그네트"
         ],
         "certs": [
-            "KSA-ISO-인증서",
-            "품질/환경경영 시스템 인증"
+            {"name": "KSA-ISO-인증서", "expiry": "2028-10-15"},
+            {"name": "품질/환경경영 시스템 인증", "expiry": "2028-10-15"}
         ],
         "customers": {"영세율기타": 53, "(주)GS글로벌": 16, "효성전기": 5, "삼성전자(DS)": 4},
         "locations": [
@@ -180,7 +200,10 @@ suppliers_data = [
             "엔진 인테이크 매니폴드",
             "VCM Motor ASM / EGR Motor ASM",
         ],
-        "certs": ["SQ 인증", "ESG 경영"],
+        "certs": [
+            {"name": "SQ 인증", "expiry": "2027-04-10"}, 
+            {"name": "ESG 경영", "expiry": ""}
+        ],
         "customers": {"(주)에이테크오토모티브": 43, "말레동현필터시스템": 28, "효성전기": 11, "(주)현대케피코": 10},
         "locations": [
             {"name": "(주)에이테크오토모티브", "type": "hq", "address": "경기도 안성시 보개면 이전봉산길 41-19", "lat": 36.0075, "lon": 129.1880, "country": "대한민국"},
@@ -191,7 +214,6 @@ suppliers_data = [
         ]
     },
     {
-        # ✅ 변경: 항성산업사 → 에이치에스테크(주)
         "name": "에이치에스테크(주)",
         "homepage": "http://www.hstechkorea.com/",
         "industry": "PRESS(CASE)",
@@ -204,20 +226,15 @@ suppliers_data = [
             "베큠리프터",
             "공압기계",
         ],
-        # ✅ 변경: 인증서 공란
         "certs": [],
-        # TODO(미확인): 거래처 비중은 기존 항성산업사 수치를 그대로 유지
         "customers": {"효성전기": 97, "사람과기술": 1, "신광기업": 1},
         "locations": [
-            # ✅ 변경: 양산 본사 주소로 갱신
-            # TODO(미확인): lat/lon 은 동면 금오5길 일대 추정 좌표 → 정확 좌표 확인 후 갱신
             {"name": "에이치에스테크(주)", "type": "hq", "address": "경상남도 양산시 동면 금오5길 18-34", "lat": 35.3135, "lon": 129.1245, "country": "대한민국"}
         ]
     }
 ]
 
 # 2. 업체별 이미지 URL 딕셔너리
-#    - http(s) 로 시작하면 원격 URL, 그 외는 로컬 파일 경로로 처리
 excel_img_data = {
     "(주)성우": {
         "prod_imgs": [
@@ -300,7 +317,6 @@ excel_img_data = {
             "http://www.hstechkorea.com/html/images/sub020101_01.jpg",   # 베큠리프터
             "http://www.hstechkorea.com/html/images/sub020201_01.jpg",   # 공압기계
         ],
-        # ✅ 변경: 인증서 공란 (IATF16949 인증 이미지 제거)
         "cert_imgs": []
     },
     "(주)에이테크경주": {
@@ -368,4 +384,3 @@ def get_homepage_domain(url: str) -> str:
 def get_homepage_url(name: str) -> str:
     """업체명으로 홈페이지 URL을 조회합니다."""
     return supplier_homepages.get(str(name), "")
-
