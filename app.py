@@ -53,16 +53,15 @@ def render_zoomable_image(img_data):
             let isDragging = false;
             let startX, startY;
 
-            // ✅ 마우스 휠로 확대/축소 (브라우저 전체 페이지 줌과 충돌 방지)
+            // ✅ 마우스 휠로 확대/축소
             container.addEventListener('wheel', (e) => {{
-                // e.preventDefault(); <- 브라우저 고유의 줌(Ctrl+휠) 및 스크롤을 막지 않도록 제거함
                 let zoomSpeed = 0.002;
                 scale += e.deltaY * -zoomSpeed;
-                scale = Math.min(Math.max(0.5, scale), 10); // 0.5배 ~ 10배까지 허용
+                scale = Math.min(Math.max(0.5, scale), 10); 
                 img.style.transform = `translate(${{translateX}}px, ${{translateY}}px) scale(${{scale}})`;
-            }}, {{ passive: true }}); // passive: true를 통해 브라우저 전체 확대/축소를 절대 막지 않음
+            }}, {{ passive: true }}); 
 
-            // 마우스 클릭 드래그로 이미지 이동 (Pan 기능)
+            // 마우스 클릭 드래그로 이미지 이동
             img.addEventListener('mousedown', (e) => {{
                 e.preventDefault();
                 isDragging = true;
@@ -92,7 +91,7 @@ def render_zoomable_image(img_data):
     components.html(html_code, height=650, scrolling=False)
 
 
-# 🚀 팝업 모달 함수 정의 (Streamlit 공식 다이얼로그 기능 활용)
+# 🚀 팝업 모달 함수 정의
 if hasattr(st, "dialog"):
     @st.dialog("🔍 이미지 확대 보기", width="large")
     def show_popup_modal(img_data):
@@ -102,12 +101,11 @@ elif hasattr(st, "experimental_dialog"):
     def show_popup_modal(img_data):
         render_zoomable_image(img_data)
 else:
-    # 구버전 Streamlit 호환성 유지용 폴백
     def show_popup_modal(img_data):
         st.session_state.popup_img = img_data
         st.rerun()
 
-# 2. 테마 CSS 설정 (레이아웃 1400px 제한 등 완벽 유지)
+# 2. 테마 CSS 설정
 css = """
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -121,16 +119,13 @@ html, body, [class*='css'] { font-family: 'Pretendard', sans-serif !important; }
 footer { visibility: hidden; }
 header { background-color: transparent !important; }
 
-/* 사이드바 영역 CSS 추가: 글자 크기 키우기 */
+/* 사이드바 영역 CSS 추가 */
 [data-testid="stSidebar"] { 
     background-color: #Fdfcfb !important; 
     border-right: 1px solid #E5E0D8 !important; 
 }
-[data-testid="stSidebar"] h3 { 
-    font-size: 24px !important; 
-}
+[data-testid="stSidebar"] h3 { font-size: 24px !important; }
 
-/* 업종, 업체, 국가 탭 글씨 크기를 '분석할 업체 선택'과 완벽히 동일하게(17.5px) 강제 적용 */
 div[data-testid="stSidebar"] button[data-baseweb="tab"] p,
 div[data-testid="stSidebar"] button[data-baseweb="tab"] span,
 div[data-testid="stSidebar"] button[data-baseweb="tab"] div[data-testid="stMarkdownContainer"] p {
@@ -138,11 +133,8 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] div[data-testid="stMarkd
     font-weight: 900 !important;
     color: #2C2A29 !important;
 }
-div[data-testid="stSidebar"] button[data-baseweb="tab"] {
-    padding: 10px 5px !important; 
-}
+div[data-testid="stSidebar"] button[data-baseweb="tab"] { padding: 10px 5px !important; }
 
-/* 다른 선택박스, 라디오 버튼 텍스트 크기 유지 */
 [data-testid="stSidebar"] label, 
 [data-testid="stSidebar"] div.stRadio > label,
 [data-testid="stSidebar"] .stSelectbox label {
@@ -155,11 +147,8 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
     font-size: 16px !important; 
     color: #4A4441 !important;
 }
-[data-testid="stSidebar"] .stTextInput input {
-    font-size: 16px !important;
-}
+[data-testid="stSidebar"] .stTextInput input { font-size: 16px !important; }
 
-/* ✅ 메트릭(검색된 파트너사 등) 라벨 폰트 크기 강력 적용 */
 [data-testid="stMetricLabel"], 
 [data-testid="stMetricLabel"] div,
 [data-testid="stMetricLabel"] p,
@@ -170,9 +159,9 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
     color: #2C2A29 !important;
 }
 
-/* 완벽한 가로 정렬을 위한 내부 컴포넌트 높이 고정 */
+/* ✅ 다크모드 대응 글씨체 색상 고정 (중요) */
 .section-header { 
-    color: #2C2A29; text-align: center; font-weight: 900; font-size: 20px; 
+    color: #2C2A29 !important; text-align: center; font-weight: 900; font-size: 20px; 
     border-bottom: 3px solid #E5E0D8; padding-bottom: 12px; margin-bottom: 15px; 
 }
 .img-container { 
@@ -183,14 +172,13 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] {
 }
 .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-/* 하단 태그 가로 정렬 (양쪽 모두 동일한 디자인 적용) */
 .tag-wrap-box { 
     display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; 
     align-items: flex-start; padding-top: 20px; margin-top: 20px;
     border-top: 1px dashed #E5E0D8; min-height: 70px;
 }
 .unified-tag { 
-    font-size: 16.5px; font-weight: 800; color: #4A4441; text-align: center; 
+    font-size: 16.5px; font-weight: 800; color: #4A4441 !important; text-align: center; 
     background: #F8F9FA; padding: 12px 24px; border-radius: 30px; 
     border: 1px solid #D1D5DB; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     white-space: nowrap;
@@ -201,9 +189,15 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .main-title { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; }
 .section-title { font-size: 24px; font-weight: 900; color: #2C2A29 !important; margin-top: 45px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 3px solid #E5E0D8; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
-.desc-box { background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; line-height: 1.8; font-weight: 400; }
 
-/* 일반 버튼 스타일 (확대 보기 - 크기 축소 유지) */
+/* ✅ 회사 개요 박스 다크모드 대응 텍스트 고정 (!important 추가) */
+.desc-box { 
+    background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; 
+    padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; 
+    line-height: 1.8; font-weight: 400; color: #2C2A29 !important; 
+}
+
+/* 일반 버튼 스타일 */
 div.stButton > button { 
     background-color: #ffffff !important; border: 1px solid #E5E0D8 !important; 
     border-radius: 10px !important; color: #2C2A29 !important; 
@@ -222,7 +216,7 @@ div.stButton > button:hover {
     transform: translateY(-2px) !important; box-shadow: 0 8px 12px rgba(0,0,0,0.05) !important; 
 }
 
-/* 거점 표시 전용 버튼 스타일 (글자 크기 및 여백 확대) */
+/* 거점 표시 전용 버튼 스타일 */
 div.stButton > button[kind="primary"] {
     padding: 14px 20px !important; 
     border-radius: 12px !important;
@@ -231,77 +225,42 @@ div.stButton > button[kind="primary"] p {
     font-size: 17.5px !important; 
 }
 
-/* 🚨 렌더링 에러 해결: div 대신 div.element-container로 명확히 타겟팅 */
+/* 메인 타이틀 버튼 스타일 */
 div.element-container:has(.main-title-anchor) { 
-    height: 0px !important; 
-    margin: 0 !important; 
-    padding: 0 !important; 
-    overflow: hidden !important; 
+    height: 0px !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; 
 }
 div.element-container:has(.main-title-anchor) + div.element-container button {
-    background-color: #2C2A29 !important; 
-    padding: 30px 40px !important; 
-    border-radius: 12px !important; 
-    margin-bottom: 20px !important; 
-    border: none !important;
-    border-bottom: 4px solid #C4A47C !important;
-    width: 100% !important;
-    text-align: left !important;
-    display: block !important;
-    box-shadow: none !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
+    background-color: #2C2A29 !important; padding: 30px 40px !important; 
+    border-radius: 12px !important; margin-bottom: 20px !important; 
+    border: none !important; border-bottom: 4px solid #C4A47C !important;
+    width: 100% !important; text-align: left !important;
+    display: block !important; box-shadow: none !important; cursor: pointer !important;
 }
-div.element-container:has(.main-title-anchor) + div.element-container button:hover {
-    background-color: #353332 !important;
-    transform: none !important;
-}
+div.element-container:has(.main-title-anchor) + div.element-container button:hover { background-color: #353332 !important; }
 div.element-container:has(.main-title-anchor) + div.element-container button p {
-    font-size: 34px !important; 
-    font-weight: 900 !important; 
-    color: #ffffff !important; 
-    margin: 0 !important; 
-    line-height: 1.2 !important; 
-    letter-spacing: -1px !important; 
-    text-align: left !important;
+    font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; 
+    margin: 0 !important; line-height: 1.2 !important; letter-spacing: -1px !important; text-align: left !important;
 }
 
-/* 🌐 홈페이지 링크 배지 (베이지/골드 테마) */
+/* 홈페이지 링크 배지 */
 .hp-link{
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 7px 16px 7px 13px;
-    background: #FDFCFB;
-    border: 1px solid #E5E0D8;
-    border-left: 3px solid #C4A47C;
-    border-radius: 30px;
-    font-size: 15px; font-weight: 800;
-    text-decoration: none !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-    transition: all 0.2s ease;
-    white-space: nowrap;
+    padding: 7px 16px 7px 13px; background: #FDFCFB;
+    border: 1px solid #E5E0D8; border-left: 3px solid #C4A47C;
+    border-radius: 30px; font-size: 15px; font-weight: 800;
+    text-decoration: none !important; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    transition: all 0.2s ease; white-space: nowrap;
 }
 .hp-link span{ color: #8A6F43 !important; }
-.hp-link:hover{
-    background: #ffffff;
-    border-color: #C4A47C;
-    box-shadow: 0 6px 12px rgba(196,164,124,0.20);
-    transform: translateY(-2px);
-}
+.hp-link:hover{ background: #ffffff; border-color: #C4A47C; box-shadow: 0 6px 12px rgba(196,164,124,0.20); transform: translateY(-2px); }
 .hp-link:hover span{ color: #2C2A29 !important; }
 .hp-arw{ font-size: 13px; opacity: 0.7; }
 .hp-link:hover .hp-arw{ opacity: 1; }
 
-/* === 03. 주요 고객사 매입 비중 (TOP 4 전용, 100% 스택바) === */
-.cust-box { padding: 24px 28px; background: #FDFCFB; border: 1px solid #E5E0D8;
-            border-radius: 12px; margin-bottom: 10px; }
-.cust-stack { display: flex; height: 56px; border-radius: 8px; overflow: hidden;
-              border: 1px solid #E5E0D8; }
-.cust-seg { display: flex; align-items: center; justify-content: center;
-            font-size: 18px !important; font-weight: 900 !important;
-            letter-spacing: -0.5px;
-            white-space: nowrap; overflow: hidden;
-            transition: filter 0.2s ease; cursor: default; }
-
+/* 주요 고객사 매입 비중 */
+.cust-box { padding: 24px 28px; background: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; margin-bottom: 10px; }
+.cust-stack { display: flex; height: 56px; border-radius: 8px; overflow: hidden; border: 1px solid #E5E0D8; }
+.cust-seg { display: flex; align-items: center; justify-content: center; font-size: 18px !important; font-weight: 900 !important; letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; transition: filter 0.2s ease; cursor: default; }
 .cust-seg.seg-md { font-size: 15px !important; }
 .cust-seg.seg-sm { font-size: 13px !important; }
 .cust-seg:hover { filter: brightness(1.08); }
@@ -310,25 +269,21 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 st.markdown(css, unsafe_allow_html=True)
 
 # 3. 데이터 및 변환 함수
-CUSTOMER_TOP_N = 4                      # 개별 표기할 상위 고객사 수
-CUSTOMER_SHOW_ETC = False               # ✅ True로 바꾸면 '기타' 구간이 다시 표시됨
+CUSTOMER_TOP_N = 4                      
+CUSTOMER_SHOW_ETC = False               
 
-# ✅ 고대비 골드톤 팔레트로 수정됨
 CUSTOMER_PALETTE = [                    
-    ("#5A3D22", "#ffffff"),  # 1위: 매우 짙은 브라운 배경 + 흰색 글씨
-    ("#9A7B54", "#ffffff"),  # 2위: 짙은 골드 배경 + 흰색 글씨
-    ("#D1BA9C", "#2C2A29"),  # 3위: 연한 베이지 배경 + 진한 회색 글씨
-    ("#F4EBE3", "#2C2A29"),  # 4위: 매우 연한 베이지 배경 + 진한 회색 글씨
+    ("#5A3D22", "#ffffff"),  
+    ("#9A7B54", "#ffffff"),  
+    ("#D1BA9C", "#2C2A29"),  
+    ("#F4EBE3", "#2C2A29"),  
 ]
 
-ETC_COLOR = ("#EFE9DE", "#2C2A29")      # '기타' 구간 (CUSTOMER_SHOW_ETC=True일 때만 사용)
+ETC_COLOR = ("#EFE9DE", "#2C2A29")      
 
 def _parse_ratio(v):
-    """35, 35.5, '35%', '약 35' 등을 float으로 변환. 불가하면 None."""
-    if v is None or isinstance(v, bool):
-        return None
-    if isinstance(v, (int, float)):
-        return float(v)
+    if v is None or isinstance(v, bool): return None
+    if isinstance(v, (int, float)): return float(v)
     m = re.search(r"(\d+(?:\.\d+)?)", str(v).replace(",", ""))
     return float(m.group(1)) if m else None
 
@@ -339,19 +294,17 @@ def _fmt_ratio(v):
     return f"{v:.0f}" if abs(v - round(v)) < 0.05 else f"{v:.1f}"
 
 def _short_name(name):
-    """막대 안에 표기할 때 법인 접두/접미어를 제거해 글자 수 절약. (툴팁은 원본 유지)"""
     s = str(name).strip()
     s = re.sub(r"^$\s*주\s*$\s*|^㈜\s*|^주식회사\s*", "", s)
     s = re.sub(r"\s*$\s*주\s*$$|\s*㈜$|\s*주식회사$", "", s)
     return s.strip() or str(name).strip()
 
 def _legacy_customer_tags(names):
-    """비중 정보가 전혀 없는 업체는 기존 둥근 태그 방식 그대로 유지."""
     tags_html = "<div style='display:flex; flex-wrap:wrap; gap:15px;'>"
     for comp in names:
         tags_html += (
             "<div style='padding:14px 28px; background:#ffffff; border:2px solid #C4A47C;"
-            " border-radius:40px; font-size:18px; font-weight:900; color:#2C2A29;"
+            " border-radius:40px; font-size:18px; font-weight:900; color:#2C2A29 !important;" # 다크모드 대응
             " box-shadow:0 6px 12px rgba(196,164,124,0.15); display:flex; align-items:center;'>"
             f"🤝 {comp}</div>"
         )
@@ -359,22 +312,14 @@ def _legacy_customer_tags(names):
     return f"<div class='cust-box'>{tags_html}</div>"
 
 def get_customer_tags_html(customers):
-    if not customers:
-        return "<p style='color:#8A817C; font-size:15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
-
-    # 리스트(비중 미입력)로 들어온 기존 데이터는 기존 디자인 유지
-    if not isinstance(customers, dict):
-        return _legacy_customer_tags(list(customers))
+    if not customers: return "<p style='color:#8A817C; font-size:15px;'>등록된 주요 고객사 정보가 없습니다.</p>"
+    if not isinstance(customers, dict): return _legacy_customer_tags(list(customers))
 
     items = [(str(k).strip(), _parse_ratio(v)) for k, v in customers.items()]
-
-    # '기타' 키와 비중 미기재 업체는 집계에서 제외 (TOP 4만 사용)
     rated = [(k, v) for k, v in items if v is not None and v > 0 and not _is_etc(k)]
 
-    if not rated:
-        return _legacy_customer_tags([k for k, _ in items])
+    if not rated: return _legacy_customer_tags([k for k, _ in items])
 
-    # 비중 내림차순 → 상위 4개사만 개별 표기
     rated.sort(key=lambda x: -x[1])
     top = rated[:CUSTOMER_TOP_N]
 
@@ -389,7 +334,6 @@ def get_customer_tags_html(customers):
         if etc_val > 0.5:
             rows.append(("기타", etc_val, etc_val / base * 100.0, ETC_COLOR[0], ETC_COLOR[1], ""))
     else:
-        # 기본 모드: TOP 4 합계를 100%로 환산해 막대를 꽉 채움
         base = sum(v for _, v in top) or 100.0
         for i, (name, val) in enumerate(top):
             bg, fg = CUSTOMER_PALETTE[i % len(CUSTOMER_PALETTE)]
@@ -399,19 +343,12 @@ def get_customer_tags_html(customers):
     for name, val, w, bg, fg, tip in rows:
         disp = _short_name(name)
         cls = "cust-seg"
-        if w >= 26:
-            label = f"{disp} {_fmt_ratio(val)}%"
-        elif w >= 13:
-            label = f"{disp} {_fmt_ratio(val)}%"
-            cls += " seg-md"
-        elif w >= 3:
-            label = f"{_fmt_ratio(val)}%"
-            cls += " seg-sm"
-        else:
-            label = ""
+        if w >= 26: label = f"{disp} {_fmt_ratio(val)}%"
+        elif w >= 13: label = f"{disp} {_fmt_ratio(val)}%"; cls += " seg-md"
+        elif w >= 3: label = f"{_fmt_ratio(val)}%"; cls += " seg-sm"
+        else: label = ""
         title = tip or f"{name} {_fmt_ratio(val)}%"
         
-        # ✅ 확실한 해결책: Streamlit의 텍스트 색상 간섭을 피하기 위해 SVG로 텍스트 렌더링
         if label:
             label_html = f"""
             <svg width="100%" height="100%" style="min-width: 50px;">
@@ -422,20 +359,13 @@ def get_customer_tags_html(customers):
             """
         else:
             label_html = ""
-
-        segs += (
-            f"<div class='{cls}' style='width:{w:.4f}%; background:{bg};' title='{title}'>"
-            f"{label_html}"
-            f"</div>"
-        )
+        segs += f"<div class='{cls}' style='width:{w:.4f}%; background:{bg};' title='{title}'>{label_html}</div>"
 
     return f"<div class='cust-box'><div class='cust-stack'>{segs}</div></div>"
 
-# 🌐 홈페이지 링크 배지 HTML 생성 (<a> 태그만 반환하여 원하는 위치에 삽입)
 def get_homepage_link_html(company):
     url = str(company.get("homepage", "") or "").strip()
-    if not url or url == "-":
-        return ""
+    if not url or url == "-": return ""
     domain = get_homepage_domain(url) or url
     return (
         f"<a class='hp-link' href='{url}' target='_blank' rel='noopener noreferrer' title='{url}'>"
@@ -458,18 +388,15 @@ def get_base64_image(url):
     except Exception:
         return None
 
-# 구버전 Streamlit 팝업 렌더링 폴백
 if not hasattr(st, "dialog") and not hasattr(st, "experimental_dialog"):
     if st.session_state.popup_img:
         st.markdown("<hr style='border: 2px solid #2C2A29;'>", unsafe_allow_html=True)
         pop_col1, pop_col2 = st.columns([8, 2])
-        with pop_col1:
-            st.markdown("<h3 style='margin-top:0;'>🔍 이미지 확대 보기</h3>", unsafe_allow_html=True)
+        with pop_col1: st.markdown("<h3 style='margin-top:0;'>🔍 이미지 확대 보기</h3>", unsafe_allow_html=True)
         with pop_col2:
             if st.button("❌ 닫기", use_container_width=True, key="fallback_close"):
                 st.session_state.popup_img = None
                 st.rerun()
-        # 폴백 시에도 줌 기능이 포함된 컴포넌트로 호출
         render_zoomable_image(st.session_state.popup_img)
         st.markdown("<hr style='border: 2px solid #2C2A29; margin-bottom: 40px;'>", unsafe_allow_html=True)
 
@@ -479,7 +406,6 @@ if "excel_img_data" not in st.session_state: st.session_state.excel_img_data = e
 suppliers = st.session_state.suppliers
 
 # 5. 헤더 및 사이드바 
-# 타이틀 클릭 시 메인 화면으로 돌아가는 버튼 
 st.markdown("<div class='main-title-anchor'></div>", unsafe_allow_html=True)
 
 def go_to_main():
@@ -491,7 +417,6 @@ st.button("🌍 글로벌 SCM 및 파트너사 인프라 분석", on_click=go_to
 with st.sidebar:
     st.markdown("<h3 style='color:#C4A47C !important; font-weight:900;'>🔍 상세 검색</h3>", unsafe_allow_html=True)
     
-    # 필터 옵션 리스트 생성
     all_countries_set = set()
     for s in suppliers:
         for loc in s.get("locations", []): all_countries_set.add(loc["country"])
@@ -513,26 +438,15 @@ with st.sidebar:
     if search_term: filtered = [s for s in filtered if search_term.lower() in s.get("name", "").lower()]
 
     st.markdown("<hr style='border-color: #E5E0D8; margin: 20px 0;'>", unsafe_allow_html=True)
-    
     st.markdown("<div style='font-size: 17.5px; font-weight: 900; color: #2C2A29; margin-bottom: 10px;'>📊 분석할 업체 선택</div>", unsafe_allow_html=True)
     
     options_sidebar_map = {"🏠 종합 메인 화면": "🏠 종합 메인 화면"}
-    
-    for s in sorted(filtered, key=lambda x: x.get('name', '')): 
-        options_sidebar_map[s['name']] = s['name']
-        
+    for s in sorted(filtered, key=lambda x: x.get('name', '')): options_sidebar_map[s['name']] = s['name']
     options_list = list(options_sidebar_map.keys())
 
-    if st.session_state.selected_company not in options_list:
-        st.session_state.selected_company = "🏠 종합 메인 화면"
+    if st.session_state.selected_company not in options_list: st.session_state.selected_company = "🏠 종합 메인 화면"
 
-    selected_display_name = st.radio(
-        "", 
-        options_list, 
-        key="selected_company",
-        on_change=reset_map_view, 
-        label_visibility="collapsed"
-    )
+    selected_display_name = st.radio("", options_list, key="selected_company", on_change=reset_map_view, label_visibility="collapsed")
     selected_name = options_sidebar_map[selected_display_name]
 
 
@@ -549,33 +463,11 @@ if selected_name == "🏠 종합 메인 화면":
     st.markdown("<div class='section-title'>🗺️ 전 세계 거점 분포도</div>", unsafe_allow_html=True)
     if all_locations:
         df_all = pd.DataFrame(all_locations)
-        
-        # ✅ 종합 메인화면: 국내(파란색) / 해외(골드색) 구분
-        def get_main_color(row):
-            if row.get('type') in ['hq', 'kr']:
-                return [41, 128, 185, 220] # 파란색 (국내)
-            else:
-                return [196, 164, 124, 220] # 골드색 (해외)
-                
+        def get_main_color(row): return [41, 128, 185, 220] if row.get('type') in ['hq', 'kr'] else [196, 164, 124, 220]
         df_all['color'] = df_all.apply(get_main_color, axis=1)
 
-        # ✅ min_zoom=1.5 추가: 축소를 제한하여 가로 반복 생성 원천 차단
         view_state = pdk.ViewState(latitude=35.0, longitude=127.0, zoom=1.5, min_zoom=1.5, max_zoom=15, pitch=0)
-        layer = pdk.Layer(
-            "ScatterplotLayer", 
-            data=df_all, 
-            get_position='[lon, lat]', 
-            get_fill_color='color', 
-            get_line_color=[255, 255, 255], 
-            stroked=True, 
-            line_width_min_pixels=1, 
-            get_radius=100000, 
-            radius_min_pixels=6, 
-            radius_max_pixels=15, 
-            pickable=True
-        )
-        
-        # ✅ 줌, 마우스 드래그 조작 활성화 (controller=True)
+        layer = pdk.Layer("ScatterplotLayer", data=df_all, get_position='[lon, lat]', get_fill_color='color', get_line_color=[255, 255, 255], stroked=True, line_width_min_pixels=1, get_radius=100000, radius_min_pixels=6, radius_max_pixels=15, pickable=True)
         view = pdk.View(type="MapView", controller=True, repeat=False)
         st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, views=[view], layers=[layer], tooltip={"text": "{name}\n{address}"}))
 
@@ -586,14 +478,17 @@ elif selected_name:
         if selected.get('sub_industry'): badge_html += f"<span style='background:#FDFCFB; border:1px solid #E5E0D8; color:#8A817C !important; padding:5px 12px; font-size:14px; font-weight:700; border-radius:4px;'>{selected.get('sub_industry', '')}</span>"
         st.markdown(badge_html + "</div>", unsafe_allow_html=True)
 
-        # 🌐 '01. 기업 개요' 헤더 줄 오른쪽 끝에 홈페이지 링크 배지 배치
+        # ✅ HTML 렌더링 안정성 확보 (span 추가)
         st.markdown(
-            "<div class='section-title'><span class='section-num'>01.</span> 기업 개요"
+            "<div class='section-title'><span class='section-num'>01.</span> <span>기업 개요</span>"
             f"<span style='margin-left:auto;'>{get_homepage_link_html(selected)}</span>"
             "</div>",
             unsafe_allow_html=True
         )
-        st.markdown(f"<div class='desc-box'>📖 {selected.get('desc', '등록된 기업 개요가 없습니다.')}</div>", unsafe_allow_html=True)
+        
+        # ✅ 줄바꿈(\n)을 <br>로 변환하여 HTML 깨짐 방지
+        desc_text = str(selected.get('desc', '등록된 기업 개요가 없습니다.')).replace('\n', '<br>')
+        st.markdown(f"<div class='desc-box'>📖 {desc_text}</div>", unsafe_allow_html=True)
         
         st.markdown("<div class='section-title'><span class='section-num'>02.</span> 핵심 역량 및 품질 인증</div>", unsafe_allow_html=True)
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
@@ -610,8 +505,7 @@ elif selected_name:
                         img_data = get_base64_image(img_url)
                         if img_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{img_data}'></div>", unsafe_allow_html=True)
-                            if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True):
-                                show_popup_modal(img_data)
+                            if st.button("🔍 확대 보기", key=f"btn_prod_{idx}", use_container_width=True): show_popup_modal(img_data)
             else:
                 st.info("등록된 이미지가 없습니다.")
                 
@@ -637,8 +531,7 @@ elif selected_name:
                         cert_data = get_base64_image(cert_url)
                         if cert_data:
                             st.markdown(f"<div class='img-container'><img src='data:image/jpeg;base64,{cert_data}'></div>", unsafe_allow_html=True)
-                            if st.button("🔍 확대 보기", key=f"btn_cert_{idx}", use_container_width=True):
-                                show_popup_modal(cert_data)
+                            if st.button("🔍 확대 보기", key=f"btn_cert_{idx}", use_container_width=True): show_popup_modal(cert_data)
             else:
                 st.info("등록된 인증서 이미지가 없습니다.")
             
@@ -661,16 +554,13 @@ elif selected_name:
             current_view = st.session_state.map_view
             target_type_key = map_view_mapping.get(current_view, "all")
 
-            # ✅ 개별 업체 화면: 기본적으로 국내(파란색), 해외(골드색) 구분
             def get_color(row):
                 is_domestic = row.get('type') in ['hq', 'kr']
                 active_color = [41, 128, 185, 220] if is_domestic else [196, 164, 124, 220]
                 dim_color = [200, 200, 200, 100]
                 
-                if current_view == "전체 뷰": 
-                    return active_color
-                if row['type'] == target_type_key: 
-                    return active_color
+                if current_view == "전체 뷰": return active_color
+                if row['type'] == target_type_key: return active_color
                 return dim_color
 
             def get_radius(row):
@@ -682,30 +572,14 @@ elif selected_name:
                 df_loc['color'] = df_loc.apply(get_color, axis=1)
                 df_loc['radius'] = df_loc.apply(get_radius, axis=1)
                 
-                # ✅ 특정 업체의 초기 줌 레벨을 1.5로 고정하여 충돌 방지
                 center_lat, center_lon, zoom_lvl = 35.0, 150.0, 1.5 
                 if current_view != "전체 뷰":
                     target_df = df_loc[df_loc['type'] == target_type_key]
                     if not target_df.empty: 
                         center_lat, center_lon, zoom_lvl = target_df['lat'].mean(), target_df['lon'].mean(), (5.5 if len(target_df) > 1 else 9.0)
                 
-                # ✅ min_zoom=1.5 추가: 축소를 제한하여 가로 반복 생성 원천 차단
                 view_state = pdk.ViewState(latitude=center_lat, longitude=center_lon, zoom=zoom_lvl, min_zoom=1.5, max_zoom=15, pitch=0, transition_duration=1200)
-                layer = pdk.Layer(
-                    "ScatterplotLayer", 
-                    data=df_loc, 
-                    get_position='[lon, lat]', 
-                    get_fill_color='color', 
-                    get_line_color=[255, 255, 255], 
-                    stroked=True, 
-                    line_width_min_pixels=2, 
-                    get_radius='radius', 
-                    radius_min_pixels=6, 
-                    radius_max_pixels=30, 
-                    pickable=True
-                )
-                
-                # ✅ 줌, 마우스 드래그 조작 활성화 (controller=True)
+                layer = pdk.Layer("ScatterplotLayer", data=df_loc, get_position='[lon, lat]', get_fill_color='color', get_line_color=[255, 255, 255], stroked=True, line_width_min_pixels=2, get_radius='radius', radius_min_pixels=6, radius_max_pixels=30, pickable=True)
                 view = pdk.View(type="MapView", controller=True, repeat=False)
                 st.pydeck_chart(pdk.Deck(map_style="light", initial_view_state=view_state, views=[view], layers=[layer], tooltip={"text": "{name}\n{address}"}), height=600)
 
