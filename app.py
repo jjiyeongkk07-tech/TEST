@@ -261,9 +261,26 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 .cust-seg.seg-sm { font-size: 13px !important; }
 .cust-seg:hover { filter: brightness(1.08); }
 
-/* ✅ 인증서 배지 글자색 강제 적용 (인라인 스타일 무시 방지) */
-span.cert-badge { color: #ffffff !important; }
-span.cert-date { color: #8A817C !important; }
+/* ✅ 수정됨: 인증서 배지 (시안 2: 외곽선 스타일) 적용 */
+span.cert-badge { 
+    background-color: var(--badge-bg, #ffffff) !important; 
+    color: var(--badge-color, #2C2A29) !important;
+    border: 1.5px solid var(--badge-border, transparent) !important;
+    padding: 3px 8px !important; 
+    border-radius: 6px !important; 
+    font-size: 13px !important; 
+    font-weight: 900 !important; 
+    margin-left: 6px !important; 
+    vertical-align: middle !important;
+    letter-spacing: 0.5px !important;
+}
+span.cert-date { 
+    color: #8A817C !important; 
+    font-size: 13px !important; 
+    display: block !important; 
+    margin-top: 6px !important; 
+    font-weight: 500 !important;
+}
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -492,24 +509,28 @@ elif selected_name:
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
         # ==========================================
-        # 🔔 [추가] 인증서 유효기간 상태 계산 함수
+        # 🔔 [수정됨] 인증서 유효기간 상태 계산 함수 (시안 2 색상 적용)
         # ==========================================
         def check_cert_status(expiry_str):
             if not expiry_str or expiry_str == "-":
-                return "none", "기한없음", "#8A817C"
+                # 기한없음: 회색 테두리
+                return "none", "기한없음", "#F3F4F6", "#6B7280", "#9CA3AF"
             try:
                 today = datetime.today()
                 expiry_date = datetime.strptime(expiry_str, "%Y-%m-%d")
                 days_left = (expiry_date - today).days
 
                 if days_left < 0:
-                    return "expired", "만료됨", "#DC2626"      # 빨강
+                    # 만료됨: 연분홍 배경, 붉은 글씨, 붉은 테두리
+                    return "expired", "만료됨", "#FEF2F2", "#DC2626", "#DC2626"
                 elif days_left <= 90:
-                    return "warning", f"{days_left}일 남음", "#F59E0B" # 주황 (90일 이내 임박)
+                    # 만료 임박: 연주황 배경, 주황 글씨, 주황 테두리
+                    return "warning", f"{days_left}일 남음", "#FFFBEB", "#D97706", "#F59E0B"
                 else:
-                    return "valid", "유효", "#10B981"         # 초록
+                    # 유효: 연초록 배경, 초록 글씨, 초록 테두리
+                    return "valid", "유효", "#ECFDF5", "#059669", "#10B981"
             except ValueError:
-                return "error", "날짜오류", "#8A817C"
+                return "error", "날짜오류", "#F3F4F6", "#6B7280", "#9CA3AF"
 
         # ==========================================
         # 🔔 [추가] 만료/임박 알림 배너 렌더링
@@ -519,9 +540,8 @@ elif selected_name:
         warning_list = []
         
         for cert in all_certs:
-            # 문자열일 경우 하위 호환성 유지, 딕셔너리일 경우 만료일 확인
             if isinstance(cert, dict) and cert.get("expiry"):
-                status, _, _ = check_cert_status(cert["expiry"])
+                status = check_cert_status(cert["expiry"])[0]
                 if status == "expired":
                     expired_list.append(cert["name"])
                 elif status == "warning":
@@ -586,7 +606,7 @@ elif selected_name:
                             st.markdown("<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
 
 
-        # ✅ 오른쪽 : 품질 및 ESG 인증 (상태 배지 추가됨)
+        # ✅ 오른쪽 : 품질 및 ESG 인증
         with col_right:
             st.markdown("<div class='section-header'>🏅 품질 및 ESG 인증</div>", unsafe_allow_html=True)
             cert_list = company_images.get("cert_imgs", [])
@@ -616,18 +636,17 @@ elif selected_name:
                         cert_info = all_certs[idx] if idx < len(all_certs) else None
                         
                         if cert_info:
-                            # 문자열 형태일 경우 호환성 지원 (이전 방식)
                             if isinstance(cert_info, str):
                                 display_html = cert_info
-                            # 딕셔너리 형태일 경우 (유효기간 포함)
                             else:
                                 cert_name = cert_info.get("name", "")
                                 expiry = cert_info.get("expiry", "")
-                                status, badge_text, color = check_cert_status(expiry)
+                                
+                                # ✅ 수정됨: CSS 변수(var)를 활용하여 상태별 색상 매핑
+                                status, badge_text, bg_color, text_color, border_color = check_cert_status(expiry)
                                 
                                 if expiry:
-                                    # ✅ 수정된 부분: 인라인 스타일 대신 정의한 클래스(cert-badge, cert-date)를 적용
-                                    badge_html = f"<span class='cert-badge' style='background-color:{color}; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:6px; vertical-align:middle;'>{badge_text}</span><br><span class='cert-date' style='font-size:13px; display:block; margin-top:4px;'>만료일: {expiry}</span>"
+                                    badge_html = f"<span class='cert-badge' style='--badge-bg:{bg_color}; --badge-color:{text_color}; --badge-border:{border_color};'>{badge_text}</span><br><span class='cert-date'>만료일: {expiry}</span>"
                                 else:
                                     badge_html = ""
                                     
