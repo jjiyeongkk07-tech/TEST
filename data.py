@@ -103,7 +103,9 @@ suppliers_data = [
             "Ball Bearing",
             "Hybrid stepping motors"
         ],
-        "certs": [], 
+        "certs": [
+             {"name": "IATF 16949", "expiry": "2027-06-04"}, 
+        ], 
         "customers": {"SNT Motiv": 33, "효성전기": 17, "영세율기타": 14, "에스엘(주)": 7}, 
         "locations": [
             {"name": "한국NMB(주)", "type": "hq", "address": "부산광역시 사상구 새벽로 167번길 85-6(감전동, 제1,2,3,4층 제에이동호)", "lat": 35.1538, "lon": 128.9830, "country": "대한민국"},
@@ -283,7 +285,9 @@ excel_img_data = {
             "https://product.minebeamitsumi.com/en/product/category/bearing/spherical/__icsFiles/afieldfile/2026/01/14/file_01_90.png",
             "https://product.minebeamitsumi.com/en/product/category/rotary/steppingmotor/hybrid/__icsFiles/afieldfile/2024/08/02/hybrid_1.png"
         ],
-        "cert_imgs": []
+        "cert_imgs": [
+            "https://github.com/user-attachments/assets/e61e36d6-ed35-4165-a697-b4981c2c5d36"
+        ]
     },
     "평화기공(주)": {
         "prod_imgs": [
