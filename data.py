@@ -247,7 +247,7 @@ excel_img_data = {
         ],
         "cert_imgs": [
             "https://github.com/user-attachments/assets/d9d59e28-f527-408b-9b9b-bf14b753fc43",
-            "https://github.com/user-attachments/assets/12511ea4-cf13-48ec-9f65-3bde1ffcbb60"
+            "https://github.com/user-attachments/assets/12511ea4-cf13-48ec-9f65-3bde1ffcbb60",
             "https://github.com/user-attachments/assets/036f7525-f7d9-4818-9fbd-29fa34b81472"        
         ]
     },
