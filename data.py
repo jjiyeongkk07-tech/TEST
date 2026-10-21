@@ -42,9 +42,9 @@ suppliers_data = [
             "자동차용 컨트롤러 / 전기차 배터리 부품 및 와이어 하네스"
         ],
         "certs": [
-            {"name": "IATF16949", "expiry": "2027-02-15"},
-            {"name": "ISO14001", "expiry": "2027-10-10"},
-            {"name": "SQ 인증", "expiry": "2026-11-05"} # 임박
+            {"name": "IATF16949", "expiry": "2027-05-05"},
+            {"name": "ISO14001", "expiry": "2019-11-10"},
+            {"name": "SQ 인증", "expiry": "2026-05-31"} 
         ],
         "customers": {"SNT Motiv": 28, "효성전기": 19, "(주)브이씨텍": 17, "계양전기(주)": 13},
         "locations": [
@@ -249,9 +249,9 @@ excel_img_data = {
             "http://hansungeec.co.kr/data/editor/2303/68f8713e9ce1b074a95162e5d3d4e265_1679371328_4312.png"
         ],
         "cert_imgs": [
-            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_k4BbP3Xf_4b392b2ae34b33eca5ce6b46f911883a7c81ca00_800x600.jpg",
-            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_2nYRHtuK_ddc0920cf4043d7d29869df505f78a0cad78dd9f_800x600.jpg",
-            "http://www.hansungeec.co.kr/data/file/sub0204/thumb-3730931109_lKOVB7QU_592a0b51d658de8d226c4d807cdfa8928f2ad0e6_800x600.jpg"
+            "https://github.com/user-attachments/assets/17d61ef0-3a3d-46d1-8219-31801127b7e3",
+            "https://github.com/user-attachments/assets/a9832b2b-1ffc-4b72-a7d2-13290eb48c9d",
+            "https://github.com/user-attachments/assets/06ecb109-c76a-4583-93c9-27a455f9aff5"
         ]
     },
     "(주)브이씨텍": {
