@@ -326,8 +326,8 @@ excel_img_data = {
             "https://lh3.googleusercontent.com/mv6mSykHwz-gq-IXHN-0MhVbyXuABptXpVliDOFFmu_3YG_OKeOunT_0pEyP5Zs7cPLlMxVG6GmEPgnYYvfImlljj4_9Omlz-BlM314=s0"
         ],
         "cert_imgs": [
-            "https://github.com/user-attachments/assets/136cb448-7ce4-49ef-a9f0-32664e6e68f4",
-            "https://github.com/user-attachments/assets/dc0b17b9-4934-4eaf-acce-223f1b182f8b",
+            "https://github.com/user-attachments/assets/ae60afaf-215c-4f5f-8a4c-e2c4a8b241c9",
+            "https://github.com/user-attachments/assets/bc9293d0-17db-42c1-8fa4-fede19fa1579",
 
         ]
     }
