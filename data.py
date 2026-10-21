@@ -14,10 +14,10 @@ suppliers_data = [
         "products": ["2차전지 제품", "전장부품 및 기타제품"],
         # ✅ 테스트를 위해 유효/만료/기한없음 등 다양하게 입력됨
         "certs": [
-            {"name": "IATF16949", "expiry": "2024-05-31"}, # 만료됨
-            {"name": "ISO14001", "expiry": "2026-11-20"},  # 만료 임박
-            {"name": "SQ 인증", "expiry": "2028-12-31"},   # 유효
-            {"name": "ESG 경영", "expiry": ""}             # 유효기간 없음
+            {"name": "IATF16949", "expiry": "2027-05-27"}, 
+            {"name": "ISO14001", "expiry": "2026-11-13"}, 
+            {"name": "SQ 인증", "expiry": "2026-03-31"},   
+            {"name": "ESG 경영", "expiry": ""}            
         ],
         "customers": {"영세율기타": 53, "(주)LG에너지솔루션": 14, "효성전기": 5, "(주)태성메탈": 4},
         "locations": [
@@ -246,7 +246,9 @@ excel_img_data = {
             "https://www.e-sungwoo.co.kr/img/sub/prd_112.jpg"
         ],
         "cert_imgs": [
-            "https://www.e-sungwoo.co.kr/img/sub/cpn-wp1_2.jpg"
+            "https://github.com/user-attachments/assets/d9d59e28-f527-408b-9b9b-bf14b753fc43",
+            "https://github.com/user-attachments/assets/12511ea4-cf13-48ec-9f65-3bde1ffcbb60"
+            "https://github.com/user-attachments/assets/036f7525-f7d9-4818-9fbd-29fa34b81472"        
         ]
     },
     "(주)한성전장": {
