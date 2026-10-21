@@ -550,7 +550,7 @@ if selected_name == "🏠 종합 메인 화면":
                             if cert_name not in expired_by_cert:
                                 expired_by_cert[cert_name] = set()
                             expired_by_cert[cert_name].add(company_name)
-                        elif days_left <= 30: # 30일 이내 임박
+                        elif days_left <= 90: # 90일 이내 임박
                             if cert_name not in warning_by_cert:
                                 warning_by_cert[cert_name] = set()
                             warning_by_cert[cert_name].add(company_name)
