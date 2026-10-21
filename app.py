@@ -526,7 +526,9 @@ if selected_name == "🏠 종합 메인 화면":
     col3.metric("🌐 해외 진출 거점", f"{len([l for l in all_locations if l.get('type') not in ['hq', 'kr']])} 곳")
     
     # ==========================================
-    # 👇 [추가 시작] 전체 파트너사 인증서 만료 요약 (B안: 카드 그리드형)
+    # 👇 [수정됨] 전체 파트너사 인증서 만료 요약 (B안: 카드 그리드형)
+    # Streamlit 마크다운 파서의 코드블록 인식 오류를 방지하기 위해 
+    # 여러 줄 텍스트(""") 대신 괄호를 이용한 문자열 연결을 사용합니다.
     # ==========================================
     expired_by_cert = {}
     warning_by_cert = {}
@@ -558,21 +560,21 @@ if selected_name == "🏠 종합 메인 화면":
     if expired_by_cert or warning_by_cert:
         st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
         
-        b_plan_html = """
-        <div style='margin-bottom: 25px; border: 1px solid #E5E0D8; border-radius: 12px; background: #FDFCFB; padding: 24px;'>
-            <div style='font-size: 17px; font-weight: 900; color: #2C2A29; margin-bottom: 16px;'>
-                ⚠️ 전체 파트너사 인증서 유효기간 현황
-            </div>
-            <div style='display: flex; gap: 15px; flex-wrap: wrap;'>
-        """
+        b_plan_html = (
+            "<div style='margin-bottom: 25px; border: 1px solid #E5E0D8; border-radius: 12px; background: #FDFCFB; padding: 24px;'>"
+            "<div style='font-size: 17px; font-weight: 900; color: #2C2A29; margin-bottom: 16px;'>"
+            "⚠️ 전체 파트너사 인증서 유효기간 현황"
+            "</div>"
+            "<div style='display: flex; gap: 15px; flex-wrap: wrap;'>"
+        )
         
         # 만료됨 카드 렌더링
         if expired_by_cert:
-            b_plan_html += """
-                <div style='flex: 1; min-width: 250px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px; padding: 16px;'>
-                    <div style='font-size: 15px; color: #991B1B; font-weight: 800; margin-bottom: 10px;'>🔴 만료됨</div>
-                    <ul style='margin: 0; padding-left: 20px; font-size: 14.5px; color: #991B1B; line-height: 1.6;'>
-            """
+            b_plan_html += (
+                "<div style='flex: 1; min-width: 250px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px; padding: 16px;'>"
+                "<div style='font-size: 15px; color: #991B1B; font-weight: 800; margin-bottom: 10px;'>🔴 만료됨</div>"
+                "<ul style='margin: 0; padding-left: 20px; font-size: 14.5px; color: #991B1B; line-height: 1.6;'>"
+            )
             for cert_name, companies in expired_by_cert.items():
                 comp_str = ", ".join(list(companies))
                 b_plan_html += f"<li><b>{cert_name}</b> : {comp_str}</li>"
@@ -580,23 +582,21 @@ if selected_name == "🏠 종합 메인 화면":
             
         # 만료 임박 카드 렌더링
         if warning_by_cert:
-            b_plan_html += """
-                <div style='flex: 1; min-width: 250px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 16px;'>
-                    <div style='font-size: 15px; color: #9A3412; font-weight: 800; margin-bottom: 10px;'>🟠 만료 임박 (30일 이내)</div>
-                    <ul style='margin: 0; padding-left: 20px; font-size: 14.5px; color: #9A3412; line-height: 1.6;'>
-            """
+            b_plan_html += (
+                "<div style='flex: 1; min-width: 250px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 16px;'>"
+                "<div style='font-size: 15px; color: #9A3412; font-weight: 800; margin-bottom: 10px;'>🟠 만료 임박 (30일 이내)</div>"
+                "<ul style='margin: 0; padding-left: 20px; font-size: 14.5px; color: #9A3412; line-height: 1.6;'>"
+            )
             for cert_name, companies in warning_by_cert.items():
                 comp_str = ", ".join(list(companies))
                 b_plan_html += f"<li><b>{cert_name}</b> : {comp_str}</li>"
             b_plan_html += "</ul></div>"
             
-        b_plan_html += """
-            </div>
-        </div>
-        """
+        b_plan_html += "</div></div>"
+        
         st.markdown(b_plan_html, unsafe_allow_html=True)
     # ==========================================
-    # 👆 [추가 끝]
+    # 👆 [수정 끝]
     # ==========================================
     
     st.markdown("<div class='section-title'>🗺️ 전 세계 거점 분포도</div>", unsafe_allow_html=True)
@@ -849,3 +849,4 @@ elif selected_name:
                 if any(loc.get("type") == typ for loc in selected.get("locations", [])):
                     names = ", ".join([loc["name"] for loc in selected["locations"] if loc["type"] == typ])
                     st.button(f"{btn_label}\n{names}", on_click=set_view, args=(btn_label,), use_container_width=True, type="primary")
+
