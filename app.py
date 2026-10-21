@@ -525,6 +525,80 @@ if selected_name == "🏠 종합 메인 화면":
     col2.metric("🏭 총 운영 거점", f"{len(all_locations)} 곳")
     col3.metric("🌐 해외 진출 거점", f"{len([l for l in all_locations if l.get('type') not in ['hq', 'kr']])} 곳")
     
+    # ==========================================
+    # 👇 [추가 시작] 전체 파트너사 인증서 만료 요약 (B안: 카드 그리드형)
+    # ==========================================
+    expired_by_cert = {}
+    warning_by_cert = {}
+
+    for s in filtered:
+        company_name = s.get("name", "알 수 없음")
+        for cert in s.get("certs", []):
+            if isinstance(cert, dict) and cert.get("expiry") and cert.get("name"):
+                expiry_str = cert["expiry"]
+                cert_name = cert["name"]
+                
+                if expiry_str != "-":
+                    try:
+                        today = datetime.today()
+                        expiry_date = datetime.strptime(expiry_str, "%Y-%m-%d")
+                        days_left = (expiry_date - today).days
+
+                        if days_left < 0:
+                            if cert_name not in expired_by_cert:
+                                expired_by_cert[cert_name] = set()
+                            expired_by_cert[cert_name].add(company_name)
+                        elif days_left <= 30: # 30일 이내 임박
+                            if cert_name not in warning_by_cert:
+                                warning_by_cert[cert_name] = set()
+                            warning_by_cert[cert_name].add(company_name)
+                    except ValueError:
+                        pass
+
+    if expired_by_cert or warning_by_cert:
+        st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+        
+        b_plan_html = """
+        <div style='margin-bottom: 25px; border: 1px solid #E5E0D8; border-radius: 12px; background: #FDFCFB; padding: 24px;'>
+            <div style='font-size: 17px; font-weight: 900; color: #2C2A29; margin-bottom: 16px;'>
+                ⚠️ 전체 파트너사 인증서 유효기간 현황
+            </div>
+            <div style='display: flex; gap: 15px; flex-wrap: wrap;'>
+        """
+        
+        # 만료됨 카드 렌더링
+        if expired_by_cert:
+            b_plan_html += """
+                <div style='flex: 1; min-width: 250px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px; padding: 16px;'>
+                    <div style='font-size: 15px; color: #991B1B; font-weight: 800; margin-bottom: 10px;'>🔴 만료됨</div>
+                    <ul style='margin: 0; padding-left: 20px; font-size: 14.5px; color: #991B1B; line-height: 1.6;'>
+            """
+            for cert_name, companies in expired_by_cert.items():
+                comp_str = ", ".join(list(companies))
+                b_plan_html += f"<li><b>{cert_name}</b> : {comp_str}</li>"
+            b_plan_html += "</ul></div>"
+            
+        # 만료 임박 카드 렌더링
+        if warning_by_cert:
+            b_plan_html += """
+                <div style='flex: 1; min-width: 250px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 16px;'>
+                    <div style='font-size: 15px; color: #9A3412; font-weight: 800; margin-bottom: 10px;'>🟠 만료 임박 (30일 이내)</div>
+                    <ul style='margin: 0; padding-left: 20px; font-size: 14.5px; color: #9A3412; line-height: 1.6;'>
+            """
+            for cert_name, companies in warning_by_cert.items():
+                comp_str = ", ".join(list(companies))
+                b_plan_html += f"<li><b>{cert_name}</b> : {comp_str}</li>"
+            b_plan_html += "</ul></div>"
+            
+        b_plan_html += """
+            </div>
+        </div>
+        """
+        st.markdown(b_plan_html, unsafe_allow_html=True)
+    # ==========================================
+    # 👆 [추가 끝]
+    # ==========================================
+    
     st.markdown("<div class='section-title'>🗺️ 전 세계 거점 분포도</div>", unsafe_allow_html=True)
     if all_locations:
         df_all = pd.DataFrame(all_locations)
