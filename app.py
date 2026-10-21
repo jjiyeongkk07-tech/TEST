@@ -584,7 +584,7 @@ if selected_name == "🏠 종합 메인 화면":
         if warning_by_cert:
             b_plan_html += (
                 "<div style='flex: 1; min-width: 250px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 16px;'>"
-                "<div style='font-size: 15px; color: #9A3412; font-weight: 800; margin-bottom: 10px;'>🟠 만료 임박 (30일 이내)</div>"
+                "<div style='font-size: 15px; color: #9A3412; font-weight: 800; margin-bottom: 10px;'>🟠 만료 임박 (90일 이내)</div>"
                 "<ul style='margin: 0; padding-left: 20px; font-size: 14.5px; color: #9A3412; line-height: 1.6;'>"
             )
             for cert_name, companies in sorted(warning_by_cert.items()):
