@@ -126,8 +126,9 @@ suppliers_data = [
             "Fork Shift"
         ],
         "certs": [
-            {"name": "IATF 16949", "expiry": "2029-01-01"}, 
-            {"name": "ISO 45001", "expiry": "2028-05-15"}, 
+            {"name": "IATF 16949", "expiry": "2024-08-18"}, 
+            {"name": "ISO 14001", "expiry": "2025-07-24"},
+            {"name": "SQ 인증", "expiry": "2026-03-31"},
             {"name": "ESG 경영", "expiry": ""}
         ],
         "customers": {"평화산업(주)": 47, "(주)피에프에스": 14, "LG전자": 4, "(주)진일공업": 4},
@@ -289,7 +290,11 @@ excel_img_data = {
             "https://ph.co.kr/upload/prod/6-1_K1KM3564(0).png",
             "https://ph.co.kr/upload/prod/6-6_K1KM3589(0).png"            
         ],
-        "cert_imgs": []
+        "cert_imgs": [
+            "https://github.com/user-attachments/assets/908a5be7-e2cb-4743-b034-01b0b2093c10",
+            "https://github.com/user-attachments/assets/fe689aeb-89ad-44ab-bdb6-27e3419fe64c",
+            "https://github.com/user-attachments/assets/de06f6b7-c91e-4f27-94cf-3b93804a4ebc"
+        ]
     },
     "(주)엠제이텍": {
         "prod_imgs": [
