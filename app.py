@@ -622,7 +622,8 @@ elif selected_name:
                                 status, badge_text, color = check_cert_status(expiry)
                                 
                                 if expiry:
-                                    badge_html = f"<span style='background-color:{color}; color:white; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:6px; vertical-align:middle;'>{badge_text}</span><br><span style='font-size:13px; color:#8A817C; display:block; margin-top:4px;'>만료일: {expiry}</span>"
+                                    # ✅ 수정된 부분: color: white !important; 와 color: #8A817C !important; 추가
+                                    badge_html = f"<span style='background-color:{color}; color: white !important; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:6px; vertical-align:middle;'>{badge_text}</span><br><span style='font-size:13px; color: #8A817C !important; display:block; margin-top:4px;'>만료일: {expiry}</span>"
                                 else:
                                     badge_html = ""
                                     
