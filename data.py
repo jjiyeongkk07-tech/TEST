@@ -177,8 +177,9 @@ suppliers_data = [
             "페라이트마그네트"
         ],
         "certs": [
-            {"name": "KSA-ISO-인증서", "expiry": "2028-10-15"},
-            {"name": "품질/환경경영 시스템 인증", "expiry": "2028-10-15"}
+            {"name": "IATF 16949", "expiry": "2027-05-30"}, 
+            {"name": "ISO 14001", "expiry": "2027-06-02"}, 
+            {"name": "ISO 9001", "expiry": "2027-06-02"}
         ],
         "customers": {"영세율기타": 53, "(주)GS글로벌": 16, "효성전기": 5, "삼성전자(DS)": 4},
         "locations": [
@@ -308,8 +309,9 @@ excel_img_data = {
             "https://unionmaterials.com/kor/images/products/01_02_img_03.jpg"
         ],
         "cert_imgs": [
-            "https://unionmaterials.com/kor/images/products/01_img_02.gif",
-            "https://unionmaterials.com/kor/images/products/02_img_03.gif"
+            "https://github.com/user-attachments/assets/7a1959c3-ca80-42a8-a248-9118e9aab39d",
+            "https://github.com/user-attachments/assets/1697fd6c-7619-4013-b750-09d27fa5e790",
+            "https://github.com/user-attachments/assets/60275615-f0c2-4621-87bb-a6f9244efaed"
         ]
     },
     "에이치에스테크(주)": {
