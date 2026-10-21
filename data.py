@@ -14,8 +14,8 @@ suppliers_data = [
         "products": ["2차전지 제품", "전장부품 및 기타제품"],
         # ✅ 테스트를 위해 유효/만료/기한없음 등 다양하게 입력됨
         "certs": [
-            {"name": "IATF16949", "expiry": "2027-05-27"}, 
-            {"name": "ISO14001", "expiry": "2026-11-13"}, 
+            {"name": "IATF 16949", "expiry": "2027-05-27"}, 
+            {"name": "ISO 14001", "expiry": "2026-11-13"}, 
             {"name": "SQ 인증", "expiry": "2026-03-31"},   
             {"name": "ESG 경영", "expiry": ""}            
         ],
@@ -42,8 +42,8 @@ suppliers_data = [
             "자동차용 컨트롤러 / 전기차 배터리 부품 및 와이어 하네스"
         ],
         "certs": [
-            {"name": "IATF16949", "expiry": "2027-05-05"},
-            {"name": "ISO14001", "expiry": "2019-11-10"},
+            {"name": "IATF 16949", "expiry": "2027-05-05"},
+            {"name": "ISO 14001", "expiry": "2019-11-10"},
             {"name": "SQ 인증", "expiry": "2026-05-31"} 
         ],
         "customers": {"SNT Motiv": 28, "효성전기": 19, "(주)브이씨텍": 17, "계양전기(주)": 13},
@@ -63,8 +63,8 @@ suppliers_data = [
         "desc": "(주)브이씨텍은 철도차량용 추진제어장치 및 보조전원장치(APU), 전기차 및 골프카용 구동 인버터 등을 개발·제조하는 전력변환 및 제어장치 전문기업입니다.",
         "products": ["철도차량용 전장품/골프카용 전장품/전기차용 전장품"],
         "certs": [
-            {"name": "IATF16949", "expiry": "2028-03-27"}, # 만료됨
-            {"name": "ISO14001", "expiry": "2027-01-27"}
+            {"name": "IATF 16949", "expiry": "2028-03-27"}, # 만료됨
+            {"name": "ISO 14001", "expiry": "2027-01-27"}
         ],
         "customers": {"현대로템": 50, "CT&T": 30, "Fulu Motor": 10, "기타": 10},
         "locations": [
@@ -205,8 +205,8 @@ suppliers_data = [
             "VCM Motor ASM / EGR Motor ASM",
         ],
         "certs": [
-            {"name": "IATF16949", "expiry": "2027-09-02"}, 
-            {"name": "SQ인증서", "expiry": "2026-07-31"},
+            {"name": "IATF 16949", "expiry": "2027-09-02"}, 
+            {"name": "SQ 인증", "expiry": "2026-07-31"},
             {"name": "ESG 경영", "expiry": ""}   
         ],
         "customers": {"(주)에이테크오토모티브": 43, "말레동현필터시스템": 28, "효성전기": 11, "(주)현대케피코": 10},
