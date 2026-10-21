@@ -160,7 +160,7 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] { padding: 10px 5px !imp
     color: #2C2A29 !important;
 }
 
-/* ✅ 다크모드 대응 글씨체 색상 고정 (중요) */
+/* 다크모드 대응 글씨체 색상 고정 */
 .section-header { 
     color: #2C2A29 !important; text-align: center; font-weight: 900; font-size: 20px; 
     border-bottom: 3px solid #E5E0D8; padding-bottom: 12px; margin-bottom: 15px; 
@@ -186,7 +186,7 @@ h2, h3, h4, p, span, label, li { color: #2C2A29 !important; }
 .section-title { font-size: 24px; font-weight: 900; color: #2C2A29 !important; margin-top: 45px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 3px solid #E5E0D8; }
 .section-num { color: #C4A47C; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
 
-/* ✅ 회사 개요 박스 다크모드 대응 텍스트 고정 (!important 추가) */
+/* 회사 개요 박스 다크모드 대응 텍스트 고정 */
 .desc-box { 
     background-color: #FDFCFB; border: 1px solid #E5E0D8; border-radius: 12px; 
     padding: 30px; border-left: 6px solid #C4A47C; font-size: 17px; 
@@ -260,6 +260,10 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 .cust-seg.seg-md { font-size: 15px !important; }
 .cust-seg.seg-sm { font-size: 13px !important; }
 .cust-seg:hover { filter: brightness(1.08); }
+
+/* ✅ 인증서 배지 글자색 강제 적용 (인라인 스타일 무시 방지) */
+span.cert-badge { color: #ffffff !important; }
+span.cert-date { color: #8A817C !important; }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -622,8 +626,8 @@ elif selected_name:
                                 status, badge_text, color = check_cert_status(expiry)
                                 
                                 if expiry:
-                                    # ✅ 수정된 부분: color: white !important; 와 color: #8A817C !important; 추가
-                                    badge_html = f"<span style='background-color:{color}; color: white !important; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:6px; vertical-align:middle;'>{badge_text}</span><br><span style='font-size:13px; color: #8A817C !important; display:block; margin-top:4px;'>만료일: {expiry}</span>"
+                                    # ✅ 수정된 부분: 인라인 스타일 대신 정의한 클래스(cert-badge, cert-date)를 적용
+                                    badge_html = f"<span class='cert-badge' style='background-color:{color}; padding:2px 6px; border-radius:4px; font-size:12px; margin-left:6px; vertical-align:middle;'>{badge_text}</span><br><span class='cert-date' style='font-size:13px; display:block; margin-top:4px;'>만료일: {expiry}</span>"
                                 else:
                                     badge_html = ""
                                     
