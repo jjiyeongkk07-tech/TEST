@@ -173,7 +173,7 @@ div[data-testid="stSidebar"] button[data-baseweb="tab"] { padding: 10px 5px !imp
 }
 .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-/* 태그 및 구분선 CSS */
+/* 태그 및 구분선 CSS (레거시 - 타 영역 호환용으로 유지) */
 .unified-tag { 
     font-size: 15.5px; font-weight: 800; color: #4A4441 !important; text-align: center; 
     background: #F8F9FA; padding: 12px 18px; border-radius: 30px; 
@@ -261,25 +261,38 @@ div.element-container:has(.main-title-anchor) + div.element-container button p {
 .cust-seg.seg-sm { font-size: 13px !important; }
 .cust-seg:hover { filter: brightness(1.08); }
 
-/* ✅ 수정됨: 인증서 배지 (시안 2: 외곽선 스타일) 적용 */
-span.cert-badge { 
-    background-color: var(--badge-bg, #ffffff) !important; 
-    color: var(--badge-color, #2C2A29) !important;
-    border: 1.5px solid var(--badge-border, transparent) !important;
-    padding: 3px 8px !important; 
-    border-radius: 6px !important; 
-    font-size: 13px !important; 
-    font-weight: 900 !important; 
-    margin-left: 6px !important; 
-    vertical-align: middle !important;
-    letter-spacing: 0.5px !important;
+/* ==========================================================
+   ✅ C안 : 품목 / 인증 공통 라벨형 태그 (배경 없음 + 이름 1줄 고정)
+   ========================================================== */
+.tag-lab { text-align: center; padding: 0 2px; }
+
+/* 이름 줄 : 높이를 고정해 좌우 영역의 베이스라인을 일치시킴 */
+.tag-name-wrap { height: 22px; overflow: hidden; }
+.tag-name-wrap svg { display: block; width: 100%; height: 100%; margin: 0 auto; overflow: visible; }
+
+/* 품목용 짧은 밑줄 (인증의 상태줄과 리듬을 맞추는 역할) */
+.tag-underline { width: 28px; height: 2px; background: #C4A47C; margin: 9px auto 0; border-radius: 2px; }
+
+/* 인증 상태줄 : 색 점 + 짧은 텍스트 */
+.cert-status {
+    font-size: 12.5px !important;
+    font-weight: 900 !important;
+    margin-top: 7px !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.2px !important;
+    color: var(--st-color, #6B7280) !important;
 }
-span.cert-date { 
-    color: #8A817C !important; 
-    font-size: 13px !important; 
-    display: block !important; 
-    margin-top: 6px !important; 
+.cert-status .st-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--st-color, #6B7280); margin-right: 5px; vertical-align: middle;
+}
+span.cert-date {
+    color: #8A817C !important;
+    font-size: 12px !important;
+    display: block !important;
+    margin-top: 3px !important;
     font-weight: 500 !important;
+    white-space: nowrap !important;
 }
 </style>
 """
@@ -389,6 +402,41 @@ def get_homepage_link_html(company):
         f"<span style='font-size:15px;'>🌐</span>"
         f"<span>{domain}</span>"
         f"<span class='hp-arw'>↗</span></a>"
+    )
+
+# ==========================================
+# ✅ [추가] 품목·인증서명 1줄 고정 렌더러 (SVG 자동 축소)
+#  - 절대 줄바꿈하지 않고, 컬럼 폭을 넘칠 때만 글자가 비례 축소됨
+#  - 줄 높이가 22px로 고정되어 좌/우 영역 하단 라인이 항상 일치
+# ==========================================
+def render_tag_name_svg(name, base_font=15.0, color="#2C2A29"):
+    name = str(name).strip()
+    if not name:
+        return "<div class='tag-name-wrap'></div>"
+
+    # 문자별 폭 가중치로 실제 텍스트 폭 추정
+    w = 0.0
+    for ch in name:
+        if ord(ch) > 0x2E80:             w += 1.00   # 한글/CJK
+        elif ch == " ":                  w += 0.30
+        elif ch in "ilj|!.,'()[]-":      w += 0.34
+        elif ch.isdigit():               w += 0.60
+        elif ch.isupper():               w += 0.70
+        else:                            w += 0.56
+
+    vb_w = w * base_font + 8.0          # 텍스트 자연 폭
+    vb_h = base_font * 1.40
+    safe = name.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    # max-width 를 자연 폭으로 제한 → 여유가 있으면 base_font 그대로, 좁으면 자동 축소
+    return (
+        f"<div class='tag-name-wrap'>"
+        f"<svg viewBox='0 0 {vb_w:.0f} {vb_h:.0f}' preserveAspectRatio='xMidYMid meet' "
+        f"style='max-width:{vb_w:.0f}px;' role='img' aria-label='{safe}'>"
+        f"<text x='{vb_w/2:.0f}' y='53%' dominant-baseline='middle' text-anchor='middle' "
+        f"fill='{color}' font-size='{base_font:.1f}' font-weight='900' "
+        f"font-family='Pretendard, sans-serif' letter-spacing='-0.4'>{safe}</text>"
+        f"</svg></div>"
     )
 
 @st.cache_data(show_spinner=False)
@@ -509,11 +557,12 @@ elif selected_name:
         company_images = st.session_state.excel_img_data.get(selected['name'], {"prod_imgs": [], "cert_imgs": []})
 
         # ==========================================
-        # 🔔 [수정됨] 인증서 유효기간 상태 계산 함수 (시안 2 색상 적용)
+        # 🔔 인증서 유효기간 상태 계산 함수
+        #   반환: (status, badge_text, bg_color, text_color, border_color)
         # ==========================================
         def check_cert_status(expiry_str):
             if not expiry_str or expiry_str == "-":
-                # 기한없음: 회색 테두리
+                # 기한없음: 회색
                 return "none", "기한없음", "#F3F4F6", "#6B7280", "#9CA3AF"
             try:
                 today = datetime.today()
@@ -521,19 +570,19 @@ elif selected_name:
                 days_left = (expiry_date - today).days
 
                 if days_left < 0:
-                    # 만료됨: 연분홍 배경, 붉은 글씨, 붉은 테두리
+                    # 만료됨: 붉은색
                     return "expired", "만료됨", "#FEF2F2", "#DC2626", "#DC2626"
                 elif days_left <= 90:
-                    # 만료 임박: 연주황 배경, 주황 글씨, 주황 테두리
+                    # 만료 임박: 주황색
                     return "warning", f"{days_left}일 남음", "#FFFBEB", "#D97706", "#F59E0B"
                 else:
-                    # 유효: 연초록 배경, 초록 글씨, 초록 테두리
+                    # 유효: 초록색
                     return "valid", "유효", "#ECFDF5", "#059669", "#10B981"
             except ValueError:
                 return "error", "날짜오류", "#F3F4F6", "#6B7280", "#9CA3AF"
 
         # ==========================================
-        # 🔔 [추가] 만료/임박 알림 배너 렌더링
+        # 🔔 만료/임박 알림 배너 렌더링
         # ==========================================
         all_certs = selected.get('certs', [])
         expired_list = []
@@ -594,16 +643,23 @@ elif selected_name:
                             st.markdown("<div class='img-container' style='visibility:hidden;'></div>", unsafe_allow_html=True)
                             st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                             
-                        # 2. 점선 및 태그(품목명) 렌더링
+                        # 2. 점선 및 태그(품목명) 렌더링 — ✅ C안 라벨형
                         tag_text = all_tags[idx] if idx < len(all_tags) else ""
                         if tag_text:
                             st.markdown(
-                                f"<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'>"
-                                f"<div class='unified-tag' style='display: inline-block; white-space: normal; word-break: keep-all; line-height: 1.3;'>{tag_text}</div>"
-                                f"</div>", unsafe_allow_html=True
+                                "<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px;'>"
+                                f"<div class='tag-lab'>{render_tag_name_svg(tag_text)}"
+                                "<div class='tag-underline'></div></div></div>",
+                                unsafe_allow_html=True
                             )
                         else:
-                            st.markdown("<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
+                            st.markdown(
+                                "<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px;'>"
+                                "<div class='tag-lab' style='visibility:hidden;'>"
+                                "<div class='tag-name-wrap'></div><div class='tag-underline'></div>"
+                                "</div></div>",
+                                unsafe_allow_html=True
+                            )
 
 
         # ✅ 오른쪽 : 품질 및 ESG 인증
@@ -632,33 +688,42 @@ elif selected_name:
                             st.markdown("<div class='img-container' style='visibility:hidden;'></div>", unsafe_allow_html=True)
                             st.markdown("""<div style='visibility: hidden; margin-bottom: 16px;'><div style='padding: 8px 14px; border: 1px solid transparent; font-size: 14px; line-height: 1.5;'>🔍 확대 보기</div></div>""", unsafe_allow_html=True)
                             
-                        # 2. 점선 및 태그(인증서명, 유효기간) 렌더링
+                        # 2. 점선 및 태그(인증서명, 유효기간) 렌더링 — ✅ C안 라벨형
                         cert_info = all_certs[idx] if idx < len(all_certs) else None
                         
                         if cert_info:
                             if isinstance(cert_info, str):
-                                display_html = cert_info
+                                inner_html = render_tag_name_svg(cert_info)
                             else:
                                 cert_name = cert_info.get("name", "")
                                 expiry = cert_info.get("expiry", "")
-                                
-                                # ✅ 수정됨: CSS 변수(var)를 활용하여 상태별 색상 매핑
                                 status, badge_text, bg_color, text_color, border_color = check_cert_status(expiry)
-                                
-                                if expiry:
-                                    badge_html = f"<span class='cert-badge' style='--badge-bg:{bg_color}; --badge-color:{text_color}; --badge-border:{border_color};'>{badge_text}</span><br><span class='cert-date'>만료일: {expiry}</span>"
+
+                                inner_html = render_tag_name_svg(cert_name)
+                                inner_html += (
+                                    f"<div class='cert-status' style='--st-color:{text_color};'>"
+                                    f"<i class='st-dot'></i>{badge_text}</div>"
+                                )
+                                if expiry and expiry != "-":
+                                    inner_html += f"<span class='cert-date'>{expiry}</span>"
                                 else:
-                                    badge_html = ""
-                                    
-                                display_html = f"<span>{cert_name}</span>{badge_html}"
+                                    inner_html += "<span class='cert-date'>&nbsp;</span>"
 
                             st.markdown(
-                                f"<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'>"
-                                f"<div class='unified-tag' style='display: inline-block; white-space: normal; word-break: keep-all; line-height: 1.3;'>{display_html}</div>"
-                                f"</div>", unsafe_allow_html=True
+                                "<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px;'>"
+                                f"<div class='tag-lab'>{inner_html}</div></div>",
+                                unsafe_allow_html=True
                             )
                         else:
-                            st.markdown("<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px; text-align: center;'><div class='unified-tag' style='visibility:hidden;'>-</div></div>", unsafe_allow_html=True)
+                            st.markdown(
+                                "<div style='border-top: 2px dashed #E5E0D8; margin-top: 15px; padding-top: 15px;'>"
+                                "<div class='tag-lab' style='visibility:hidden;'>"
+                                "<div class='tag-name-wrap'></div>"
+                                "<div class='cert-status'><i class='st-dot'></i>-</div>"
+                                "<span class='cert-date'>-</span>"
+                                "</div></div>",
+                                unsafe_allow_html=True
+                            )
 
 
         st.markdown("<div class='section-title' style='margin-top: 40px;'><span class='section-num'>03.</span> 주요 매출처 및 매입 비중</div>", unsafe_allow_html=True)
