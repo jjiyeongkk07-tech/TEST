@@ -202,7 +202,8 @@ suppliers_data = [
         ],
         "certs": [
             {"name": "IATF16949", "expiry": "2027-09-02"}, 
-            {"name": "SQ인증서", "expiry": "2026-07-31"}
+            {"name": "ISO 14001", "expiry": "2025-04-22"}
+            {"name": "SQ인증서", "expiry": "확인불가"}
         ],
         "customers": {"(주)에이테크오토모티브": 43, "말레동현필터시스템": 28, "효성전기": 11, "(주)현대케피코": 10},
         "locations": [
