@@ -201,8 +201,8 @@ suppliers_data = [
             "VCM Motor ASM / EGR Motor ASM",
         ],
         "certs": [
-            {"name": "SQ 인증", "expiry": "2027-04-10"}, 
-            {"name": "ESG 경영", "expiry": ""}
+            {"name": "IATF16949", "expiry": "2027-09-02"}, 
+            {"name": "SQ인증서", "expiry": ""}
         ],
         "customers": {"(주)에이테크오토모티브": 43, "말레동현필터시스템": 28, "효성전기": 11, "(주)현대케피코": 10},
         "locations": [
@@ -326,9 +326,9 @@ excel_img_data = {
             "https://lh3.googleusercontent.com/mv6mSykHwz-gq-IXHN-0MhVbyXuABptXpVliDOFFmu_3YG_OKeOunT_0pEyP5Zs7cPLlMxVG6GmEPgnYYvfImlljj4_9Omlz-BlM314=s0"
         ],
         "cert_imgs": [
-            "https://lh3.googleusercontent.com/n3N9I7-3hxL0_EAYP9wix4T4eJ9epdpCTbpeyhgIewnWJA0gaJx8wMGXnQbrdG9OlLhcHeHuiIaBawntq9ST_luiloNArjHSMW61MVOioFh7o3ntsvuE=w600-h600-n",
-            "https://lh3.googleusercontent.com/DHN_b-_kZLmredozLJjqntkkhLeIQ_SgAvP35QvdCIBFylCDUpDpsVIsW0s6Fbe9oUIOypiA5jLM5CfdQIW3bjCPbBS1yEy9j10cRM_onmuv0_6nKiCoMA=w600-h600-n",
-            "https://lh3.googleusercontent.com/O74mpv_DZ0CEAFqIJWXrOeim2a9qcElDLIPo7BudQ438eKTeEv0ObLhu_ex6VrSSo17SsR_ECrTlg_jXddvg9fPduI5fvTuwvyONzTmb5BdBDxQlHpIs=w600-h600-n"
+            "https://github.com/user-attachments/assets/136cb448-7ce4-49ef-a9f0-32664e6e68f4",
+            "https://github.com/user-attachments/assets/dc0b17b9-4934-4eaf-acce-223f1b182f8b",
+
         ]
     }
 }
