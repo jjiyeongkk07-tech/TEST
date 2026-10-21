@@ -154,9 +154,9 @@ suppliers_data = [
             "가전 모터코어"
         ],
         "certs": [
-            {"name": "IATF 16949", "expiry": "2027-05-30"}, 
-            {"name": "ISO 14001", "expiry": "2027-06-02"}, 
-            {"name": "ISO 9001", "expiry": "2027-06-02"}
+            {"name": "IATF 16949", "expiry": "2024-10-21"}, 
+            {"name": "ISO 14001", "expiry": "2024-10-17"}, 
+            {"name": "SQ 인증", "expiry": "2026-10-31"}
         ],
         "customers": {"효성전기": 12, "선진알앤디(주)": 11, "두원공조": 10, "(주)엠넥스": 9},
         "locations": [
@@ -298,9 +298,9 @@ excel_img_data = {
             "https://mjtech.co.kr/images/sub/product/home-img-detail.png"
         ],
         "cert_imgs": [
-            "https://github.com/user-attachments/assets/7a1959c3-ca80-42a8-a248-9118e9aab39d",
-            "https://github.com/user-attachments/assets/1697fd6c-7619-4013-b750-09d27fa5e790",
-            "https://github.com/user-attachments/assets/60275615-f0c2-4621-87bb-a6f9244efaed"
+            "https://github.com/user-attachments/assets/c5fc65bf-aace-4ce5-8acf-eb084dff60bc",
+            "https://github.com/user-attachments/assets/378aec07-72aa-4b0d-9403-aed8c8ba22d4",
+            "https://github.com/user-attachments/assets/3066c6a6-c38d-4d0b-becb-431fcccb57c4"
         ]
     },
     "유니온머티리얼즈": {
