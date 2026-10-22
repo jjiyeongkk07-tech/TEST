@@ -249,7 +249,8 @@ excel_img_data = {
         "cert_imgs": [
             "https://github.com/user-attachments/assets/d9d59e28-f527-408b-9b9b-bf14b753fc43",
             "https://github.com/user-attachments/assets/12511ea4-cf13-48ec-9f65-3bde1ffcbb60",
-            "https://github.com/user-attachments/assets/036f7525-f7d9-4818-9fbd-29fa34b81472"        
+            "https://github.com/user-attachments/assets/036f7525-f7d9-4818-9fbd-29fa34b81472",
+            "https://github.com/user-attachments/assets/ded21d18-84eb-434c-be50-9492e40488d9"
         ]
     },
     "(주)한성전장": {
@@ -300,7 +301,8 @@ excel_img_data = {
         "cert_imgs": [
             "https://github.com/user-attachments/assets/908a5be7-e2cb-4743-b034-01b0b2093c10",
             "https://github.com/user-attachments/assets/fe689aeb-89ad-44ab-bdb6-27e3419fe64c",
-            "https://github.com/user-attachments/assets/de06f6b7-c91e-4f27-94cf-3b93804a4ebc"
+            "https://github.com/user-attachments/assets/de06f6b7-c91e-4f27-94cf-3b93804a4ebc",
+            "https://github.com/user-attachments/assets/ded21d18-84eb-434c-be50-9492e40488d9"
         ]
     },
     "(주)엠제이텍": {
@@ -337,7 +339,8 @@ excel_img_data = {
         "prod_imgs": [
             "https://lh3.googleusercontent.com/XvqObZ4oNZ7yf3uf-nloTL0CuYpDJYyxLHWt9Fb_djJi-86trLBU6aSGnhB1ya4GRBYnaHANQ19UVnlZCkNwHiWaMFOUdlwb5CG3yz_yaA=s0",
             "https://lh3.googleusercontent.com/imJ0h79-BNyZMTQ9Ar489EtMIHVIinyTsIhcO07g8nFJxpDtV5IvBfAhDl9tKBqJaapmGo3wg1gBDgOB_ZXhexMZZtMLkBVSKJjN1B4=s0",
-            "https://lh3.googleusercontent.com/mv6mSykHwz-gq-IXHN-0MhVbyXuABptXpVliDOFFmu_3YG_OKeOunT_0pEyP5Zs7cPLlMxVG6GmEPgnYYvfImlljj4_9Omlz-BlM314=s0"
+            "https://lh3.googleusercontent.com/mv6mSykHwz-gq-IXHN-0MhVbyXuABptXpVliDOFFmu_3YG_OKeOunT_0pEyP5Zs7cPLlMxVG6GmEPgnYYvfImlljj4_9Omlz-BlM314=s0",
+            "https://github.com/user-attachments/assets/ded21d18-84eb-434c-be50-9492e40488d9"
         ],
         "cert_imgs": [
             "https://github.com/user-attachments/assets/ae60afaf-215c-4f5f-8a4c-e2c4a8b241c9",
