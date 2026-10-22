@@ -339,13 +339,12 @@ excel_img_data = {
         "prod_imgs": [
             "https://lh3.googleusercontent.com/XvqObZ4oNZ7yf3uf-nloTL0CuYpDJYyxLHWt9Fb_djJi-86trLBU6aSGnhB1ya4GRBYnaHANQ19UVnlZCkNwHiWaMFOUdlwb5CG3yz_yaA=s0",
             "https://lh3.googleusercontent.com/imJ0h79-BNyZMTQ9Ar489EtMIHVIinyTsIhcO07g8nFJxpDtV5IvBfAhDl9tKBqJaapmGo3wg1gBDgOB_ZXhexMZZtMLkBVSKJjN1B4=s0",
-            "https://lh3.googleusercontent.com/mv6mSykHwz-gq-IXHN-0MhVbyXuABptXpVliDOFFmu_3YG_OKeOunT_0pEyP5Zs7cPLlMxVG6GmEPgnYYvfImlljj4_9Omlz-BlM314=s0",
-            "https://github.com/user-attachments/assets/ded21d18-84eb-434c-be50-9492e40488d9"
+            "https://lh3.googleusercontent.com/mv6mSykHwz-gq-IXHN-0MhVbyXuABptXpVliDOFFmu_3YG_OKeOunT_0pEyP5Zs7cPLlMxVG6GmEPgnYYvfImlljj4_9Omlz-BlM314=s0"
         ],
         "cert_imgs": [
             "https://github.com/user-attachments/assets/ae60afaf-215c-4f5f-8a4c-e2c4a8b241c9",
             "https://github.com/user-attachments/assets/bc9293d0-17db-42c1-8fa4-fede19fa1579",
-
+            "https://github.com/user-attachments/assets/ded21d18-84eb-434c-be50-9492e40488d9"
         ]
     }
 }
