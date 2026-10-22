@@ -17,7 +17,7 @@ suppliers_data = [
             {"name": "IATF 16949", "expiry": "2027-05-27"}, 
             {"name": "ISO 14001", "expiry": "2026-11-13"}, 
             {"name": "SQ 인증", "expiry": "2026-03-31"},   
-            {"name": "ESG 경영", "expiry": ""}            
+            {"name": "ESG 경영", "expiry": "　"}            
         ],
         "customers": {"영세율기타": 53, "(주)LG에너지솔루션": 14, "효성전기": 5, "(주)태성메탈": 4},
         "locations": [
